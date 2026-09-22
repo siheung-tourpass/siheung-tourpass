@@ -1,0 +1,3 @@
+<%@ page pageEncoding="UTF-8" %>
+<label>동반 유형<select name="companionId"><option value="">선택 안 함</option><c:forEach var="item" items="${options.companionTypes}"><option value="${item.id}" ${view ne 'journey-builder' and param.companionId eq item.id ? 'selected' : ''}><c:out value="${item.name}"/></option></c:forEach></select></label>
+<fieldset><legend>관심 테마 · ${view eq 'journey-builder' ? '복수 선택' : '복수 선택 가능'}</legend><c:forEach var="item" items="${options.themes}"><label><input type="checkbox" name="themeId" value="${item.id}" ${not empty selectedThemeIds and selectedThemeIds.contains(item.id) ? 'checked' : ''}> <c:out value="${item.name}"/></label></c:forEach></fieldset>

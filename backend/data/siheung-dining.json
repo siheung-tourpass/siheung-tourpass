@@ -1,0 +1,133 @@
+{
+  "sources": [
+    {
+      "code": "MODEL",
+      "url": "https://www.siheung.go.kr/portal/foodpreference/list.do?mId=0313010300",
+      "title": "시흥시 모범음식점 목록",
+      "designation": "모범음식점",
+      "contentDate": null
+    },
+    {
+      "code": "SAFETY",
+      "url": "https://www.siheung.go.kr/portal/foodsafety/list.do?mId=0313010100",
+      "title": "시흥시 식품안심업소 목록",
+      "designation": "식품안심업소",
+      "contentDate": "2026-10-02"
+    }
+  ],
+  "places": [
+    {
+      "code": "DINING_BEIJING",
+      "name": "더베이징",
+      "address": "경기도 시흥시 중심상가1길 14 (정왕동, 104-111호)",
+      "category": "음식점",
+      "regionCode": "REGION_JEONGWANG",
+      "regionName": "정왕·옥구",
+      "sourceCode": "MODEL",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": "중식",
+      "designationNumber": null,
+      "designatedOn": null,
+      "image": {
+        "path": "/assets/dining/beijing-exterior.jpg",
+        "alt": "시흥시 정왕동 더베이징의 간판과 매장 입구",
+        "title": "경기도_시흥시_더베이징_외관",
+        "attribution": "ⓒ한국관광공사 · 공공누리 제3유형",
+        "photographer": "개별 촬영자 미표기",
+        "provider": "한국관광공사 한국관광콘텐츠랩",
+        "sourceUrl": "https://api.visitkorea.or.kr/#/hubTourSearchCatDetail?contentId=2838256&langDiv=KOR",
+        "originalUrl": "https://tong.visitkorea.or.kr/cms/resource/45/2838245_image2_1.jpeg",
+        "licenseUrl": "https://www.kogl.or.kr/info/licenseType3.do",
+        "checkedOn": "2026-10-18",
+        "width": 940,
+        "height": 626,
+        "reviewBasis": "콘텐츠랩 com/getImage.do의 사진 2838245_3: 더베이징 외관·Type3 확인. 관광정보의 중심상가1길 14 주소 및 사진 간판 대조. 원본 보존·전체 비율 축소만 허용."
+      }
+    },
+    {
+      "code": "DINING_BORIGULBI",
+      "name": "보리굴비마을",
+      "address": "경기도 시흥시 동서로857번길 28-22 (물왕동, 1,2층)",
+      "category": "음식점",
+      "regionCode": "REGION_MULWANG",
+      "regionName": "물왕",
+      "sourceCode": "MODEL",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": "한식",
+      "designationNumber": null,
+      "designatedOn": null
+    },
+    {
+      "code": "DINING_TTANGKKEUT",
+      "name": "땅끝횟집",
+      "address": "경기도 시흥시 오이도로 145-1 (정왕동, 1-3층)",
+      "category": "음식점",
+      "regionCode": "REGION_OIDO",
+      "regionName": "오이도",
+      "sourceCode": "MODEL",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": "한식",
+      "designationNumber": null,
+      "designatedOn": null
+    },
+    {
+      "code": "DINING_WINDMILL",
+      "name": "오이도풍차횟집",
+      "address": "경기도 시흥시 오이도로 143 (정왕동, 1-3층)",
+      "category": "음식점",
+      "regionCode": "REGION_OIDO",
+      "regionName": "오이도",
+      "sourceCode": "MODEL",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": "한식",
+      "designationNumber": null,
+      "designatedOn": null
+    },
+    {
+      "code": "DINING_JINAEYEON",
+      "name": "진애연(주)",
+      "address": "경기도 시흥시 월곶해안로 153, 2,3층 (월곶동)",
+      "category": "음식점",
+      "regionCode": "REGION_WOLGOT",
+      "regionName": "월곶",
+      "sourceCode": "MODEL",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": "한식",
+      "designationNumber": null,
+      "designatedOn": null
+    },
+    {
+      "code": "DINING_PAULBASSETT",
+      "name": "폴 바셋 신세계시흥프리미엄아울렛점",
+      "address": "경기도 시흥시 서해안로 699(2503호 정왕동, 신세계프리미엄아울렛)",
+      "category": "카페",
+      "regionCode": "REGION_BAEGOT",
+      "regionName": "배곧",
+      "sourceCode": "SAFETY",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": null,
+      "designationNumber": "HG200007083",
+      "designatedOn": "2026-09-28"
+    },
+    {
+      "code": "DINING_STARBUCKS_DAEYA",
+      "name": "스타벅스시흥대야동점",
+      "address": "경기도 시흥시 비둘기공원7길 51(대명프라자 103,104호 대야동)",
+      "category": "카페",
+      "regionCode": "REGION_DAEYA",
+      "regionName": "대야·소래산",
+      "sourceCode": "SAFETY",
+      "checkedOn": "2026-10-18",
+      "reviewStatus": "SOURCE_CHECKED",
+      "cuisine": null,
+      "designationNumber": "HG200007031",
+      "designatedOn": "2026-09-24"
+    }
+  ]
+}

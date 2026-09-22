@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<h1><c:out value="${data.name}"/></h1><p><c:out value="${fn:replace(fn:replace(data.description, '시연용·실제 사용 불가. ', ''), '시연 자료·실제 사용 불가', '시연 자료')}"/></p>

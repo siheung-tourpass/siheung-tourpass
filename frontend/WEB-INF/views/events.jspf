@@ -1,0 +1,12 @@
+<%@ page pageEncoding="UTF-8" %>
+<section class="events-section" aria-labelledby="events-title">
+<h1 id="events-title">시흥 행사</h1>
+<p>공식 안내에서 모은 행사입니다. 검토 대기 자료이며, 방문 전 공식 안내에서 변경·취소와 접수 조건을 확인해 주세요.</p>
+<form method="get" action="${root}/events" class="event-filter"><label>여행 날짜<input type="date" name="date" value="${fn:escapeXml(eventData.date)}"></label><button>해당 날짜 행사 보기</button><a href="${root}/events">전체 보기</a></form>
+<h2><c:out value="${empty eventData.date ? '예정·기간 중 행사' : '선택한 날짜의 예정·기간 중 행사'}"/> <span class="count">${fn:length(eventData.current)}건</span></h2>
+<c:if test="${empty eventData.current}"><p class="empty-state">${empty eventData.date ? '현재 수집 자료에 예정·기간 중인 행사가 없습니다.' : '선택한 날짜에 예정·기간 중인 행사 자료가 없습니다. 다른 날짜나 종료 일정을 확인해 주세요.'}</p></c:if>
+<div class="event-cards"><c:forEach var="event" items="${eventData.current}"><%@ include file="event-card.jspf" %></c:forEach></div>
+<c:if test="${not empty eventData.past}"><details class="past-events"><summary>일정이 지난 행사 ${fn:length(eventData.past)}건</summary><p class="result-meta">일정 경과에 따른 구분이며 실제 개최 완료를 확인한 것은 아닙니다.</p><div class="event-cards"><c:forEach var="event" items="${eventData.past}"><%@ include file="event-card.jspf" %></c:forEach></div></details></c:if>
+<p class="form-hint">여행 만들기에서 행사 카드도 내 여행 덱에 담을 수 있습니다.</p>
+<a class="button" href="${root}/journeys/new">관광지 골라 여행 만들기</a>
+</section>
