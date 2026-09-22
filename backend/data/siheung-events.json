@@ -1,0 +1,497 @@
+{
+  "schema_version": 1,
+  "dataset_id": "SIHEUNG_EVENTS_20261014",
+  "collected_on": "2026-10-14",
+  "scope": "2026년 가을 시흥시 행사 6건 표본. 전체 행사 목록 아님. 종료 일정은 아카이브 후보로 구분.",
+  "review_policy": "모든 행사·장소 연결·이미지는 DRAFT. DB 적재·카드 노출 없음. 일정 경과와 실제 개최 상태를 구분.",
+  "sources": [
+    {
+      "code": "SRC_EVENT_GG_AUTUMN",
+      "title": "2026 경기도에서 만나는 가을축제 모음집",
+      "publisher": "경기도청",
+      "url": "https://www.gg.go.kr/bbs/boardView.do?bIdx=263490602&bcIdx=0&bsIdx=838&menuId=1534",
+      "checked_on": "2026-10-14",
+      "content_date": "2026-09-17",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "시흥 행사 상세 mdftv_27~29 및 게시물 하단 이용조건",
+      "license": "KOGL Type 3",
+      "license_url": "https://www.kogl.or.kr/info/licenseType3.do"
+    },
+    {
+      "code": "SRC_EVENT_GAETGOL",
+      "title": "제21회 시흥갯골축제 · 축제소개",
+      "publisher": "시흥갯골축제 공식 홈페이지",
+      "url": "https://shggfestival.com/about/",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "축제 기간·장소·이용요금·운영 시간"
+    },
+    {
+      "code": "SRC_EVENT_MOIM",
+      "title": "동아리축제 소개",
+      "publisher": "시흥시청소년청년재단",
+      "url": "https://www.shyouth.or.kr/moim/contents/view?contentsNo=408&menuLevel=2&menuNo=549",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "행사 소개 페이지 확인; 일정은 경기도청 자료에 근거",
+      "note": "본문이 이미지 중심이므로 이 페이지에서 일정·장소를 독립 검증한 것으로 보지 않음."
+    },
+    {
+      "code": "SRC_EVENT_COFFEE",
+      "title": "제4회 세계커피콩축제 · 2026 세계커피대회 안내",
+      "publisher": "커피비평가협회",
+      "url": "https://www.ccacoffee.co.kr/wcc",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "축제 기간·연계 대회 안내",
+      "note": "페이지의 2025년 파일명 배경·로고를 2026년 행사 포스터로 사용하지 않음."
+    },
+    {
+      "code": "SRC_EVENT_COFFEE_CAFE",
+      "title": "카페 그랑프리-시흥 2026",
+      "publisher": "커피비평가협회",
+      "url": "https://www.ccacoffee.co.kr/lcc",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "소비자 선호도 본선·은계호수 특설무대",
+      "note": "투표가 11월 1일까지인데 시상식이 10월 31일로 기재됨. 상세 시간표는 주최 측 재확인 필요. 참가업소 무료를 일반 관람료로 확대하지 않음."
+    },
+    {
+      "code": "SRC_EVENT_BOOK",
+      "title": "갯골생태공원에서 만나는 힙한 책 놀이터, 2026 시흥 책모락 미리보기",
+      "publisher": "시흥시 공식 블로그",
+      "url": "https://blog.naver.com/siheungblog/224390930210",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 행사일시·장소·사전접수",
+      "access_url": "https://blog.naver.com/PostView.naver?blogId=siheungblog&logNo=224390930210&redirect=Dlog&widgetTypeCall=true&directAccess=false",
+      "note": "원문 10/7(화) 요일 표기는 2026년 달력과 불일치. 접수일은 날짜만 보존하고 현재 접수 가능 여부는 미확인."
+    },
+    {
+      "code": "SRC_EVENT_SIHWA",
+      "title": "머무름이 일상이 되는 곳, 2026 시화호, 쉼",
+      "publisher": "시흥시 공식 블로그",
+      "url": "https://blog.naver.com/siheungblog/224408288249",
+      "checked_on": "2026-10-14",
+      "content_date": null,
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 기간·장소·현장 안내·프로그램별 예약 안내",
+      "access_url": "https://blog.naver.com/PostView.naver?blogId=siheungblog&logNo=224408288249&redirect=Dlog&widgetTypeCall=true&directAccess=false"
+    }
+  ],
+  "events": [
+    {
+      "code": "EVENT_2026_001",
+      "name": "제21회 시흥갯골축제",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-09-18",
+      "end_date": "2026-09-20",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "10:00~22:00; 열기구 프로그램 09:00부터",
+      "venue_name": "시흥갯골생태공원",
+      "address": "경기도 시흥시 동서로 287",
+      "coordinates": null,
+      "description": "갯골생태공원에서 공연과 생태·염전 체험을 진행하는 축제.",
+      "admission_fee": "무료, 일부 체험프로그램 유료",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": "프로그램별 예약 조건 미확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_GAETGOL",
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "PAST",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_001",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [
+        "IMG_EVENT_001"
+      ],
+      "notes": []
+    },
+    {
+      "code": "EVENT_2026_002",
+      "name": "시흥월곶포구축제",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-10-09",
+      "end_date": "2026-10-11",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": null,
+      "venue_name": "월곶해안로 일원",
+      "address": "경기도 시흥시 월곶해안로 188",
+      "coordinates": null,
+      "description": "월곶 해안 일원에서 열리는 포구 축제.",
+      "admission_fee": "입장료 무료",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": null,
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "PAST",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_012",
+          "relation": "RELATED_AREA",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [
+        "IMG_EVENT_002"
+      ],
+      "notes": [
+        "개별 체험·먹거리 비용 미확인. 경기도청이 연결한 한국관광공사 상세 URL은 확인 시 404여서 교차 검증 불가."
+      ]
+    },
+    {
+      "code": "EVENT_2026_003",
+      "name": "MOIM International",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-10-17",
+      "end_date": "2026-10-17",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": null,
+      "venue_name": "시흥시청 일원",
+      "address": "경기도 시흥시 시청로 20",
+      "coordinates": null,
+      "description": "경기도청 가을축제 안내에 수록된 시흥 행사.",
+      "admission_fee": "입장료 무료",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": null,
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [],
+      "image_ids": [
+        "IMG_EVENT_003"
+      ],
+      "notes": [
+        "정식 회차명·세부 프로그램·운영시간은 주최 측 재확인 필요. 경기도청의 명칭을 그대로 사용. 시청과 대응되는 기존 관광 장소 없음."
+      ]
+    },
+    {
+      "code": "EVENT_2026_004",
+      "name": "제4회 2026 세계커피콩축제",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-10-31",
+      "end_date": "2026-11-01",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": null,
+      "venue_name": "은계호수 특설무대·행사 부스",
+      "address": null,
+      "coordinates": null,
+      "description": "커피 경연과 시민 대상 카페 평가 등을 연계하는 축제.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "대회별 참가 신청 조건이 다름. 일반 관람 예약 조건 미확인.",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_COFFEE",
+        "SRC_EVENT_COFFEE_CAFE"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_008",
+          "relation": "RELATED_AREA",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": [
+        "카페 그랑프리 시간표에 투표 종료일과 시상일 불일치가 있어 일별 운영시간 미확정.",
+        "도로명주소는 해당 행사 원문에서 확인하지 못함."
+      ]
+    },
+    {
+      "code": "EVENT_2026_005",
+      "name": "2026 시흥 책모락",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-10-17",
+      "end_date": "2026-10-17",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "10:00~17:00",
+      "venue_name": "갯골생태공원",
+      "address": null,
+      "coordinates": null,
+      "description": "야외 독서와 북토크·공연·체험을 함께 즐기는 행사.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "일부 프로그램 10월 7일부터 도서관 누리집 선착순 사전접수; 현장 상황에 따라 현장접수 병행.",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_BOOK"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_001",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [
+        "IMG_EVENT_004"
+      ],
+      "notes": [
+        "원문의 접수일 요일 오기 때문에 날짜만 보존. 현재 접수 잔여·참여 가능 여부 미확인.",
+        "행사 원문에 도로명주소가 없으므로 기존 관광지 주소를 행사 출처 확인값으로 복제하지 않음."
+      ]
+    },
+    {
+      "code": "EVENT_2026_006",
+      "name": "2026 시화호의 날 주간 「시화호, 쉼」",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-10-03",
+      "end_date": "2026-10-11",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": null,
+      "venue_name": "시화호 및 거북섬 일원",
+      "address": null,
+      "coordinates": null,
+      "description": "휴식·걷기·전시·공연·해양레저 등 날짜별 프로그램을 운영하는 행사.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "프로그램별 운영일·장소·예약 조건이 달라 개별 안내 확인 필요.",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_SIHWA"
+      ],
+      "checked_on": "2026-10-14",
+      "date_position_on_checked_on": "PAST",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_013",
+          "relation": "RELATED_AREA",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [
+        "IMG_EVENT_005"
+      ],
+      "notes": [
+        "현장 총괄운영부스는 거북섬마리나(정왕동 2730). 전체 행사의 단일 주소로 사용하지 않음.",
+        "기간 경과 표시는 달력 계산이며 실제 개최 완료를 확인한 값이 아님."
+      ]
+    }
+  ],
+  "images": [
+    {
+      "code": "IMG_EVENT_001",
+      "event_code": "EVENT_2026_001",
+      "path": "backend/data/event-images/gg-2026-siheung-1.png",
+      "kind": "EVENT_INTRO_PHOTO",
+      "alt": "갯골축제 소개에 실린 야외 야간 연주 장면",
+      "work_title": "시흥갯골축제 소개 이미지",
+      "provider": "경기도청",
+      "author": null,
+      "author_note": "게시물에 개별 촬영자 미표기",
+      "source_ids": [
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "source_page_url": "https://www.gg.go.kr/bbs/boardView.do?bIdx=263490602&bcIdx=0&bsIdx=838&menuId=1534",
+      "original_url": "https://www.gg.go.kr/uploads/CONTENTS/site/gg/fallfst26_thumb_siheung_1.png",
+      "license": "KOGL Type 3",
+      "license_url": "https://www.kogl.or.kr/info/licenseType3.do",
+      "license_evidence": "게시물 하단: 공공누리 제3유형(출처명시 + 변경금지). 수집 시 사진 별도 제외 문구는 발견하지 못함.",
+      "reuse_status": "PAGE_LICENSE_CHECKED",
+      "review_status": "DRAFT",
+      "checked_on": "2026-10-14",
+      "captured_on": null,
+      "capture_note": "촬영일 미확인. 2026년 행사 현장 사진이라는 의미가 아님.",
+      "display_constraints": [
+        "출처·공공누리 유형·원문 링크 표시",
+        "원본 파일 보존; 크롭·필터·문구 합성 금지",
+        "전체 이미지를 원래 비율로 표시"
+      ],
+      "attribution": "경기도청 「2026 경기도에서 만나는 가을축제 모음집」의 시흥갯골축제 소개 이미지, 공공누리 제3유형. 개별 촬영자·촬영일 미확인.",
+      "width": 500,
+      "height": 300,
+      "bytes": 313603,
+      "sha256": "bb8f69cf014b5555b9257f73dd18bf4fa053b4c7a7c2e779dd092a55581a0b7c"
+    },
+    {
+      "code": "IMG_EVENT_002",
+      "event_code": "EVENT_2026_002",
+      "path": "backend/data/event-images/gg-2026-siheung-2.png",
+      "kind": "EVENT_INTRO_PHOTO",
+      "alt": "월곶포구축제 소개에 실린 수변공원과 행사장 전경",
+      "work_title": "시흥월곶포구축제 소개 이미지",
+      "provider": "경기도청",
+      "author": null,
+      "author_note": "게시물에 개별 촬영자 미표기",
+      "source_ids": [
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "source_page_url": "https://www.gg.go.kr/bbs/boardView.do?bIdx=263490602&bcIdx=0&bsIdx=838&menuId=1534",
+      "original_url": "https://www.gg.go.kr/uploads/CONTENTS/site/gg/fallfst26_thumb_siheung_2.png",
+      "license": "KOGL Type 3",
+      "license_url": "https://www.kogl.or.kr/info/licenseType3.do",
+      "license_evidence": "게시물 하단: 공공누리 제3유형(출처명시 + 변경금지). 수집 시 사진 별도 제외 문구는 발견하지 못함.",
+      "reuse_status": "PAGE_LICENSE_CHECKED",
+      "review_status": "DRAFT",
+      "checked_on": "2026-10-14",
+      "captured_on": null,
+      "capture_note": "촬영일 미확인. 2026년 행사 현장 사진이라는 의미가 아님.",
+      "display_constraints": [
+        "출처·공공누리 유형·원문 링크 표시",
+        "원본 파일 보존; 크롭·필터·문구 합성 금지",
+        "전체 이미지를 원래 비율로 표시"
+      ],
+      "attribution": "경기도청 「2026 경기도에서 만나는 가을축제 모음집」의 시흥월곶포구축제 소개 이미지, 공공누리 제3유형. 개별 촬영자·촬영일 미확인.",
+      "width": 500,
+      "height": 300,
+      "bytes": 320391,
+      "sha256": "ae005652f6d218d15a65e14f2b5e3bf53a8b79cd0219e4aa7636b4bd862e9228"
+    },
+    {
+      "code": "IMG_EVENT_003",
+      "event_code": "EVENT_2026_003",
+      "path": "backend/data/event-images/gg-2026-siheung-3.png",
+      "kind": "EVENT_INTRO_PHOTO",
+      "alt": "MOIM International 소개에 실린 야외 무대 공연 장면",
+      "work_title": "MOIM International 소개 이미지",
+      "provider": "경기도청",
+      "author": null,
+      "author_note": "게시물에 개별 촬영자 미표기",
+      "source_ids": [
+        "SRC_EVENT_GG_AUTUMN"
+      ],
+      "source_page_url": "https://www.gg.go.kr/bbs/boardView.do?bIdx=263490602&bcIdx=0&bsIdx=838&menuId=1534",
+      "original_url": "https://www.gg.go.kr/uploads/CONTENTS/site/gg/fallfst26_thumb_siheung_3.png",
+      "license": "KOGL Type 3",
+      "license_url": "https://www.kogl.or.kr/info/licenseType3.do",
+      "license_evidence": "게시물 하단: 공공누리 제3유형(출처명시 + 변경금지). 수집 시 사진 별도 제외 문구는 발견하지 못함.",
+      "reuse_status": "PAGE_LICENSE_CHECKED",
+      "review_status": "DRAFT",
+      "checked_on": "2026-10-14",
+      "captured_on": null,
+      "capture_note": "촬영일 미확인. 2026년 행사 현장 사진이라는 의미가 아님.",
+      "display_constraints": [
+        "출처·공공누리 유형·원문 링크 표시",
+        "원본 파일 보존; 크롭·필터·문구 합성 금지",
+        "전체 이미지를 원래 비율로 표시"
+      ],
+      "attribution": "경기도청 「2026 경기도에서 만나는 가을축제 모음집」의 MOIM International 소개 이미지, 공공누리 제3유형. 개별 촬영자·촬영일 미확인.",
+      "width": 500,
+      "height": 300,
+      "bytes": 360703,
+      "sha256": "a2b2d3ad8612ac8ea659e930a67fc03ce9d98fae99b4a5ca69ee0831df993c6f"
+    },
+    {
+      "code": "IMG_EVENT_004",
+      "event_code": "EVENT_2026_005",
+      "path": null,
+      "kind": "POSTER_CANDIDATE",
+      "alt": "2026 시흥 책모락 홍보물",
+      "provider": "시흥시 공식 블로그",
+      "author": null,
+      "source_ids": [
+        "SRC_EVENT_BOOK"
+      ],
+      "source_page_url": "https://blog.naver.com/siheungblog/224390930210",
+      "original_url": "https://postfiles.pstatic.net/MjAyNjEwMDdfODYg/MDAxNzkxMzU0ODg0NjIw.HzHKLGdk01za9rc1dzPhO0QENEdIbfhMJKyIxmXQ1rYg.IYfkFOEjcjCvHmRALkJdffssfNMud9k1IJYZoBuV1Hgg.JPEG/%EB%B3%B4%EB%8F%84%EC%9E%90%EB%A3%8C4_%EC%8B%9C%ED%9D%A5_%EC%B1%85%EB%AA%A8%EB%9D%BD_%ED%99%8D%EB%B3%B4%EB%AC%BC.jpg?type=w466",
+      "license": null,
+      "license_url": null,
+      "reuse_status": "PERMISSION_UNCONFIRMED",
+      "review_status": "DRAFT",
+      "checked_on": "2026-10-14",
+      "note": "게시물에서 이미지 재사용 허락을 확인하지 못해 파일 미다운로드·서비스 노출 보류."
+    },
+    {
+      "code": "IMG_EVENT_005",
+      "event_code": "EVENT_2026_006",
+      "path": null,
+      "kind": "POSTER_CANDIDATE",
+      "alt": "2026 시화호, 쉼 메인 포스터",
+      "provider": "시흥시 공식 블로그",
+      "author": null,
+      "source_ids": [
+        "SRC_EVENT_SIHWA"
+      ],
+      "source_page_url": "https://blog.naver.com/siheungblog/224408288249",
+      "original_url": "https://postfiles.pstatic.net/MjAyNjA5MTVfMjI1/MDAxNzg5NDM3Njk3NzUw.810rYfe9gxqruPSTCIq4N4FBh_xpH5Cs5RqfdAFdRzQg.Y8zYIS9uOekxmLG4cq5HxWNweBtzetbwERY0rLPSENsg.JPEG/%EC%8B%9C%ED%99%94%ED%98%B8,_%EC%89%BC_%EB%A9%94%EC%9D%B8%ED%8F%AC%EC%8A%A4%ED%84%B0_%EC%B5%9C%EC%A2%85(1)_(1).jpg?type=w966",
+      "license": null,
+      "license_url": null,
+      "reuse_status": "PERMISSION_UNCONFIRMED",
+      "review_status": "DRAFT",
+      "checked_on": "2026-10-14",
+      "note": "게시물에서 이미지 재사용 허락을 확인하지 못해 파일 미다운로드·서비스 노출 보류."
+    }
+  ],
+  "collection_gaps": [
+    {
+      "subject": "오이도 축제 2026",
+      "reason": "검색 결과에는 10월 24~25일 일정이 있으나 공식 원문에서 확인하지 못함.",
+      "resume_when": "시흥시 또는 공식 운영기관의 해당 연도 공고 확보 후 행사·이미지 수집."
+    },
+    {
+      "subject": "세계커피콩축제 대표 이미지",
+      "reason": "공식 페이지의 배경·로고가 2025 파일명으로 제공되며 2026 대표 포스터와 재사용 조건 미확보.",
+      "resume_when": "2026 공식 이미지와 재사용 허락 확보."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:if test="${imagePlace.materialKind eq 'REAL'}">
+<c:choose><c:when test="${not empty imagePlace.image}">
+<figure class="place-photo">
+<c:if test="${view ne 'journey-builder'}"><img src="${root}${fn:escapeXml(imagePlace.image.path)}" alt="${fn:escapeXml(imagePlace.image.alt)}" loading="lazy" decoding="async" width="${imagePlace.image.width}" height="${imagePlace.image.height}"></c:if>
+<figcaption><c:out value="${imagePlace.image.alt}"/> · 사진: <c:out value="${imagePlace.image.author}"/>
+<c:if test="${not empty imagePlace.image.capturedYear}"> · <c:out value="${imagePlace.image.capturedYear}"/>년 촬영</c:if>
+<c:if test="${not empty imagePlace.image.publishedOn}"> · <c:out value="${imagePlace.image.publishedOn}"/> 게시 (촬영일 미확인)</c:if>
+ · <a href="${fn:escapeXml(imagePlace.image.sourceUrl)}" rel="noopener noreferrer"><c:out value="${empty imagePlace.image.sourceTitle ? '원본 출처' : imagePlace.image.sourceTitle}"/></a>
+<c:if test="${not empty imagePlace.image.publisher}"> (<c:out value="${imagePlace.image.publisher}"/>)</c:if>
+ · <a href="${fn:escapeXml(imagePlace.image.licenseUrl)}" rel="noopener noreferrer"><c:out value="${imagePlace.image.license}"/></a> · 화면 크기에 맞춰 축소 표시<c:if test="${view eq 'journey-builder'}"><p>화면 표시: 세로 크롭·틴트 적용, 원본 파일 보존</p></c:if></figcaption>
+</figure>
+</c:when><c:otherwise><p class="photo-pending">사진 준비 중 · <c:out value="${imagePlace.name}"/></p></c:otherwise></c:choose>
+</c:if>

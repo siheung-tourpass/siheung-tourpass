@@ -1,0 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
+<label class="place-pick"><input type="checkbox" name="cardKey" value="${fn:escapeXml(cardKey)}" aria-label="${fn:escapeXml(cardName)} 선택" ${cardSelected ? 'checked' : ''}><span>여행에 담기</span></label>
+<button type="button" class="card-flip" data-flip="back" aria-label="${fn:escapeXml(cardName)} 상세 정보" hidden><c:out value="${cardDetails}"/></button>
+<button type="button" class="card-select-toggle" aria-label="${fn:escapeXml(cardName)} 여행 선택" aria-pressed="${cardSelected ? 'true' : 'false'}" hidden></button>

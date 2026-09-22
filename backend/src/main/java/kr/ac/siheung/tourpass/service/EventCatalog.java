@@ -1,0 +1,63 @@
+package kr.ac.siheung.tourpass.service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
+/** Bundled official notices are information, not approved recommendation candidates. */
+public final class EventCatalog {
+    private static final JsonNode DATA=load();
+    private static JsonNode load(){
+        try(var stream=EventCatalog.class.getResourceAsStream("/siheung-events.json")){
+            if(stream==null)throw new IOException("Missing siheung-events.json");
+            return new ObjectMapper().readTree(stream);
+        }catch(IOException e){throw new ExceptionInInitializerError(e);}
+    }
+    public static Map<String,Object> list(String date){
+        return list(LocalDate.now(ZoneId.of("Asia/Seoul")),date);
+    }
+    public static Map<String,Object> list(LocalDate today,String date){
+        String selected=Input.date(date,true);
+        LocalDate filter=selected==null?null:LocalDate.parse(selected);
+        var current=new ArrayList<Map<String,Object>>();
+        var past=new ArrayList<Map<String,Object>>();
+        for(var event:DATA.path("events")){
+            LocalDate start=LocalDate.parse(event.path("start_date").asText());
+            LocalDate end=LocalDate.parse(event.path("end_date").asText());
+            if(filter!=null&&(filter.isBefore(start)||filter.isAfter(end)))continue;
+            (today.isAfter(end)?past:current).add(card(event,today));
+        }
+        Comparator<Map<String,Object>> byDate=Comparator.comparing(card->(String)card.get("start_date"));
+        current.sort(byDate);past.sort(byDate.reversed());
+        return Map.of("current",current,"past",past,"date",selected==null?"":selected);
+    }
+    public static Map<String,Object> find(String code){
+        for(var event:DATA.path("events"))if(code.equals(event.path("code").asText()))return card(event,LocalDate.now(ZoneId.of("Asia/Seoul")));
+        return null;
+    }
+    private static Map<String,Object> card(JsonNode event,LocalDate today){
+        LocalDate start=LocalDate.parse(event.path("start_date").asText()),end=LocalDate.parse(event.path("end_date").asText());
+        var card=new LinkedHashMap<String,Object>();
+        for(String key:List.of("code","name","start_date","end_date","venue_name","description","checked_on"))card.put(key,event.path(key).asText());
+        for(String key:List.of("daily_hours","address","admission_fee","reservation_note"))card.put(key,event.path(key).asText("미확인"));
+        card.put("reviewStatus",event.path("review_status").asText());
+        card.put("scheduleLabel",today.isAfter(end)?"일정 종료":today.isBefore(start)?"예정":"기간 중");
+        var sources=new ArrayList<Map<String,String>>();
+        for(var source:DATA.path("sources"))for(var id:event.path("source_ids"))if(id.asText().equals(source.path("code").asText())){
+            sources.add(Map.of("url",Input.url(source.path("url").asText(),false),"publisher",source.path("publisher").asText()));
+        }
+        card.put("sources",sources);
+        var notes=new ArrayList<String>();event.path("notes").forEach(note->notes.add(note.asText()));card.put("notes",notes);
+        for(var image:DATA.path("images")){
+            if(!image.path("event_code").asText().equals(event.path("code").asText())||!image.path("reuse_status").asText().equals("PAGE_LICENSE_CHECKED"))continue;
+            String path=image.path("path").asText("");
+            if(!path.matches("backend/data/event-images/[a-z0-9-]+\\.png"))continue;
+            card.put("image",Map.of("path",path.replace("backend/data/event-images/","/assets/events/"),"alt",image.path("alt").asText(),"attribution",image.path("attribution").asText(),"sourceUrl",Input.url(image.path("source_page_url").asText(),false),"licenseUrl",Input.url(image.path("license_url").asText(),false)));
+        }
+        return card;
+    }
+
+}

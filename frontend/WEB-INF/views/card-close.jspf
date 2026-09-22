@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<button type="button" class="card-flip" data-flip="front" aria-label="카드 앞면으로 돌아가기" hidden>앞면 보기 ↶</button>

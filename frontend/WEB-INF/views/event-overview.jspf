@@ -1,0 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
+<h3><c:out value="${event.name}"/></h3>
+<p class="event-dates"><time datetime="${fn:escapeXml(event.start_date)}"><c:out value="${event.start_date}"/></time><c:if test="${event.start_date ne event.end_date}"> ~ <time datetime="${fn:escapeXml(event.end_date)}"><c:out value="${event.end_date}"/></time></c:if></p>
+<p><c:out value="${event.venue_name}"/></p>
