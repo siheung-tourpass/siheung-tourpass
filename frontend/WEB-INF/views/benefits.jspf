@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:forEach var="benefit" items="${benefits}"><article><h2><c:out value="${empty benefit.benefitName ? benefit.name : benefit.benefitName}"/></h2><p><c:out value="${benefit.description}"/></p><dl>
+<dt>가맹점</dt><dd><c:out value="${empty benefit.merchantName ? data.name : benefit.merchantName}"/></dd>
+<dt>지역·위치</dt><dd><c:out value="${empty benefit.regionName ? data.regionName : benefit.regionName}"/> · <c:out value="${empty benefit.locationDescription ? data.locationDescription : benefit.locationDescription}"/></dd>
+<dt>유형</dt><dd><c:out value="${benefit.benefitType eq 'FREE_ONCE' ? '가상 체험 1회 무료' : '가상 음료 할인'}"/></dd>
+<dt>횟수</dt><dd>패스당 <c:out value="${benefit.useLimit}"/>회</dd>
+<dt>시연 금액</dt><dd><c:choose><c:when test="${benefit.benefitType eq 'DISCOUNT'}"><c:out value="${benefit.basePriceWon}"/>원 − <c:out value="${benefit.discountWon}"/>원 할인 = </c:when></c:choose>본인 부담 <c:out value="${benefit.payableWon}"/>원<c:if test="${benefit.payableWon eq 0}"> · 추가 비용 없음</c:if> · 결제 없음</dd>
+<dt>예약</dt><dd>예약 불필요 · <c:out value="${benefit.reservationNote}"/></dd>
+<c:if test="${view eq 'pass'}"><dt>잔여 횟수</dt><dd><c:out value="${benefit.remainingCount}"/>회 · <c:out value="${benefit.reasonLabel}"/></dd><dt>사용 시각</dt><dd><c:out value="${empty benefit.usedAtKst ? '아직 사용하지 않음' : benefit.usedAtKst}"/></dd></c:if>
+</dl><p>시연용·실제 사용 불가</p></article></c:forEach>

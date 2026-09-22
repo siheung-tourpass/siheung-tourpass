@@ -1,0 +1,16 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:choose><c:when test="${view eq 'catalog'}"><h1>가맹점과 패스 혜택</h1><p>여행에 더할 혜택을 살펴보세요. 모든 상품과 가맹점은 시연용입니다.</p><h2>시연 상품</h2>
+<c:forEach var="item" items="${data.products}"><article><h2><a href="${root}/products/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${item.description}"/></p><p>발급부터 24시간 · 만료 정각부터 사용 불가 · 결제 없음</p></article></c:forEach>
+<h2>가상 가맹점</h2><c:forEach var="item" items="${data.merchants}"><article><h2><a href="${root}/merchants/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${item.regionName}"/> · <c:out value="${item.locationDescription}"/></p></article></c:forEach>
+<c:if test="${empty data.merchants}"><p>등록된 가맹점이 없습니다.</p></c:if>
+</c:when><c:otherwise><h1><c:out value="${data.name}"/></h1><p><c:out value="${data.description}"/></p>
+<c:if test="${view ne 'product'}"><p><c:out value="${data.regionName}"/> · <c:out value="${data.locationDescription}"/></p></c:if>
+<c:if test="${view eq 'product'}"><p>발급부터 24시간 · 시작 시각 포함, 만료 시각 제외 · 각 혜택 패스당 1회 · 결제 없음</p>
+<c:choose><c:when test="${user.role eq 'VISITOR'}"><form method="post" action="${root}/passes/issue"><input type="hidden" name="csrf" value="${fn:escapeXml(csrf)}"><input type="hidden" name="productId" value="${data.id}"><button>시연 혜택 이용권 발급</button></form></c:when><c:when test="${empty user}"><a href="${root}/login">로그인 후 발급</a></c:when></c:choose></c:if>
+<c:if test="${view eq 'place'}"><p><c:out value="${data.materialKind eq 'REAL' ? '실제 관광 소개' : '시연 자료·실제 사용 불가'}"/> · 검토 상태: <c:out value="${data.reviewStatusLabel}"/></p><p>근거: <c:out value="${data.evidenceNote}"/></p>
+<c:if test="${not empty data.sourceUrl}"><p><a href="${fn:escapeXml(data.sourceUrl)}" rel="noopener noreferrer">소개 출처</a> · 확인일 <c:out value="${data.checkedOn}"/></p></c:if>
+<c:forEach var="source" items="${data.sources}"><p><a href="${fn:escapeXml(source.sourceUrl)}" rel="noopener noreferrer">추가 출처</a> · <c:out value="${source.checkedOn}"/> · <c:out value="${source.evidenceNote}"/></p></c:forEach>
+<c:set var="addPlaceId" value="${data.id}"/><%@ include file="add-journey.jspf" %>
+<p>영업·예약·이동 가능성: 미확인. 추천과 소개는 이용 가능성을 보장하지 않습니다.</p></c:if>
+<c:set var="benefits" value="${data.benefits}"/><%@ include file="benefits.jspf" %>
+</c:otherwise></c:choose>

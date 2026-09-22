@@ -1,0 +1,35 @@
+:root {
+  --color-paper: #f5f6f7;
+  --color-surface: #ffffff;
+  --color-ink: #202c28;
+  --color-muted: #626d68;
+  --color-rule: #e4e9e6;
+  --color-accent: #175940;
+  --color-accent-hover: #114831;
+  --color-link: #12604b;
+  --color-soft: #eaf3ed;
+  --color-focus: #ad6020;
+  --color-danger: #a3312a;
+  --color-danger-soft: #fff0ed;
+  --color-notice: #f1ede2;
+  --color-notice-ink: #675b3b;
+  --font-body: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-display: var(--font-body);
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-title: clamp(1.75rem, 3vw, 2.25rem);
+  --text-display: clamp(2rem, 4.5vw, 3.5rem);
+  --radius-control: 12px;
+  --radius-panel: 24px;
+}

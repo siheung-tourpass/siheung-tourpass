@@ -1,0 +1,1534 @@
+{
+  "schema_version": 1,
+  "dataset_id": "SIHEUNG_TOURISM_20261002",
+  "collected_on": "2026-10-02",
+  "scope": "시흥시 내 9개 서비스 분류 지역의 13개 실제 관광 장소 표본. 전체 관광지·수요 대표 자료 아님.",
+  "review_policy": "모든 장소·개념·관계는 DRAFT. 관리자 승인 전 추천 후보 없음.",
+  "sources": [
+    {
+      "code": "SRC_GAETGOL",
+      "title": "시흥 갯골생태공원",
+      "publisher": "한국관광공사",
+      "url": "https://access.visitkorea.or.kr/opentour/detail.do?cotId=44219c7f-c556-474b-b92d-92505fa93199",
+      "checked_on": "2026-10-02",
+      "content_date": "2024-07-02",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "개요·주소",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_GAETGOL_FAMILY",
+      "title": "갯골생태공원, 바람언덕에 그린스쿨",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=addfcd3e-a9e4-401c-ad97-9839b5720a8a",
+      "checked_on": "2026-10-02",
+      "content_date": "2020-10",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 가족 나들이·염전체험 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_PREHISTORIC",
+      "title": "오이도 선사유적공원",
+      "publisher": "한국관광공사",
+      "url": "https://access.visitkorea.or.kr/opentour/detail.do?cotId=4b33a891-95be-48dc-a98d-c6f029a4599c",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "관광지 소개·주소",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_MUSEUM",
+      "title": "생생한 유물과 재미있는 교육, 휴식이 공존하는 공간 - 시흥 오이도박물관",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=264ef757-a6e8-48f3-9724-904ae9a84fc3",
+      "checked_on": "2026-10-02",
+      "content_date": "2022-07",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 전시·어린이 체험·가족 방문 소개와 주소",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_LOTUS",
+      "title": "시흥 연꽃테마파크(관곡지)와 인천 소래습지생태공원",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=420224c6-3206-48f0-8f36-a88c6fcd981a",
+      "checked_on": "2026-10-02",
+      "content_date": "2019-03",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "관곡지·연꽃테마파크 소개; 인천 관광지는 수집 제외",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_WAVE",
+      "title": "샤카! 더위를 쫓고 파도를 타다, 시흥 웨이브파크",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=cda885e6-fd10-44fa-a9de-b120cd7c4b2a",
+      "checked_on": "2026-10-02",
+      "content_date": "2022-05",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문 첫 부분의 거북섬 인공 서핑장 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_HANUL",
+      "title": "서울 근교 여행, 선선한 바람과 함께 즐기는 야간 산책 명소 4",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=40b18ed1-5b2b-4cb5-ac72-85d0cb739242",
+      "checked_on": "2026-10-02",
+      "content_date": "2025-01",
+      "content_date_note": "출처에 표시된 작성 또는 갱신 시점; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "배곧한울공원 단락·위치",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_EUNGYE",
+      "title": "은계호수공원",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5e9e675d-e381-4df0-8f91-88aa81830cd2",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 은행동·산책로·쉼터·수변데크 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_MULWANG",
+      "title": "물왕호수",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=9fc74bfe-7618-46bf-bed2-b6c474880a34",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 담수호·휴식처·명칭 변경 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_DULEGIL",
+      "title": "경기둘레길 54코스 상세안내",
+      "publisher": "경기관광공사",
+      "url": "https://ggtour.or.kr/dulegil/usr/wap/detail.do?app=24910&seq=10054",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "추천 장소: 호조벌·소래산 마애보살입상; 관련 관광지: 소래산",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_WOLGOT",
+      "title": "Wolgot Harbor (월곶포구)",
+      "publisher": "한국관광공사",
+      "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=94401",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "Introduction·Address; 한국어 상세 페이지는 열기 오류로 영문 페이지 확인",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_GEOBUK",
+      "title": "거북섬",
+      "publisher": "한국관광공사",
+      "url": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=f4ddd92c-99df-4691-a52a-9c167a227d99",
+      "checked_on": "2026-10-02",
+      "content_date": null,
+      "content_date_note": "본문에서 작성·갱신일 미확인",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "본문의 시흥 시화MTV 인공섬·해양레저 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    }
+  ],
+  "regions": [
+    {
+      "code": "REGION_GEOBUK",
+      "type": "Region",
+      "label": "거북섬",
+      "scope": "시화MTV 거북섬 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_OIDO",
+      "type": "Region",
+      "label": "오이도",
+      "scope": "오이도 관광지 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_JANGGOK",
+      "type": "Region",
+      "label": "장곡·갯골",
+      "scope": "장곡동 갯골생태공원 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_HAJUNG",
+      "type": "Region",
+      "label": "하중·호조벌",
+      "scope": "관곡지·연꽃테마파크·하중동 호조벌 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_BAEGOT",
+      "type": "Region",
+      "label": "배곧",
+      "scope": "배곧한울공원 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_EUNGYE",
+      "type": "Region",
+      "label": "은계",
+      "scope": "은행동 은계호수공원 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_MULWANG",
+      "type": "Region",
+      "label": "물왕",
+      "scope": "물왕호수 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_DAEYA",
+      "type": "Region",
+      "label": "대야·소래산",
+      "scope": "대야동 소래산 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    },
+    {
+      "code": "REGION_WOLGOT",
+      "type": "Region",
+      "label": "월곶",
+      "scope": "월곶동 포구 일원",
+      "classification_basis": "프로젝트의 관광 검색 분류. 행정구역 경계·전체 지역 대표성 주장 없음.",
+      "review_status": "DRAFT",
+      "active": true
+    }
+  ],
+  "themes": [
+    {
+      "code": "THEME_EXPERIENCE",
+      "type": "Theme",
+      "label": "체험",
+      "definition": "전시 참여·교육·활동을 소개하는 관심 주제",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_MARINE_EXPERIENCE",
+      "type": "Theme",
+      "label": "해양 체험",
+      "definition": "서핑 등 물과 관련된 참여 활동; 바다 경관만으로 부여하지 않음",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_REST",
+      "type": "Theme",
+      "label": "휴식",
+      "definition": "출처가 쉼터·휴식·산책 공간으로 소개하는 관심 주제",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_NATURE",
+      "type": "Theme",
+      "label": "자연·생태",
+      "definition": "식물·갯벌·산림·농경 경관 등의 관찰",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_HISTORY",
+      "type": "Theme",
+      "label": "역사·문화",
+      "definition": "유적·역사적 장소·유물 전시",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_WALKING",
+      "type": "Theme",
+      "label": "산책",
+      "definition": "출처에서 산책로·걷기 활동을 소개",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "THEME_SCENERY",
+      "type": "Theme",
+      "label": "경관 감상",
+      "definition": "노을·수변·포구 등의 풍경 감상",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    }
+  ],
+  "companion_types": [
+    {
+      "code": "COMPANION_FAMILY",
+      "type": "CompanionType",
+      "label": "가족",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    },
+    {
+      "code": "COMPANION_FRIENDS",
+      "type": "CompanionType",
+      "label": "친구",
+      "review_status": "DRAFT",
+      "active": true,
+      "provenance": "PROJECT_MODEL"
+    }
+  ],
+  "places": [
+    {
+      "code": "PLACE_REAL_001",
+      "type": "Place",
+      "label": "시흥 갯골생태공원",
+      "region_code": "REGION_JANGGOK",
+      "address": "경기도 시흥시 동서로 287",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "장곡동 갯골생태공원 일원",
+      "description": "갯골과 옛 염전 주변의 생물 관찰 공간.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GAETGOL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_002",
+      "type": "Place",
+      "label": "오이도 선사유적공원",
+      "region_code": "REGION_OIDO",
+      "address": "경기도 시흥시 서해안로 113-27",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "오이도 관광지 일원",
+      "description": "패총과 신석기 생활상을 소개하는 유적공원.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_003",
+      "type": "Place",
+      "label": "시흥오이도박물관",
+      "region_code": "REGION_OIDO",
+      "address": "경기도 시흥시 오이도로 332",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "오이도 관광지 일원",
+      "description": "시흥 출토 유물 전시와 어린이 선사문화 체험을 소개하는 박물관.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MUSEUM"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_004",
+      "type": "Place",
+      "label": "연꽃테마파크",
+      "region_code": "REGION_HAJUNG",
+      "address": "경기도 시흥시 관곡지로 139",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "관곡지·연꽃테마파크·하중동 호조벌 일원",
+      "description": "연과 수련을 관찰하는 공간으로 관곡지와 별도 장소다.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_005",
+      "type": "Place",
+      "label": "관곡지",
+      "region_code": "REGION_HAJUNG",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "관곡지·연꽃테마파크·하중동 호조벌 일원",
+      "description": "강희맹과 연꽃 재배의 역사적 연관을 소개하는 연못.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_006",
+      "type": "Place",
+      "label": "웨이브파크",
+      "region_code": "REGION_GEOBUK",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "시화MTV 거북섬 일원",
+      "description": "거북섬 일원에 조성된 인공 서핑장.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WAVE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_007",
+      "type": "Place",
+      "label": "배곧한울공원",
+      "region_code": "REGION_BAEGOT",
+      "address": "경기도 시흥시 해송십리로 61",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "배곧한울공원 일원",
+      "description": "서해에 접한 공원으로 해안 산책과 노을 감상을 소개한다.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_HANUL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_008",
+      "type": "Place",
+      "label": "은계호수공원",
+      "region_code": "REGION_EUNGYE",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "은행동 은계호수공원 일원",
+      "description": "은행동의 호수 주변 산책로와 쉼터가 있는 공원.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_EUNGYE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_009",
+      "type": "Place",
+      "label": "물왕호수",
+      "region_code": "REGION_MULWANG",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "물왕호수 일원",
+      "description": "시흥의 담수호로, 물왕저수지라는 이전 명칭도 사용되었다.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MULWANG"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_010",
+      "type": "Place",
+      "label": "호조벌",
+      "region_code": "REGION_HAJUNG",
+      "address": "경기도 시흥시 하중동 73",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "관곡지·연꽃테마파크·하중동 호조벌 일원",
+      "description": "간척지의 논과 수로 경관을 소개하는 장소.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_011",
+      "type": "Place",
+      "label": "소래산",
+      "region_code": "REGION_DAEYA",
+      "address": "경기도 시흥시 대야동",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "대야동 소래산 일원",
+      "description": "산림과 산책로를 소개하는 시흥 대야동의 산.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_012",
+      "type": "Place",
+      "label": "월곶포구",
+      "region_code": "REGION_WOLGOT",
+      "address": "경기도 시흥시 월곶동",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "월곶동 포구 일원",
+      "description": "서해안에 위치하며 어선이 드나드는 포구.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WOLGOT"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_013",
+      "type": "Place",
+      "label": "거북섬",
+      "region_code": "REGION_GEOBUK",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "시화MTV 거북섬 일원",
+      "description": "시흥 시화MTV에 조성된 인공섬으로 해양레저 시설이 소개되어 있다.",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GEOBUK"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 소개와 위치를 요약. 현재 운영·접근 가능성의 승인 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN"
+      },
+      "merchant_links": [],
+      "benefit_links": []
+    }
+  ],
+  "annotations": [
+    {
+      "code": "ANN_001",
+      "subject": "PLACE_REAL_001",
+      "predicate": "locatedIn",
+      "object": "REGION_JANGGOK",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GAETGOL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '장곡·갯골'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_002",
+      "subject": "PLACE_REAL_001",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GAETGOL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "염생식물과 갯벌 생물 관찰 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_003",
+      "subject": "PLACE_REAL_001",
+      "predicate": "hasTheme",
+      "object": "THEME_EXPERIENCE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GAETGOL_FAMILY"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "옛 염전 복원 체험장과 소금 생산 학습 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_004",
+      "subject": "PLACE_REAL_002",
+      "predicate": "locatedIn",
+      "object": "REGION_OIDO",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '오이도'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_005",
+      "subject": "PLACE_REAL_002",
+      "predicate": "hasTheme",
+      "object": "THEME_HISTORY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "패총·신석기 생활상·유물 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_006",
+      "subject": "PLACE_REAL_002",
+      "predicate": "hasTheme",
+      "object": "THEME_EXPERIENCE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "움집 체험·선사체험마을 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_007",
+      "subject": "PLACE_REAL_002",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "공원 산책로 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_008",
+      "subject": "PLACE_REAL_002",
+      "predicate": "hasTheme",
+      "object": "THEME_SCENERY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_PREHISTORIC"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "전망대에서 오이도 풍경과 낙조 감상 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_009",
+      "subject": "PLACE_REAL_003",
+      "predicate": "locatedIn",
+      "object": "REGION_OIDO",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MUSEUM"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '오이도'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_010",
+      "subject": "PLACE_REAL_003",
+      "predicate": "hasTheme",
+      "object": "THEME_HISTORY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MUSEUM"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "시흥 출토 유물과 선사문화 전시 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_011",
+      "subject": "PLACE_REAL_003",
+      "predicate": "hasTheme",
+      "object": "THEME_EXPERIENCE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MUSEUM"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "어린이체험실의 선사생활 체험 전시 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_012",
+      "subject": "PLACE_REAL_004",
+      "predicate": "locatedIn",
+      "object": "REGION_HAJUNG",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '하중·호조벌'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_013",
+      "subject": "PLACE_REAL_004",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "다양한 연·수련과 수생 생물 관찰 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_014",
+      "subject": "PLACE_REAL_004",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "연밭 사이 길을 걷는 활동 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_015",
+      "subject": "PLACE_REAL_005",
+      "predicate": "locatedIn",
+      "object": "REGION_HAJUNG",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '하중·호조벌'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_016",
+      "subject": "PLACE_REAL_005",
+      "predicate": "hasTheme",
+      "object": "THEME_HISTORY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "강희맹의 연꽃씨 도입과 관곡지 역사 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_017",
+      "subject": "PLACE_REAL_005",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_LOTUS"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "연못의 연꽃 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_018",
+      "subject": "PLACE_REAL_006",
+      "predicate": "locatedIn",
+      "object": "REGION_GEOBUK",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WAVE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '거북섬'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_019",
+      "subject": "PLACE_REAL_006",
+      "predicate": "hasTheme",
+      "object": "THEME_MARINE_EXPERIENCE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WAVE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "서프풀에서 서핑 활동을 하는 시설 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_020",
+      "subject": "PLACE_REAL_007",
+      "predicate": "locatedIn",
+      "object": "REGION_BAEGOT",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_HANUL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '배곧'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_021",
+      "subject": "PLACE_REAL_007",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_HANUL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "해안선을 따라 조성된 산책로 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_022",
+      "subject": "PLACE_REAL_007",
+      "predicate": "hasTheme",
+      "object": "THEME_SCENERY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_HANUL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "서해 노을과 야간 경관 감상 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_023",
+      "subject": "PLACE_REAL_008",
+      "predicate": "locatedIn",
+      "object": "REGION_EUNGYE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_EUNGYE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '은계'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_024",
+      "subject": "PLACE_REAL_008",
+      "predicate": "hasTheme",
+      "object": "THEME_REST",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_EUNGYE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "도심 휴식 공간과 쉼터 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_025",
+      "subject": "PLACE_REAL_008",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_EUNGYE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "호수 산책로·수변데크 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_026",
+      "subject": "PLACE_REAL_008",
+      "predicate": "hasTheme",
+      "object": "THEME_SCENERY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_EUNGYE"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "호수와 오난산 경관 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_027",
+      "subject": "PLACE_REAL_009",
+      "predicate": "locatedIn",
+      "object": "REGION_MULWANG",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MULWANG"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '물왕'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_028",
+      "subject": "PLACE_REAL_009",
+      "predicate": "hasTheme",
+      "object": "THEME_REST",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MULWANG"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "대표 휴식처로 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_029",
+      "subject": "PLACE_REAL_009",
+      "predicate": "hasTheme",
+      "object": "THEME_SCENERY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MULWANG"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "호수 야경과 계절 경관 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_030",
+      "subject": "PLACE_REAL_010",
+      "predicate": "locatedIn",
+      "object": "REGION_HAJUNG",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '하중·호조벌'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_031",
+      "subject": "PLACE_REAL_010",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "논과 수로·계절별 농경 경관 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_032",
+      "subject": "PLACE_REAL_010",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "논길과 수로를 따라 걷는 활동 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_033",
+      "subject": "PLACE_REAL_011",
+      "predicate": "locatedIn",
+      "object": "REGION_DAEYA",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '대야·소래산'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_034",
+      "subject": "PLACE_REAL_011",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "소나무·잣나무 숲과 자연경관 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_035",
+      "subject": "PLACE_REAL_011",
+      "predicate": "hasTheme",
+      "object": "THEME_WALKING",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_DULEGIL"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "산림욕장과 산책로 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_036",
+      "subject": "PLACE_REAL_012",
+      "predicate": "locatedIn",
+      "object": "REGION_WOLGOT",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WOLGOT"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '월곶'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_037",
+      "subject": "PLACE_REAL_012",
+      "predicate": "hasTheme",
+      "object": "THEME_SCENERY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_WOLGOT"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "서해안 포구와 어선 출입 소개; 경관 테마는 프로젝트 해석; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_038",
+      "subject": "PLACE_REAL_013",
+      "predicate": "locatedIn",
+      "object": "REGION_GEOBUK",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GEOBUK"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처의 장소 위치를 서비스 지역 '거북섬'로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_039",
+      "subject": "PLACE_REAL_001",
+      "predicate": "suitableFor",
+      "object": "COMPANION_FAMILY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_GAETGOL_FAMILY"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처가 가족 나들이를 겸한 생태 역사문화 여행으로 직접 소개; 모든 연령·안전·현재 프로그램 이용 가능성 보장 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_040",
+      "subject": "PLACE_REAL_003",
+      "predicate": "suitableFor",
+      "object": "COMPANION_FAMILY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MUSEUM"
+      ],
+      "checked_on": "2026-10-02",
+      "evidence_note": "출처가 가족 방문·아이와의 활동을 직접 소개; 모든 연령·안전·현재 프로그램 이용 가능성 보장 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    }
+  ],
+  "theme_parents": [
+    {
+      "subject": "THEME_MARINE_EXPERIENCE",
+      "predicate": "subThemeOf",
+      "object": "THEME_EXPERIENCE",
+      "material_kind": "DEMO",
+      "source_ids": [],
+      "checked_on": "2026-10-02",
+      "evidence_note": "의미 모델의 기존 서비스 테마 정의: 해양 체험은 체험의 하위 개념. 외부 관광 사실 아님.",
+      "assertion_basis": "PROJECT_MODEL",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    }
+  ],
+  "semantic_examples": [
+    {
+      "input": {
+        "region": "REGION_OIDO",
+        "themes": [
+          "THEME_EXPERIENCE"
+        ],
+        "companion": "COMPANION_FAMILY"
+      },
+      "approval_assumption": "해당 장소·지역·테마·동반 관계가 모두 승인된 가정",
+      "expected": [
+        {
+          "place": "PLACE_REAL_003",
+          "base_score": 3
+        },
+        {
+          "place": "PLACE_REAL_002",
+          "base_score": 2
+        }
+      ],
+      "personal_adjustment": 0
+    },
+    {
+      "input": {
+        "region": "REGION_GEOBUK",
+        "themes": [
+          "THEME_EXPERIENCE"
+        ],
+        "companion": null
+      },
+      "approval_assumption": "해당 장소·지역·테마와 테마 부모 관계가 모두 승인된 가정",
+      "expected": [
+        {
+          "place": "PLACE_REAL_006",
+          "base_score": 2,
+          "inference": [
+            "THEME_MARINE_EXPERIENCE",
+            "THEME_EXPERIENCE"
+          ]
+        },
+        {
+          "place": "PLACE_REAL_013",
+          "base_score": 0
+        }
+      ],
+      "personal_adjustment": 0
+    },
+    {
+      "input": {
+        "region": null,
+        "themes": [],
+        "companion": null
+      },
+      "approval_assumption": "없음: 현재 파일 상태 그대로",
+      "expected": [],
+      "reason": "전체 장소가 DRAFT이므로 추천 제외"
+    }
+  ]
+}
