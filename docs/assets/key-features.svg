@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="452" viewBox="0 0 1280 452" role="img" aria-labelledby="title desc">
+  <title id="title">시흥 투어패스 핵심 기능</title>
+  <desc id="desc">나에게 맞는 장소 찾기: 지역·테마·동반 유형으로 온톨로지 기반 추천과 근거를 확인하고 본인의 혜택 피드백을 다음 추천에 반영한다. 나만의 여행 만들기: 관광지·행사·음식점 카드를 선택해 임시 저장·확정하고 방문 기록을 아카이브한다. 이용권으로 혜택 받기: 방문객은 시연용 이용권을 발급받아 코드를 제시하며 담당자는 잔여를 확인하고 사용 처리한다. 여행 패스와 혜택 이용권은 별개이며 선택 연결한다.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; fill: #1A2028; }
+    .heading { font-size: 27px; font-weight: 700; }
+    .subtitle { font-size: 19px; fill: #525862; }
+    .body { font-size: 19px; }
+    .label { font-size: 18px; font-weight: 700; fill: #175940; }
+    .role { font-size: 17px; font-weight: 700; fill: #175940; }
+    .icon { fill: none; stroke: #175940; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect width="1280" height="452" rx="16" fill="#F1F4F8"/>
+  <g transform="translate(24 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><path d="M24 43s15-14 15-25a15 15 0 0 0-30 0c0 11 15 25 15 25Z"/><circle cx="24" cy="18" r="5"/></g>
+    <text x="104" y="63" class="label">01 | 맞춤 추천</text>
+    <text x="24" y="132" class="heading">나에게 맞는 장소 찾기</text>
+    <text x="24" y="164" class="subtitle">온톨로지 기반 추천과 근거 확인</text>
+    <path d="M24 190H376" stroke="#DBDEE3"/>
+    <text x="24" y="226" class="role">방문객</text>
+    <text x="24" y="257" class="body">지역 · 테마 · 동반 유형으로 탐색</text>
+    <text x="24" y="315" class="role">개인화</text>
+    <text x="24" y="346" class="body">내 혜택 피드백을 다음 추천에 반영</text>
+  </g>
+  <g transform="translate(440 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><rect x="5" y="10" width="38" height="29" rx="5"/><path d="M5 19h38M12 30h9"/></g>
+    <text x="104" y="63" class="label">02 | 여행 구성·기록</text>
+    <text x="24" y="132" class="heading">나만의 여행 만들기</text>
+    <text x="24" y="164" class="subtitle">관광지 · 행사 · 음식점 카드를 담아</text>
+    <path d="M24 190H376" stroke="#DBDEE3"/>
+    <text x="24" y="226" class="role">여행 구성</text>
+    <text x="24" y="257" class="body">카드 선택 · 순서 조정 · 저장·확정</text>
+    <text x="24" y="315" class="role">방문 기록</text>
+    <text x="24" y="346" class="body">방문일 · 메모 · 만족도 · 아카이브</text>
+  </g>
+  <g transform="translate(856 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><path d="M6 19h36v24H6ZM4 19 9 5h30l5 14M17 43V29h14v14M4 19c0 7 10 7 10 0 0 7 10 7 10 0 0 7 10 7 10 0 0 7 10 7 10 0"/></g>
+    <text x="104" y="63" class="label">03 | 선택 혜택</text>
+    <text x="24" y="132" class="heading">이용권으로 혜택 받기</text>
+    <text x="24" y="164" class="subtitle">시연용 1일 이용권 · 여행에 선택 연결</text>
+    <path d="M24 190H376" stroke="#DBDEE3"/>
+    <text x="24" y="226" class="role">방문객</text>
+    <text x="24" y="257" class="body">이용권 발급 · 코드 제시 · 피드백</text>
+    <text x="24" y="315" class="role">가맹점 담당자</text>
+    <text x="24" y="346" class="body">잔여 확인 · 혜택 사용 처리 · 이력</text>
+  </g>
+</svg>

@@ -1,0 +1,89 @@
+:root {
+  --color-primary-edge: oklch(100% 0 0 / .18);
+  --color-surface-inset: oklch(98% 0.004 260);
+  --shadow-primary: inset 0 1px 0 var(--color-primary-edge), 0 3px 8px var(--color-shadow);
+  --color-paper: oklch(96.5% 0.006 260);
+  --color-surface: oklch(100% 0 0);
+  --color-ink: oklch(24% 0.018 260);
+  --color-muted: oklch(46% 0.018 260);
+  --color-rule: oklch(90% 0.008 260);
+  --color-border: oklch(58% 0.016 260);
+  --font-body: system-ui, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-display: var(--font-body);
+  --layout-width: 1040px;
+  --layout-gutter: 24px;
+  --control-height: 52px;
+  --panel-padding: 32px;
+  --radius-control: 18px;
+  --radius-panel: 28px;
+  --text-card-title: clamp(1.5rem, 3vw, 1.875rem);
+  --text-title: clamp(1.75rem, 3.5vw, 2.5rem);
+  --text-section: 1.25rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-card-flip: 280ms;
+  --dur-short: 120ms;
+  --color-accent: #175940;
+  --color-accent-hover: #114831;
+  --color-link: #12604b;
+  --color-soft: #eaf3ed;
+  --color-focus: var(--color-accent);
+  --color-card-selected: oklch(57% 0.17 150);
+  --color-card-shade: oklch(12% 0.025 160 / .2);
+  --color-card-shade-bottom: oklch(12% 0.025 160 / .32);
+  --color-card-panel: var(--color-surface);
+  --color-card-ink: var(--color-ink);
+  --color-card-empty: oklch(94% 0.025 160);
+  --color-card-art: oklch(70% 0.065 160);
+  --text-card-heading: clamp(1.375rem, 2.6vw, 1.75rem);
+  --color-danger: #a3312a;
+  --color-danger-soft: #fff0ed;
+  --color-notice: #f1ede2;
+  --color-notice-ink: #675b3b;
+  --color-accent-ink: var(--color-surface);
+  --color-surface-raised: oklch(98.5% 0.004 160);
+  --color-edge: oklch(100% 0 0);
+  --color-shadow: oklch(28% 0.025 260 / 0.04);
+  --color-shadow-deep: oklch(28% 0.025 260 / 0.07);
+  --shadow-surface: inset 0 1px 0 var(--color-edge), 0 2px 4px var(--color-shadow), 0 8px 24px var(--color-shadow);
+  --shadow-floating: inset 0 1px 0 var(--color-edge), 0 3px 8px var(--color-shadow), 0 12px 28px var(--color-shadow-deep);
+  --shadow-control: inset 0 1px 0 var(--color-surface), 0 2px 4px var(--color-shadow);
+  --destination-card-width: 360px;
+  --destination-card-ratio: 2 / 3;
+  --pass-stub-width: clamp(96px, 24vw, 180px);
+  --radius-pill: 999px;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+}
+
+/* Shared application chrome; brand and feature tokens stay project-specific. */
+:root {
+  --navigation-width: 640px;
+  --navigation-gutter: 12px;
+  --navigation-lift: 12px;
+  --bottom-navigation-height: 80px;
+  --radius-navigation: 32px;
+  --color-popup-backdrop: oklch(24% 0.018 260 / .3);
+  --navigation-label-size: .75rem;
+  --header-height: 76px;
+  --content-top: 32px;
+  --navigation-clearance: calc(var(--bottom-navigation-height) + var(--navigation-lift) + 32px + env(safe-area-inset-bottom));
+}
+@media (min-width: 40rem) {
+  :root { --navigation-gutter: 24px; --navigation-lift: 16px; --navigation-label-size: .875rem; }
+}
+@media (max-width: 39.99rem) {
+  :root { --header-height: 68px; --content-top: 24px; }
+}
+
+:root { --color-print-ink: oklch(0% 0 0); }

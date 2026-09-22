@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:if test="${not empty cover.coverImage}"><img class="pass-cover-image" data-kind="${cover.coverKind}" src="${root}${fn:escapeXml(cover.coverImage.path)}" alt="${fn:escapeXml(cover.coverImage.alt)}" loading="lazy" decoding="async"></c:if>

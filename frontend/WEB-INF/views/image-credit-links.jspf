@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<a href="${fn:escapeXml(creditImage.sourceUrl)}" target="_blank" rel="noopener"><c:out value="${creditSourceLabel}"/></a> · <a href="${fn:escapeXml(creditImage.licenseUrl)}" target="_blank" rel="noopener"><c:out value="${empty creditLicenseLabel ? '이용 조건' : creditLicenseLabel}"/></a><c:remove var="creditLicenseLabel"/>

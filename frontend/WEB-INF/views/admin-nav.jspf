@@ -1,0 +1,15 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:if test="${adminArea eq 'tourism'}"><div class="admin-tourism-nav"><nav class="admin-nav" aria-label="관광 관리 세부 메뉴">
+<a href="${root}/admin" ${view eq 'admin' ? 'aria-current=page' : ''}>여행 카드</a>
+<a href="${root}/admin/ontology?collection=places" ${collection eq 'places' ? 'aria-current=page' : ''}>관광지 편집·검토</a></nav>
+<details class="admin-concepts" ${view eq 'relations' or (view eq 'editor' and collection ne 'places') ? 'open' : ''}><summary>추천 분류 설정</summary><nav class="admin-nav" aria-label="추천 분류 설정">
+<a href="${root}/admin/ontology?collection=regions" ${collection eq 'regions' ? 'aria-current=page' : ''}>지역</a>
+<a href="${root}/admin/ontology?collection=themes" ${collection eq 'themes' ? 'aria-current=page' : ''}>테마</a>
+<a href="${root}/admin/ontology?collection=companion-types" ${collection eq 'companion-types' ? 'aria-current=page' : ''}>동반 유형</a>
+<a href="${root}/admin/relations" ${view eq 'relations' ? 'aria-current=page' : ''}>관계·검토</a></nav></details></div></c:if>
+<c:if test="${adminArea eq 'benefits'}"><nav class="admin-nav" aria-label="혜택 관리 세부 메뉴">
+<a href="${root}/admin/catalog?collection=products" ${collection eq 'products' ? 'aria-current=page' : ''}>상품</a>
+<a href="${root}/admin/catalog?collection=merchants" ${collection eq 'merchants' ? 'aria-current=page' : ''}>가맹점</a>
+<a href="${root}/admin/catalog?collection=benefits" ${collection eq 'benefits' ? 'aria-current=page' : ''}>혜택</a>
+<a href="${root}/admin/passes" ${view eq 'passes' or view eq 'pass' ? 'aria-current=page' : ''}>이용권·취소</a>
+</nav></c:if>

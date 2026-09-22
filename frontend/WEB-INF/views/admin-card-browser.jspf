@@ -1,0 +1,25 @@
+<%@ page pageEncoding="UTF-8" %>
+<section class="admin-card-browser" aria-label="여행 카드 선택">
+<div class="admin-browser-tools" hidden>
+<label><span class="visually-hidden">이름·위치 검색</span><input type="search" data-admin-search placeholder="이름이나 위치로 찾기" maxlength="100"></label>
+<div class="admin-card-types" role="group" aria-label="카드 종류"><button type="button" class="secondary" data-admin-kind="all" aria-pressed="true">전체</button><button type="button" class="secondary" data-admin-kind="place" aria-pressed="false">관광지</button><button type="button" class="secondary" data-admin-kind="event" aria-pressed="false">행사</button><button type="button" class="secondary" data-admin-kind="restaurant" aria-pressed="false">음식점</button><button type="button" class="secondary" data-admin-kind="cafe" aria-pressed="false">카페</button></div>
+</div>
+<p class="admin-browser-count" role="status">${fn:length(adminCards)}개의 카드</p>
+<div class="admin-card-grid"><c:forEach var="card" items="${adminCards}">
+<c:set var="cardKind" value="${card.kind eq 'dining' ? (card.category eq '카페' ? 'cafe' : 'restaurant') : card.kind}"/>
+<c:url var="cardInfoUrl" value="/cards/detail"><c:param name="key" value="${card.key}"/></c:url>
+<c:url var="cardGoodsUrl" value="/admin/goods"><c:param name="key" value="${card.key}"/></c:url>
+<c:url var="cardEditUrl" value="/admin/ontology"><c:param name="collection" value="places"/><c:param name="id" value="${card.id}"/></c:url>
+<article class="admin-place-card builder-card ${card.kind eq 'event' ? 'event-card' : card.kind eq 'dining' ? 'dining-card' : ''} ${not empty card.image ? 'has-background' : ''}" data-admin-kind="${cardKind}" data-search="${fn:escapeXml(card.name)} ${fn:escapeXml(card.locationDescription)}" data-key="${fn:escapeXml(card.key)}">
+<a class="admin-card-select card-front" href="${fn:escapeXml(card.kind eq 'place' ? cardEditUrl : cardInfoUrl)}${card.kind eq 'place' ? '#admin-edit' : ''}">
+<c:if test="${not empty card.image}"><%@ include file="card-background.jspf" %></c:if>
+<p class="card-kind"><%@ include file="card-kind-icon.jspf" %><c:out value="${card.kind eq 'dining' ? card.category : card.kindLabel}"/></p>
+<c:if test="${empty card.image}"><%@ include file="card-placeholder.jspf" %></c:if>
+<div class="card-overview"><c:choose><c:when test="${card.kind eq 'event'}"><c:set var="event" value="${card}"/><%@ include file="event-overview.jspf" %></c:when><c:otherwise><h3><c:out value="${card.name}"/></h3><c:if test="${card.kind eq 'dining'}"><p><c:out value="${card.regionName}"/> · <c:out value="${card.designation}"/></p></c:if><p><c:if test="${card.kind eq 'place'}"><c:out value="${card.regionName}"/> · </c:if><c:out value="${card.locationDescription}"/></p></c:otherwise></c:choose></div>
+<span class="admin-card-action card-flip">${card.kind eq 'place' ? '정보·검토' : '안내 확인'} <span aria-hidden="true">→</span></span></a>
+<a class="admin-card-print button secondary" href="${fn:escapeXml(cardGoodsUrl)}#goods-settings" aria-label="${fn:escapeXml(card.name)} 카드 출력">카드 출력</a>
+</article></c:forEach></div>
+<p class="admin-browser-empty" hidden>조건에 맞는 카드가 없습니다. 검색어나 종류를 바꿔 주세요.</p>
+<button type="button" class="secondary admin-browser-more" hidden>카드 더 보기</button>
+<c:if test="${view eq 'admin'}"><p class="admin-help">행사·음식점·카페는 수집된 안내 자료입니다. 출처와 확인일은 안내 확인에서 볼 수 있습니다.</p></c:if>
+</section>

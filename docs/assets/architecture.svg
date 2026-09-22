@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1568" height="452" viewBox="0 0 1568 452" role="img" aria-labelledby="title desc">
+  <title id="title">시흥 투어패스 시스템 아키텍처</title>
+  <desc id="desc">관광 장소 추천과 개인 여행·혜택 이용권을 제공하는 웹서비스. 브라우저에서 Spring Boot 서버와 데이터 저장으로 이어지는 실행 흐름이며 화살표는 소스 의존성이 아니다. 서버는 Controller·Handler, Service, DAO로 책임을 나누며 JSP로 화면을 렌더링한다. 정적 자료는 서버가 직접 읽는다.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; fill: #1A2028; }
+    .heading { font-size: 27px; font-weight: 700; }
+    .subtitle { font-size: 19px; fill: #525862; }
+    .body { font-size: 19px; }
+    .label { font-size: 18px; font-weight: 700; fill: #175940; }
+    .role { font-size: 17px; font-weight: 700; fill: #175940; }
+    .icon { fill: none; stroke: #175940; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect width="1568" height="452" rx="16" fill="#F1F4F8"/>
+  <g transform="translate(24 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><rect x="3" y="5" width="42" height="31" rx="4"/><path d="M3 13h42M18 43h12M24 36v7"/></g>
+    <text x="104" y="63" class="label">01 | 사용자 화면</text>
+    <text x="24" y="126" class="heading">웹 브라우저</text>
+    <text x="24" y="154" class="subtitle">방문객 · 가맹점 담당자 · 관리자</text>
+    <text x="24" y="181" class="subtitle">HTML · CSS · JavaScript</text>
+    <path d="M24 200H376" stroke="#DBDEE3"/>
+    <text x="24" y="233" class="role">여행 · 이용권 화면</text>
+    <text x="24" y="264" class="body">카드 탐색 · 여행 구성 · 혜택 확인</text>
+    <text x="24" y="315" class="role">화면 표시 · 사용자 입력</text>
+    <text x="24" y="346" class="body">서버 렌더링 화면 · 선택 상태 관리</text>
+  </g>
+  <g transform="translate(584 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><rect x="4" y="5" width="40" height="16" rx="4"/><rect x="4" y="27" width="40" height="16" rx="4"/><path d="M12 13h1M12 35h1M23 13h13M23 35h13"/></g>
+    <text x="104" y="63" class="label">02 | 핵심 처리</text>
+    <text x="24" y="126" class="heading">Spring Boot</text>
+    <text x="24" y="154" class="subtitle">Kotlin · Java · 단일 WAR</text>
+    <text x="24" y="181" class="subtitle">레이어드 모놀리식 · MVC</text>
+    <path d="M24 200H376" stroke="#DBDEE3"/>
+    <text x="24" y="233" class="role">Controller · Handler · JSP</text>
+    <text x="24" y="264" class="body">인증·권한 검사 · HTML / JSON 응답</text>
+    <text x="24" y="315" class="role">Service</text>
+    <text x="24" y="346" class="body">여행 · 추천 · 이용권 · 피드백</text>
+  </g>
+  <g transform="translate(1144 24)">
+    <rect width="400" height="404" rx="14" fill="#FFFFFF" stroke="#DBDEE3"/>
+    <rect x="24" y="24" width="64" height="64" rx="16" fill="#EAF3ED"/>
+    <g class="icon" transform="translate(32 32)" aria-hidden="true"><ellipse cx="24" cy="9" rx="18" ry="6"/><path d="M6 9v30c0 8 36 8 36 0V9M6 24c0 8 36 8 36 0"/></g>
+    <text x="104" y="63" class="label">03 | 데이터 저장</text>
+    <text x="24" y="126" class="heading">PostgreSQL 16</text>
+    <text x="24" y="154" class="subtitle">여행 · 이용권 · 사용 이력</text>
+    <path d="M24 200H376" stroke="#DBDEE3"/>
+    <text x="24" y="233" class="role">추천 데이터</text>
+    <text x="24" y="264" class="body">장소 · 테마 · 관계 · 피드백</text>
+    <text x="24" y="315" class="role">정적 자료</text>
+    <text x="24" y="346" class="body">관광 사진 · 행사·음식점 JSON</text>
+  </g>
+  <g>
+    <text x="504" y="207" class="role" text-anchor="middle">HTTP</text>
+    <text x="1064" y="207" class="role" text-anchor="middle">DAO · JDBC</text>
+    <path d="M440 226H568m-8-6 8 6-8 6M1000 226H1128m-8-6 8 6-8 6" fill="none" stroke="#175940" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"/>
+  </g>
+</svg>

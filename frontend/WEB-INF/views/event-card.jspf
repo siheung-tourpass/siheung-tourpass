@@ -1,0 +1,12 @@
+<%@ page pageEncoding="UTF-8" %>
+<article class="event-card builder-card ${not empty event.image ? 'has-background' : ''}" data-card-kind="event" data-latitude="${event.coordinates.latitude}" data-longitude="${event.coordinates.longitude}" data-card-key="event:${fn:escapeXml(event.code)}" data-region-id="${event.regionId}" data-saved-only="${event.savedOnly}" data-start-date="${fn:escapeXml(event.startDate)}" data-end-date="${fn:escapeXml(event.endDate)}">
+<div class="card-front"><c:if test="${not empty event.image}"><%@ include file="card-background.jspf" %></c:if><p class="card-kind"><%@ include file="card-kind-icon.jspf" %>행사</p><c:if test="${empty event.image}"><%@ include file="card-placeholder.jspf" %></c:if><div class="card-overview"><%@ include file="event-overview.jspf" %><p class="card-distance" hidden></p></div>
+<c:set var="cardDetails" value="일정·이용 정보"/><%@ include file="card-actions.jspf" %></div>
+<details class="card-details card-back"><summary>일정·이용 정보</summary><div class="card-detail-content">
+<h4><c:out value="${event.name}"/></h4><p class="result-meta"><strong><c:out value="${event.scheduleLabel}"/></strong> · <c:out value="${event.reviewStatusLabel}"/></p><p><c:out value="${event.description}"/></p><%@ include file="event-image.jspf" %>
+<dl><dt>운영 시간</dt><dd><c:out value="${event.dailyHours}"/></dd><dt>주소</dt><dd><c:out value="${event.address}"/></dd><dt>비용</dt><dd><c:out value="${event.admissionFee}"/></dd><dt>예약 조건</dt><dd><c:out value="${event.reservationNote}"/></dd></dl>
+<c:if test="${not empty event.notes}"><details><summary>안내 확인 사항</summary><ul><c:forEach var="note" items="${event.notes}"><li><c:out value="${note}"/></li></c:forEach></ul></details></c:if>
+<p class="event-sources"><c:forEach var="source" items="${event.sources}" varStatus="loop"><c:if test="${not loop.first}"> · </c:if><a href="${fn:escapeXml(source.url)}" target="_blank" rel="noopener"><c:out value="${source.publisher}"/> 공식 안내 · 새 탭</a></c:forEach></p>
+<p class="result-meta">자료 확인 <c:out value="${event.checkedOn}"/> · 실제 개최·참여 가능 여부 미확인</p>
+<p class="form-hint">여행에 담아도 행사 예약·접수가 되지 않습니다.</p></div><%@ include file="card-close.jspf" %></details>
+</article>

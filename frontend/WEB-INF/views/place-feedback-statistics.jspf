@@ -1,0 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="admin-heading"><div><h1>관광지 피드백 통계</h1><p>관광지별 만족도와 응답 분포를 확인하세요.</p></div></div>
+<%@ include file="admin-nav.jspf" %>
+<p>방문객이 직접 남긴 현재 평가입니다. 수정·삭제가 반영되며 비공개 전환된 관광지의 평가도 포함합니다.</p>
+<c:if test="${empty data}"><section class="panel"><h2>아직 피드백이 없습니다</h2><p>방문객이 관광지 상세에서 평가를 남기면 이곳에 집계됩니다.</p><a href="${root}/admin">관광지 둘러보기</a></section></c:if>
+<div class="destination-grid"><c:forEach var="item" items="${data}"><article class="panel"><h2><c:out value="${item.placeName}"/></h2><p><c:out value="${item.regionName}"/></p><p>응답 <strong>${item.responseCount}건</strong> · 평균 만족도 <strong>${item.averageRating} / 5점</strong></p>
+<table class="feedback-distribution"><caption>점수별 응답 수</caption><thead><tr><th scope="col">점수</th><th scope="col">응답 수</th></tr></thead><tbody><c:forEach var="score" begin="1" end="5"><tr><th scope="row">${score}점</th><td>${item['rating' += score]}건</td></tr></c:forEach></tbody></table>
+<a href="${root}/admin/ontology?collection=places&amp;id=${item.placeId}">관광지 관리</a></article></c:forEach></div>
