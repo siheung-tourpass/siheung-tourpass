@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [api, web, tourism]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: tourpass_ci
+          POSTGRES_DB: siheung_tourpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d siheung_tourpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      TOURPASS_DB_URL: jdbc:postgresql://127.0.0.1:5432/siheung_tourpass
+      TOURPASS_DB_USER: postgres
+      TOURPASS_DB_PASSWORD: tourpass_ci
+      PGUSER: postgres
+      PGPASSWORD: tourpass_ci
+      API_URL: http://localhost:8080/siheung-tourpass/api/v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build
+        run: mvn -B -ntp -f backend/pom.xml package
+      - name: Unit, architecture and data checks
+        if: matrix.suite == 'api'
+        run: |
+          sh backend/scripts/check-boundaries.sh
+          node backend/tests/card_scroll_check.cjs
+          python3 backend/tests/tourism_sql_check.py
+      - name: Seed test database
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -d siheung_tourpass < backend/sql/schema.sql
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -d siheung_tourpass < backend/sql/seed.sql
+          if [ '${{ matrix.suite }}' != web ]; then
+            python3 backend/scripts/tourism-sql.py > /tmp/tourism.sql
+            psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -d siheung_tourpass < /tmp/tourism.sql
+          fi
+      - name: Start application
+        run: |
+          java -jar backend/target/siheung-tourpass.war > /tmp/tourpass.log 2>&1 &
+          echo $! > /tmp/tourpass.pid
+          curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 2 --retry-all-errors --max-time 5 "$API_URL/session" > /dev/null
+      - name: API, database and journey checks
+        if: matrix.suite == 'api'
+        run: |
+          python3 backend/tests/api_check.py "$API_URL"
+          python3 backend/tests/db_check.py 127.0.0.1
+          python3 backend/tests/journey_check.py "$API_URL"
+          python3 backend/tests/journey_cards_check.py "$API_URL"
+          python3 backend/tests/place_feedback_check.py "$API_URL"
+      - name: Restart database and application
+        if: matrix.suite == 'api'
+        run: |
+          kill "$(cat /tmp/tourpass.pid)"
+          timeout 30 tail --pid="$(cat /tmp/tourpass.pid)" -f /dev/null
+          docker restart '${{ job.services.postgres.id }}'
+          for attempt in {1..30}; do
+            if psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -d siheung_tourpass -c 'SELECT 1' > /dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -d siheung_tourpass -c 'SELECT 1'
+          java -jar backend/target/siheung-tourpass.war >> /tmp/tourpass.log 2>&1 &
+          curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 2 --retry-all-errors --max-time 5 "$API_URL/session" > /dev/null
+          python3 backend/tests/restart_check.py "$API_URL"
+          python3 backend/tests/admin_check.py "$API_URL"
+          python3 backend/tests/race_check.py "$API_URL"
+      - name: JSP form checks
+        if: matrix.suite == 'web'
+        run: python3 backend/tests/web_check.py http://localhost:8080/siheung-tourpass
+      - name: Tourism integration checks
+        if: matrix.suite == 'tourism'
+        run: python3 backend/tests/tourism_check.py "$API_URL"
+      - name: Show application log on failure
+        if: failure()
+        run: cat /tmp/tourpass.log || true

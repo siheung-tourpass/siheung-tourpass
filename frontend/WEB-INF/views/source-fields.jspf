@@ -1,0 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
+<label>${empty source ? '추가 URL' : 'URL'}<input type="url" name="extraSourceUrl" value="${fn:escapeXml(source.sourceUrl)}"></label>
+<label>확인일<input type="date" name="extraCheckedOn" value="${fn:escapeXml(source.checkedOn)}"></label>
+<label>근거<textarea name="extraEvidenceNote" maxlength="1000"><c:out value="${source.evidenceNote}"/></textarea></label>

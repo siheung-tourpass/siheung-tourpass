@@ -1,0 +1,12 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="admin-home">
+<header class="admin-heading"><div><h1>관리자 홈</h1><p>검토할 자료를 확인하고 필요한 업무를 시작하세요.</p></div></header>
+<section class="admin-home-review panel" aria-labelledby="admin-review-title"><div><h2 id="admin-review-title">${data.pending gt 0 ? '검토할 관광 자료가 있습니다' : '검토 대기 관광지가 없습니다'}</h2><p>활성 관광지 중 <strong>${data.pending}곳</strong>이 검토를 기다리고 있습니다.</p></div><a class="button ${data.pending gt 0 ? '' : 'secondary'}" href="${root}/admin/ontology?collection=places&amp;reviewStatus=DRAFT&amp;active=true">자료 검토</a></section>
+<section class="admin-home-tasks" aria-labelledby="admin-tasks-title"><h2 id="admin-tasks-title">관리 업무</h2>
+<div class="admin-task-list">
+<a class="admin-task" href="${root}/admin"><div><h3>관광 관리</h3><p>관광지 정보와 추천에 쓰이는 지역·테마·관계를 관리하고 카드를 출력합니다.</p><span>등록 관광지 ${data.places}곳 · 안내 행사 ${data.events}건 · 음식점·카페 ${data.dining}곳</span></div><span class="admin-task-arrow" aria-hidden="true">→</span></a>
+<a class="admin-task" href="${root}/admin/catalog?collection=products"><div><h3>혜택 관리</h3><p>상품·가맹점·혜택을 수정하고 발급 이용권을 조회합니다.</p></div><span class="admin-task-arrow" aria-hidden="true">→</span></a>
+<a class="admin-task" href="${root}/admin/place-feedback"><div><h3>통계</h3><p>관광지별 만족도와 응답 분포를 확인합니다.</p></div><span class="admin-task-arrow" aria-hidden="true">→</span></a>
+</div></section>
+<section class="admin-home-public" aria-labelledby="admin-public-title"><h2 id="admin-public-title">공개 화면 확인</h2><p>방문객에게 표시되는 자료와 행사 일정을 확인하세요.</p><div class="actions"><a href="${root}/explore">여행 카드 보기 ↗</a></div></section>
+</div>

@@ -1,0 +1,7 @@
+<%@ page pageEncoding="UTF-8" %>
+<section class="home-layout landing-layout" aria-labelledby="landing-title">
+<div class="home-photo"><c:set var="imagePlace" value="${homePhoto}"/><%@ include file="place-image.jspf" %></div>
+<header class="home-heading"><h1 id="landing-title">나만의 시흥 여행을 담다</h1><p>관광지부터 행사·음식점·카페까지,<br>함께 고르고 여행의 기억을 남기세요.</p></header>
+<div class="actions"><a class="button" href="${root}/login">로그인하고 시작하기</a><a class="button secondary" href="${root}/explore">여행 카드 둘러보기</a></div>
+<p>둘러보기는 로그인 없이, 여행 저장은 로그인 후에 이용하세요.</p>
+</section>

@@ -1,0 +1,87 @@
+<%@ page pageEncoding="UTF-8" %>
+<h1 id="builder-page-title" tabindex="-1">${empty draft ? '여행 만들기' : '여행 이어 만들기'}</h1><c:if test="${not empty draft}"><p><c:out value="${draft.name}"/> · 제작 중</p></c:if>
+<c:if test="${not empty builderTemplate}"><p class="builder-template-note"><c:out value="${builderTemplate}"/>에서 시작했어요. 카드와 순서를 바꾼 뒤 저장하세요.</p></c:if>
+<nav id="builder-steps" aria-label="여행 만들기 단계" hidden><ol><li data-step="start">1. 시작 카드</li><li data-step="build">2. 덱 구성</li><li data-step="review">3. 여행 확인</li></ol></nav>
+<p id="builder-step-hint" hidden></p>
+<p class="builder-intro">관심 있는 관광지에서 시작해 행사·음식점·카페도 함께 골라 보세요. 담은 카드 주변의 후보를 비교하며 여행을 이어 갈 수 있어요.</p>
+<form id="journey-filters" method="get" action="${root}/journeys/new" data-recommendations-url="${root}/api/v1/recommendations">
+<fieldset id="builder-filters" disabled>
+
+<fieldset id="builder-first-card" class="builder-themes"><legend>어떤 테마로 여행을 시작할까요?</legend><div class="builder-theme-options"><label><input type="radio" name="themeId" value="" checked><span>테마 없이 둘러보기</span></label><c:forEach var="item" items="${options.themes}"><label><input type="radio" name="themeId" value="${item.id}"><span><c:out value="${item.name}"/></span></label></c:forEach></div></fieldset>
+<details id="builder-search-panel" open><summary>직접 찾기 · 검색·세부 조건</summary>
+<label class="deck-search-label">카드 검색<input id="card-search" type="search" placeholder="이름, 위치, 소개로 찾기" autocomplete="off"></label>
+<details class="builder-filter-panel"><summary>세부 조건</summary><div class="builder-advanced">
+<%@ include file="recommendation-region.jspf" %>
+<label>행사 날짜<input id="card-date" type="date"></label>
+<label>동반 유형<select name="companionId"><option value="">선택 안 함</option><c:forEach var="item" items="${options.companionTypes}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label>
+<p class="form-hint">아이와 함께라면 동반 유형과 추천 이유를 살펴보고, 체험 연령·보호자 동반·접수 조건은 공식 안내에서 확인해 주세요.</p>
+<p class="form-hint">지역은 관광지·음식점·카페에 적용해요. 테마·동반 유형은 첫 관광지 추천에 반영해요.</p>
+<div class="actions"><button type="reset" class="secondary">조건 초기화</button><button>카드 보기</button></div>
+</div></details>
+</details>
+</fieldset>
+</form>
+<p id="builder-status" class="result-meta" role="status" aria-live="polite">카드를 골라 여행에 담아 보세요.</p>
+<noscript><p>카드 선택과 저장은 가능합니다. 추천 조건·선택 목록·순서 조정은 JavaScript를 켜면 사용할 수 있어요.</p></noscript>
+<form id="journey-builder" data-selection-order="${fn:escapeXml(selectedCardOrder)}" method="post" action="${root}/journeys/${empty draft ? 'create' : 'update'}">
+<%@ include file="csrf.jspf" %><c:if test="${not empty draft}"><input type="hidden" name="id" value="${draft.id}"></c:if>
+<div class="builder-layout"><div class="builder-catalog">
+<div class="card-tools" hidden>
+
+
+<div class="card-types" role="group" aria-label="카드 종류"><button type="button" class="secondary" data-card-type="all" aria-pressed="true">전체</button><button type="button" class="secondary" data-card-type="place" aria-pressed="false">관광지</button><button type="button" class="secondary" data-card-type="event" aria-pressed="false">행사</button><button type="button" class="secondary" data-card-type="dining" aria-pressed="false">음식점·카페</button></div>
+<button type="button" id="shuffle-cards" class="secondary">섞기 ↻</button><p id="card-count" role="status" aria-live="polite"></p>
+</div>
+<section id="builder-browse-section" aria-labelledby="builder-browse-title"><div class="deck-heading"><h2 id="builder-browse-title">발견할 카드</h2><div class="deck-navigation" hidden><button type="button" id="deck-previous" class="secondary" aria-label="이전 카드">←</button><span id="deck-position" role="status" aria-live="polite"></span><button type="button" id="deck-next" class="secondary" aria-label="다음 카드">→</button></div></div>
+<p id="builder-context" class="form-hint"></p>
+<p id="builder-empty" class="empty-state" ${empty data ? '' : 'hidden'}>조건에 맞는 카드가 없습니다. 검색어·카드 종류·날짜·지역을 바꿔 보세요.</p>
+<div id="deck-stage" class="deck-stage" tabindex="0" role="group" aria-label="여행 카드 덱 · 좌우로 밀어 탐색"><div id="browse-cards" class="builder-cards" tabindex="0" role="region" aria-label="좌우 스크롤로 카드 탐색"><c:forEach var="card" items="${data}"><c:choose><c:when test="${card.kind eq 'place'}"><c:set var="place" value="${card}"/>
+<article class="builder-card ${not empty place.image ? 'has-background' : ''}" data-card-kind="${card.kind}" data-latitude="${place.coordinates.latitude}" data-longitude="${place.coordinates.longitude}" data-card-key="${fn:escapeXml(card.key)}" data-region-id="${place.regionId}" data-saved-only="${place.savedOnly}">
+<div class="card-front"><c:if test="${not empty place.image}"><%@ include file="card-background.jspf" %></c:if>
+<c:if test="${place.materialKind eq 'REAL' and empty place.image}"><p class="photo-pending">사진 준비 중 · <c:out value="${place.name}"/></p></c:if>
+<p class="card-kind"><%@ include file="card-kind-icon.jspf" %>관광지</p><div class="card-overview"><h3><c:out value="${place.name}"/></h3>
+<p class="builder-region" title="${fn:escapeXml(place.locationDescription)}"><c:out value="${place.regionName}"/> · <c:out value="${place.locationDescription}"/></p>
+<c:if test="${empty place.image}"><div class="deck-art" aria-hidden="true"><svg viewBox="0 0 320 90" fill="none" stroke="currentColor" stroke-width="2"><path d="M0 70 60 28l54 38 54-48 76 52 76-30M20 78h280"/><circle cx="256" cy="22" r="10"/><path d="M42 72c40-32 48 20 92-8s75 21 110-12" stroke-dasharray="5 6"/></svg></div></c:if>
+<p class="card-distance" hidden></p></div>
+<c:set var="cardDetails" value="소개·이용 정보"/><%@ include file="card-actions.jspf" %>
+</div>
+<details class="card-back card-details"><summary>소개·이용 정보</summary><div class="card-detail-content"><h4><c:out value="${place.name}"/></h4><p class="result-reason" hidden></p><p><c:out value="${fn:replace(place.description, '시연 자료·실제 사용 불가', '시연 자료')}"/></p><c:if test="${place.materialKind eq 'REAL'}"><p>자료 확인 <c:out value="${empty place.checkedOn ? '미확인' : place.checkedOn}"/> · <c:out value="${place.reviewStatusLabel}"/></p><c:if test="${not empty place.sourceUrl}"><a href="${fn:escapeXml(place.sourceUrl)}" target="_blank" rel="noopener">관광 소개 출처 · 새 탭</a></c:if></c:if>
+<c:if test="${place.materialKind eq 'REAL'}"><%@ include file="visit-info.jspf" %></c:if>
+<c:if test="${place.materialKind ne 'REAL'}"><p class="result-meta">시연 자료</p></c:if>
+
+<c:if test="${place.savedOnly}"><p>현재 공개되지 않은 장소입니다. 담을 당시 정보가 유지됩니다.</p></c:if><c:if test="${not place.savedOnly and place.reviewStatus eq 'APPROVED'}"><a class="detail-link" href="${root}/places/detail?id=${place.id}" target="_blank" rel="noopener">자세히 보기 · 새 탭</a></c:if><c:if test="${not place.savedOnly}"><a class="detail-link" href="${root}/cards/detail?key=place:${place.id}#place-feedback" target="_blank" rel="noopener">관광지 피드백 · 새 탭</a></c:if><c:set var="imagePlace" value="${place}"/><%@ include file="place-image.jspf" %></div><%@ include file="card-close.jspf" %></details>
+</article>
+</c:when><c:when test="${card.kind eq 'event'}"><c:set var="event" value="${card}"/><%@ include file="event-card.jspf" %></c:when>
+<c:when test="${card.kind eq 'dining'}"><%@ include file="dining-card.jspf" %></c:when>
+<c:otherwise><c:set var="merchant" value="${card}"/>
+<article class="builder-card merchant-card" data-card-kind="${card.kind}" data-card-key="${fn:escapeXml(card.key)}" data-saved-only="${merchant.savedOnly}" data-region-id="${merchant.regionId}">
+<div class="card-front"><p class="card-kind"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4-2 6a3 3 0 0 0 5 2 3 3 0 0 0 5 0 3 3 0 0 0 5 0 3 3 0 0 0 5-2l-2-6ZM4 13v7h16v-7M9 20v-5h6v5"/></svg>가맹점</p><div class="merchant-emblem card-placeholder" aria-hidden="true"><svg viewBox="0 0 96 96"><path d="M20 30h56v46H20ZM16 30l8-14h48l8 14M36 30v46M60 30v46M16 44h64"/><path d="M48 16C30 16 28 3 38 6c7 2 10 10 10 10Zm0 0C66 16 68 3 58 6c-7 2-10 10-10 10Z"/></svg></div>
+<div class="card-overview"><h3><c:out value="${merchant.name}"/></h3><p><c:out value="${merchant.regionName}"/> · <c:out value="${merchant.locationDescription}"/></p>
+
+<p class="card-distance" hidden></p></div><c:set var="cardDetails" value="혜택·이용 조건"/><%@ include file="card-actions.jspf" %></div><details class="card-back card-details"><summary>혜택·이용 조건</summary><div class="card-detail-content"><h4><c:out value="${merchant.name}"/></h4><p><c:out value="${merchant.description}"/></p>
+<c:if test="${empty merchant.benefits}"><p>현재 공개된 혜택이 없습니다.</p></c:if>
+<c:forEach var="benefit" items="${merchant.benefits}"><h4><c:out value="${benefit.name}"/></h4><p><c:out value="${benefit.description}"/></p><p>이용권당 <c:out value="${benefit.useLimit}"/>회 · 본인 부담 <c:out value="${benefit.payableWon}"/>원</p><p><c:out value="${benefit.reservationNote}"/></p><a href="${root}/products/detail?id=${benefit.productId}">기간·금액·발급 조건 확인</a></c:forEach>
+<a class="detail-link" href="${root}/merchants/detail?id=${merchant.id}" target="_blank" rel="noopener">가맹점 상세 · 새 탭</a></div><%@ include file="card-close.jspf" %></details></article>
+</c:otherwise></c:choose></c:forEach></div></div>
+
+<p id="deck-feedback" class="deck-feedback" role="status" aria-live="polite">좌우로 넘겨 보고, 카드를 눌러 담거나 빼세요.</p>
+</section></div>
+<section id="deck-summary" aria-labelledby="selection-title"><header class="pass-cover-popover-heading"><h2 id="selection-title">담은 카드 <span id="selection-count" class="count" role="status" aria-live="polite">0장</span></h2></header>
+<aside id="selection-summary" class="builder-summary panel" aria-labelledby="selection-title" tabindex="-1">
+<p id="selection-empty">아직 담은 카드가 없어요. 마음에 드는 카드를 눌러 담아 주세요.</p>
+<ol id="selected-places"></ol>
+<template id="selected-place-template"><li><span></span><div class="selection-controls">
+<button type="button" class="secondary" data-action="위로" title="위로"><span aria-hidden="true">↑</span></button>
+<button type="button" class="secondary" data-action="아래로" title="아래로"><span aria-hidden="true">↓</span></button>
+<button type="button" class="secondary" data-action="빼기" title="빼기"><span aria-hidden="true">×</span></button>
+</div><input type="hidden" name="cardKey"></li></template>
+<section id="journey-details"><c:choose><c:when test="${user.role eq 'VISITOR'}"><h3>이 여행에 이름을 붙여 주세요</h3>
+<label>패스 이름<input name="name" maxlength="100" required placeholder="나의 시흥 여행" autocomplete="off" value="${fn:escapeXml(empty draft ? builderName : draft.name)}"></label>
+<label>여행 날짜 · 선택<input type="date" name="travelDate" value="${fn:escapeXml(draft.travelDate)}"></label>
+<p class="form-hint">장소를 담아도 예약이나 혜택 발급은 되지 않아요. 혜택 이용권은 저장 후 연결할 수 있어요.</p>
+</c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
+</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button></div><p class="form-hint">확정한 패스는 내 패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
+<div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span id="bar-count" role="status" aria-live="polite">0장 선택</span><button type="button" id="builder-next">이 카드로 시작</button></div>
+</form>
+<c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>
+<script src="${root}/assets/card-scroll.js" defer></script><script src="${root}/assets/journey-builder.js" defer></script>

@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<label>희망 지역<select name="regionId"><option value="">시흥시 전체</option><c:forEach var="item" items="${options.regions}"><option value="${item.id}" ${view ne 'journey-builder' and param.regionId eq item.id ? 'selected' : ''}><c:out value="${item.name}"/></option></c:forEach></select></label>

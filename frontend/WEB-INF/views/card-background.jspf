@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<img class="card-background" src="${root}${fn:escapeXml(card.image.path)}" alt="${fn:escapeXml(card.image.alt)}" loading="lazy" decoding="async" width="${card.image.width}" height="${card.image.height}" draggable="false">

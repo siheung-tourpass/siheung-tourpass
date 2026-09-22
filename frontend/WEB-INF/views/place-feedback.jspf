@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<section class="panel" id="place-feedback" aria-labelledby="place-feedback-title"><h2 id="place-feedback-title">관광지 피드백</h2>
+<p>이 관광지는 어떠셨나요? 만족도는 관리자에게 통계로 제공됩니다. 의견 원문은 나에게만 보이며 추천 점수에는 반영되지 않습니다.</p>
+<c:choose><c:when test="${user.role eq 'VISITOR'}">
+<c:if test="${param.feedback eq 'saved'}"><p role="status">피드백을 저장했습니다.</p></c:if><c:if test="${param.feedback eq 'deleted'}"><p role="status">피드백을 삭제했습니다.</p></c:if>
+<form method="post" action="${root}/feedback/places/save"><%@ include file="csrf.jspf" %><input type="hidden" name="id" value="${data.id}">
+<label>만족도<select name="rating" required><option value="">점수를 선택해 주세요</option><c:forEach var="score" begin="1" end="5"><option value="${score}" ${placeFeedback.rating eq score ? 'selected' : ''}>${score}점${score eq 1 ? ' · 매우 불만족' : score eq 5 ? ' · 매우 만족' : ''}</option></c:forEach></select></label>
+<label>의견 · 선택 · 500자 이내<textarea name="comment" maxlength="500" rows="3"><c:out value="${placeFeedback.comment}"/></textarea></label><button>${empty placeFeedback ? '피드백 저장' : '피드백 수정'}</button></form>
+<c:if test="${not empty placeFeedback}"><form method="post" action="${root}/feedback/places/delete"><%@ include file="csrf.jspf" %><input type="hidden" name="id" value="${data.id}"><button class="secondary">피드백 삭제</button></form></c:if>
+</c:when><c:when test="${empty user}"><a href="${root}/login">로그인하고 피드백 남기기</a></c:when><c:otherwise><p>방문객 계정으로 피드백을 남길 수 있습니다.</p></c:otherwise></c:choose></section>
