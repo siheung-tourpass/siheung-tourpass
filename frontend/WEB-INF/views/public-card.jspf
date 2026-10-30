@@ -1,13 +1,14 @@
 <%@ page pageEncoding="UTF-8" %>
+<c:if test="${user.role eq 'ADMIN'}"><p><a href="${root}/admin">← 관광 관리</a></p><div class="actions detail-admin-actions"><a class="button" href="${root}/admin/goods?key=${fn:escapeXml(data.key)}">카드 출력</a><c:if test="${data.kind eq 'place'}"><a class="button secondary" href="${root}/admin/ontology?collection=places&amp;id=${data.id}#admin-edit">정보 편집·검토</a></c:if></div></c:if>
 <section class="panel public-card"><p><c:out value="${data.kindLabel}"/> · 시흥 투어패스<c:if test="${data.materialKind eq 'DEMO'}"> · 시연 자료</c:if></p><h1><c:out value="${data.name}"/></h1>
 <c:if test="${not empty data.image}"><img class="public-card-photo" src="${root}${fn:escapeXml(data.image.path)}" alt="${fn:escapeXml(data.image.alt)}"><p><c:out value="${data.credit}"/> · 원본 비율</p><p><c:set var="creditImage" value="${data.image}"/><c:set var="creditSourceLabel" value="사진 원문"/><%@ include file="image-credit-links.jspf" %></p></c:if>
-<p><c:out value="${data.description}"/></p><dl><dt>위치</dt><dd><c:out value="${data.locationDescription}"/></dd><dt>자료 상태</dt><dd><c:out value="${data.reviewStatus eq 'SOURCE_CHECKED' ? '공식 목록 대조' : data.reviewStatusLabel}"/></dd><dt>확인일</dt><dd><c:out value="${empty data.checkedOn ? '미확인' : data.checkedOn}"/></dd>
+<h2>장소 소개</h2><p><c:out value="${data.description}"/></p><h2>방문 정보</h2><dl><dt>위치</dt><dd><c:out value="${data.locationDescription}"/></dd><dt>자료 상태</dt><dd><c:out value="${data.reviewStatus eq 'SOURCE_CHECKED' ? '공식 목록 대조' : data.reviewStatusLabel}"/></dd><dt>확인일</dt><dd><c:out value="${empty data.checkedOn ? '미확인' : data.checkedOn}"/></dd>
 <c:if test="${data.kind eq 'event'}"><dt>일정</dt><dd><c:out value="${data.startDate}"/> ~ <c:out value="${data.endDate}"/> · <c:out value="${data.scheduleLabel}"/></dd><dt>비용</dt><dd><c:out value="${data.admissionFee}"/></dd><dt>예약</dt><dd><c:out value="${data.reservationNote}"/></dd></c:if>
 <c:if test="${data.kind eq 'dining'}"><dt>지정 근거</dt><dd><c:out value="${data.sourceTitle}"/> · 자료 기준일 <c:out value="${data.contentDate}"/></dd><dt>영업시간·가격·예약</dt><dd>미확인</dd></c:if></dl>
 <c:if test="${not empty data.sourceUrl}"><p><a href="${fn:escapeXml(data.sourceUrl)}" target="_blank" rel="noopener">공식 안내 원문 ↗</a></p></c:if>
 <c:if test="${data.kind eq 'place' and data.materialKind eq 'REAL'}"><%@ include file="visit-info.jspf" %></c:if>
 <c:if test="${data.kind eq 'dining'}"><p>메뉴·가격·영업시간·예약·주차 조건은 방문 전 업소에 확인해 주세요. 공식 지정은 할인이나 혜택 제휴를 뜻하지 않습니다.</p></c:if>
 <c:if test="${data.kind eq 'event'}"><c:forEach var="source" items="${data.sources}"><p><a href="${fn:escapeXml(source.url)}" target="_blank" rel="noopener"><c:out value="${source.publisher}"/> 공식 안내 ↗</a></p></c:forEach><c:forEach var="note" items="${data.notes}"><p><c:out value="${note}"/></p></c:forEach><p>일정·접수 조건은 공식 안내에서 다시 확인하세요. 검토 대기 자료는 개최·예약 확정을 뜻하지 않습니다.</p></c:if>
-<a class="button" href="${root}/explore">다른 여행 카드 둘러보기</a></section>
+<a class="button secondary" href="${root}/explore">다른 여행 카드 둘러보기</a></section>
 
 <c:if test="${data.kind eq 'place'}"><%@ include file="place-feedback.jspf" %></c:if>

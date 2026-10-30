@@ -1,0 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
+<article class="goods-card">
+<div class="goods-card-brand"><span>시흥 투어패스</span><span><c:out value="${photoCard.kindLabel}"/><c:if test="${photoCard.materialKind eq 'DEMO'}"> · 시연</c:if></span></div>
+<div class="goods-photo"><c:choose><c:when test="${not empty photoCard.image}"><img src="${root}${fn:escapeXml(photoCard.image.path)}" alt="${fn:escapeXml(photoCard.image.alt)}"></c:when><c:otherwise><div class="goods-type-art"><span>시흥</span><small><c:out value="${photoCard.kindLabel}"/></small></div></c:otherwise></c:choose></div>
+<div class="goods-card-title"><h3><c:out value="${photoCard.name}"/></h3><c:if test="${photoCard.kind eq 'event'}"><p><c:out value="${photoCard.startDate}"/> — <c:out value="${photoCard.endDate}"/></p></c:if></div>
+<div class="goods-card-bottom"><div><p class="goods-caption"><c:out value="${empty photoCaption ? '시흥에서 만난 좋은 순간' : photoCaption}"/></p><small><c:choose><c:when test="${not empty photoQr}">QR로 장소 안내와<br>사진 출처를 확인하세요.</c:when><c:otherwise>나의 여행 기록 · <c:out value="${photoCard.visitedOn}"/></c:otherwise></c:choose></small></div><c:if test="${not empty photoQr}"><svg class="goods-qr" viewBox="0 0 ${photoQr.size} ${photoQr.size}" role="img" aria-label="${fn:escapeXml(photoCard.name)} 안내 QR"><rect width="100%" height="100%" class="qr-paper"/><path d="${fn:escapeXml(photoQr.path)}"/></svg></c:if></div>
+<c:if test="${not empty photoCard.credit}"><p class="goods-credit"><c:out value="${photoCard.credit}"/> · 원본 비율</p></c:if>
+</article>

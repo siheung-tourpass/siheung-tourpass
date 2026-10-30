@@ -1,13 +1,13 @@
 <%@ page pageEncoding="UTF-8" %>
-<c:choose><c:when test="${view eq 'catalog'}"><h1>가맹점과 패스 혜택</h1><p>여행에 더할 혜택을 살펴보세요.</p><h2>시연 상품</h2>
+<c:choose><c:when test="${view eq 'catalog'}"><h1>여행에 더하는 혜택</h1><p>무료 체험과 음료 할인을 비교하고, 이용할 때 발급하세요.</p><c:if test="${user.role eq 'VISITOR'}"><div class="actions"><a class="button secondary" href="${root}/passes">내 혜택 이용권</a><a href="${root}/feedback/history">사용 이력·피드백</a></div></c:if><ol class="benefit-steps"><li><strong>조건 확인</strong><span>위치·비용·예약 여부를 확인해요.</span></li><li><strong>이용할 때 발급</strong><span>발급 즉시 24시간이 시작돼요.</span></li><li><strong>코드 제시</strong><span>담당자 확인 후 혜택당 1회 사용해요.</span></li></ol><h2>시연 상품</h2>
 <c:forEach var="item" items="${data.products}"><article class="pass-card"><div class="pass-card-main"><h2><a href="${root}/products/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${fn:replace(item.description, '시연용·실제 사용 불가. ', '')}"/></p><p>발급부터 24시간 · 만료 정각부터 사용 불가 · 결제 없음</p></div><div class="pass-card-action"><a class="button secondary" href="${root}/products/detail?id=${item.id}">상품 보기</a></div></article></c:forEach>
 <h2>가상 가맹점</h2><div class="destination-grid"><c:forEach var="item" items="${data.merchants}"><article class="destination-card"><h2><a href="${root}/merchants/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${item.regionName}"/> · <c:out value="${item.locationDescription}"/></p></article></c:forEach></div>
 <c:if test="${empty data.merchants}"><p>등록된 가맹점이 없습니다.</p></c:if>
 </c:when><c:when test="${view eq 'product'}">
 <article class="pass-card"><div class="pass-card-main"><%@ include file="catalog-heading.jspf" %>
 <p>발급부터 24시간 · 시작 시각 포함, 만료 시각 제외 · 각 혜택 패스당 1회 · 결제 없음</p></div>
-<div class="pass-card-action"><c:choose><c:when test="${user.role eq 'VISITOR'}"><form method="post" action="${root}/passes/issue"><%@ include file="csrf.jspf" %><input type="hidden" name="productId" value="${data.id}"><button aria-label="시연 혜택 이용권 발급">이용권 발급</button></form></c:when><c:when test="${empty user}"><a href="${root}/login">로그인 후 발급</a></c:when></c:choose></div></article>
-<c:set var="benefits" value="${data.benefits}"/><%@ include file="benefits.jspf" %>
+<div class="pass-card-action"><c:choose><c:when test="${not empty activeBenefitPass}"><a class="button" href="${root}/passes/detail?id=${activeBenefitPass.id}">발급한 이용권 보기</a><p>이미 사용 기간 중인 이용권이 있어요.</p></c:when><c:when test="${user.role eq 'VISITOR'}"><form method="post" action="${root}/passes/issue"><%@ include file="csrf.jspf" %><input type="hidden" name="productId" value="${data.id}"><button aria-label="시연 혜택 이용권 발급">지금 발급 · 24시간 시작</button></form></c:when><c:when test="${empty user}"><a href="${root}/login">로그인 후 발급</a></c:when></c:choose></div></article>
+<p>유효한 이용권은 한 번에 하나만 가질 수 있어요. 여행 날짜와 관계없이 발급 즉시 시작됩니다. 발급한 이용권은 여행 설정에서 연결하세요.</p><c:set var="benefits" value="${data.benefits}"/><%@ include file="benefits.jspf" %>
 </c:when><c:otherwise>
 <article class="destination-card destination-detail"><div class="destination-content"><c:if test="${view eq 'place'}"><c:set var="imagePlace" value="${data}"/><%@ include file="place-image.jspf" %></c:if>
 <%@ include file="catalog-heading.jspf" %><p><c:out value="${data.regionName}"/> · <c:out value="${data.locationDescription}"/></p>

@@ -184,3 +184,41 @@
 .feedback-distribution caption { text-align:left; color:var(--color-muted); font-size:var(--text-sm); margin-bottom:var(--space-sm); }
 .feedback-distribution th, .feedback-distribution td { padding:var(--space-sm) 0; border-bottom:1px solid var(--color-rule); }
 .feedback-distribution td:last-child, .feedback-distribution thead th:last-child { text-align:right; }
+
+.admin-card-actions { padding:var(--space-md); border-top:1px solid var(--color-rule); background:var(--color-surface); }
+.admin-card-actions .admin-card-print { display:flex; justify-content:center; align-items:center; gap:var(--space-sm); width:100%; min-height:52px; margin:0; white-space:nowrap; }
+.admin-card-print svg { width:20px; height:20px; flex-shrink:0; }
+.admin-card-print span:last-child { margin-left:auto; }
+.goods-selection { display:flex; align-items:center; gap:var(--space-md); padding:var(--space-md); margin-bottom:var(--space-lg); border:1px solid var(--color-rule); border-radius:var(--radius-control); }
+.goods-selection img { width:64px; height:80px; object-fit:contain; flex-shrink:0; }
+.goods-selection > div { min-width:0; overflow-wrap:anywhere; }
+.goods-selection span { color:var(--color-muted); font-size:var(--text-sm); }
+.goods-selection p { margin:var(--space-xs) 0 0; font-weight:700; }
+.journey-photocards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-xl); }
+.journey-photocard { padding:var(--space-md); border:1px solid var(--color-rule); border-radius:var(--radius-panel); background:var(--color-surface); box-shadow:var(--shadow-surface); min-width:0; }
+.journey-photocard-image { aspect-ratio:1; display:flex; align-items:center; justify-content:center; background:var(--color-soft); color:var(--color-accent); }
+.journey-photocard-image img { width:100%; height:100%; object-fit:contain; }
+.journey-photocard-memory { padding:var(--space-md); overflow-wrap:anywhere; }
+.journey-photocard-memory h2 { margin:0; font-size:var(--text-lg); }
+.journey-photocard-memory p { font-size:var(--text-sm); }
+.journey-photocard-note { white-space:pre-wrap; }
+@media (max-width:850px) { .journey-photocards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:540px) { .journey-photocards { grid-template-columns:minmax(0,1fr); } }
+
+/* Shared card detail and personal print layout. */
+.public-card { max-width:960px; padding:var(--space-xl); border-radius:0; }
+.public-card h2 { font-size:var(--text-lg); border-top:1px solid var(--color-rule); padding-top:var(--space-xl); }
+.detail-admin-actions { max-width:960px; margin:0 auto var(--space-xl); }
+.page-journey-photocards .goods-sheet { max-width:720px; margin:auto; }
+.goods-card-title h3, .goods-caption { overflow-wrap:anywhere; }
+.page-journey-photocards [hidden] { display:none !important; }
+@media print {
+ body.page-journey-photocards { background:var(--color-surface); padding:0; }
+ .page-journey-photocards > :not(main), .page-journey-photocards main > :not(.goods-sheet) { display:none !important; }
+ .page-journey-photocards main { width:auto; max-width:none; padding:0; margin:0; }
+ .page-journey-photocards .goods-sheet { display:grid; grid-template-columns:90mm 90mm; gap:5mm; width:185mm; max-width:none; }
+ .page-journey-photocards .goods-card { width:90mm; height:130mm; padding:4mm; break-inside:avoid; print-color-adjust:exact; }
+ .page-journey-photocards .goods-photo { height:49mm; }
+ .page-journey-photocards .goods-card-title h3 { font-size:12pt; }
+ .page-journey-photocards .goods-caption { font-size:9pt; }
+}

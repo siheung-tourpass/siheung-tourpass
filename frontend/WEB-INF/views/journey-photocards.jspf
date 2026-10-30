@@ -1,0 +1,7 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="goods-toolbar"><div><h1><c:out value="${data.name}"/> 포토카드</h1><p>직접 찍은 사진으로 남기는 여행 · 90 × 130 mm</p></div><c:if test="${not empty photoCards}"><button type="button" data-photo-print hidden>인쇄 / PDF 저장</button></c:if></div>
+<p class="photo-print-help">A4 세로 · 배율 100% · 머리글/바닥글 끔. 사진은 원본 비율로 표시합니다.</p>
+<div class="goods-sheet"><c:forEach var="photoCard" items="${photoCards}"><c:set var="photoCaption" value="${data.name}"/><c:set var="photoQr" value="${null}"/><%@ include file="photocard.jspf" %></c:forEach></div>
+<c:if test="${empty photoCards}"><div class="empty-state"><h2>내 사진으로 추억을 남겨 보세요</h2><p>여행 기록에서 장소별 사진을 올리면 포토카드가 만들어집니다.</p></div></c:if>
+<p role="status" data-photo-print-status></p><p class="photo-return"><a href="${root}/journeys/detail?id=${data.id}">사진 관리 · 여행 기록으로 돌아가기 →</a></p>
+<script src="${root}/assets/journey-photos.js" defer></script>

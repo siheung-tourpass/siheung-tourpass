@@ -1,5 +1,7 @@
 # 이슈·PR 작성 규칙
 
+작성은 [이슈 템플릿](../.github/ISSUE_TEMPLATE.md)·[PR 템플릿](../.github/PULL_REQUEST_TEMPLATE.md)에서 시작한다. 요구사항·문서의 관리 원칙은 [작업 지침](../AGENTS.md)을 따른다.
+
 ## 이슈
 
 - 제목은 `[Bug] 요약`, `[Feature] 요약`, `[Task] 요약` 중 하나로 작성한다. 각각 오류, 기능 제안, 문서·정리 등 기타 작업에 사용한다.

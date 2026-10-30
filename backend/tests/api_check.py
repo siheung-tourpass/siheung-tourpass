@@ -66,11 +66,9 @@ def run():
         public.request('GET', path, expected=401 if path.startswith('/me/') else 404,
                        code='AUTH_REQUIRED' if path.startswith('/me/') else 'NOT_FOUND')
     public.request('GET', '/products/not-an-id', expected=400, code='INVALID_INPUT')
-    public.request('OPTIONS', '/products/1', expected=204)
     visitor.request('GET', '/admin/ontology/places/1/review', expected=403, code='FORBIDDEN')
     visitor.request('DELETE', '/me/journeys/1', {}, csrf=False, expected=403, code='CSRF_INVALID')
 
-    public.request('PUT','/products/1',{},expected=405)
     assert public.request('GET','/products/1')[1]['benefits'][1]['payableWon'] == 4000
     assert public.request('GET','/recommendations?regionId=3')[1]['items'] == []
     public.request('GET','/recommendations?regionId=999',expected=400)

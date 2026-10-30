@@ -15,7 +15,7 @@ public final class RedemptionService {
     public Lookup lookup(Connection c,String user,Map<String,Object> body) throws SQLException {
         Input.fields(body,"merchantId,code");String merchant=Input.id(body.get("merchantId")),code=Input.text(body.get("code"),32,false);assigned(c,user,merchant);
         var p=RedemptionDao.lookup(c,code,merchant);require(p!=null,404,"PASS_CODE_NOT_FOUND");
-        Instant now=Instant.now();var bs=new ArrayList<Map<String,Object>>();for(var b:PassDao.benefits(c,(String)p.get("id")))if(merchant.equals(b.get("merchantId"))){String reason=PassService.availability(p,b,now);bs.add(Map.of("issuedBenefitId",b.get("id"),"benefitName",b.get("benefitName"),"remainingCount",b.get("remainingCount"),"usable",reason.equals("AVAILABLE"),"reason",reason));}
+        Instant now=Instant.now();var bs=lookupBenefits(c,p,merchant,now);
         var token=new Confirmation(AuthService.token(),user,merchant,(String)p.get("id"),now.plusSeconds(300),false);
         return new Lookup(Map.of("confirmationToken",token.token(),"confirmationExpiresAt",token.expiresAt().toString(),"benefits",bs),token);
     }
@@ -26,12 +26,16 @@ public final class RedemptionService {
     }
     public Map<String,Object> getLookup(Connection c,String user,String id) throws SQLException {
         var token=storedLookup(c,user,id,false);assigned(c,user,token.merchantId());
-        var pass=PassDao.get(c,token.passId());var benefits=new ArrayList<Map<String,Object>>();
-        for(var benefit:PassDao.benefits(c,token.passId()))if(token.merchantId().equals(benefit.get("merchantId"))){
-            String reason=PassService.availability(pass,benefit,Instant.now());
+        var benefits=lookupBenefits(c,PassDao.get(c,token.passId()),token.merchantId(),Instant.now());
+        return new LinkedHashMap<>(Map.of("id",id,"confirmationToken",id,"confirmationExpiresAt",token.expiresAt().toString(),"used",token.used(),"benefits",benefits));
+    }
+    private List<Map<String,Object>> lookupBenefits(Connection c,Map<String,Object> pass,String merchant,Instant now) throws SQLException {
+        var benefits=new ArrayList<Map<String,Object>>();
+        for(var benefit:PassDao.benefits(c,(String)pass.get("id")))if(merchant.equals(benefit.get("merchantId"))){
+            String reason=PassService.availability(pass,benefit,now);
             benefits.add(Map.of("issuedBenefitId",benefit.get("id"),"benefitName",benefit.get("benefitName"),"remainingCount",benefit.get("remainingCount"),"usable",reason.equals("AVAILABLE"),"reason",reason));
         }
-        return new LinkedHashMap<>(Map.of("id",id,"confirmationToken",id,"confirmationExpiresAt",token.expiresAt().toString(),"used",token.used(),"benefits",benefits));
+        return benefits;
     }
     private Confirmation storedLookup(Connection c,String user,String id,boolean lock) throws SQLException {
         require(id!=null&&id.matches("[A-Za-z0-9_-]{22}"),404,"NOT_FOUND");

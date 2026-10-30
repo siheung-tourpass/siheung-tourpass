@@ -50,6 +50,7 @@ public final class WebHandler {
                 }else if(r.getServletPath().equals("/logout"))s.invalidate();
                 else if(result.data() instanceof RedemptionService.Lookup lookup){s.setAttribute("confirmation",lookup.confirmation());result=page("confirm",lookup.response());}
                 else if(r.getServletPath().equals("/merchant/redeem/confirm"))s.setAttribute("confirmation",((RedemptionService.Confirmation)s.getAttribute("confirmation")).consume());
+                if("photo".equals(result.view())){out.setContentType("image/jpeg");out.getOutputStream().write((byte[])result.data());return;}
                 if(result.view()!=null&&result.view().equals("json")){ApiHandler.json(out,result.data());return;}
                 if(result.redirect()!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+result.redirect());return;}
                 r.setAttribute("view",result.view());r.setAttribute("data",display(result.data()));r.setAttribute("csrf",s.getAttribute("csrf"));
@@ -66,6 +67,7 @@ public final class WebHandler {
         r.setAttribute("view",r.getServletPath().equals("/login") && Set.of("INVALID_CREDENTIALS","INVALID_INPUT","CSRF_INVALID").contains(e.code)?"login":"error");r.setAttribute("message",message(e.code));r.setAttribute("errorCode",e.code);r.setAttribute("csrf",r.getSession().getAttribute("csrf"));out.setStatus(e.status);out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
     }
     public static String message(String code){return switch(code){
+        case "INVALID_PHOTO"->"JPEG·PNG 사진을 선택해 주세요. 8MB 이하, 1,600만 화소까지 저장할 수 있습니다.";
         case "INVALID_INPUT","INVALID_CONCEPT"->"입력값을 확인해 주세요.";
         case "INVALID_CREDENTIALS"->"아이디와 비밀번호를 확인해 주세요.";
         case "FORBIDDEN"->"이 작업을 수행할 권한이 없습니다.";
@@ -84,6 +86,7 @@ public final class WebHandler {
         case "THEME_CYCLE"->"테마 관계에 순환이 생겨 저장할 수 없습니다.";
         case "DUPLICATE_RELATION","DUPLICATE_RESOURCE","DUPLICATE_FEEDBACK"->"이미 등록된 자료입니다.";
         case "REVIEW_REQUIRED"->"근거와 연결 자료의 승인을 확인해 주세요.";
+        case "JOURNEY_NOT_COMPLETED"->"사용 완료한 여행에서만 포토카드를 확인할 수 있습니다.";
         case "JOURNEY_LOCKED"->"제작 중인 패스만 구성을 바꾸거나 삭제할 수 있습니다.";
         case "TEMPLATE_UNAVAILABLE"->"이 템플릿의 장소 자료가 준비되지 않았습니다. 다른 템플릿이나 빈 여행으로 시작해 주세요.";
         case "JOURNEY_EMPTY"->"제작 확정 전에 카드를 한 장 이상 담아 주세요.";
@@ -132,7 +135,7 @@ public final class WebHandler {
         method(r,"GET");
         if("ADMIN".equals(role(user)))return page("home",adminOverview(c));
         r.setAttribute("homePhoto",Map.of("materialKind","REAL","image",PlaceImages.random()));
-        if(user!=null && "VISITOR".equals(user.get("role"))) {
+        if("VISITOR".equals(role(user))) {
             var journeys=new JourneyService().list(c,(String)user.get("id"),null);
             var drafts=journeys.stream().filter(j->"PLANNING".equals(j.get("status"))).toList();
             r.setAttribute("homeDraftCount",drafts.size());
@@ -150,7 +153,12 @@ public final class WebHandler {
         method(r,"GET");return page("catalog",Map.of("products",catalog.list(c,"products",null),"merchants",catalog.list(c,"merchants",Input.param(q.get("regionId")))));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        method(r,"GET");return page("product",catalog.product(c,id(r)));
+        method(r,"GET");
+        if("VISITOR".equals(role(user))){
+            var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
+            if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
+        }
+        return page("product",catalog.product(c,id(r)));
     }
     public Page merchant(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");return page("merchant",catalog.merchant(c,id(r)));
@@ -167,8 +175,9 @@ public final class WebHandler {
         String role=role(user);
         var q=query(r);
         method(r,"GET");
-        if("application/json".equals(r.getHeader("Accept")))return page("json",new RecommendationService().recommend(c,uid,role,q));
-        journeyOptions(c,r,uid,role);r.setAttribute("options",ontology.options(c));r.setAttribute("selectedThemeIds",new HashSet<>(Objects.requireNonNullElse(values(r,"themeId"),List.of())));return page("recommendations",new RecommendationService().recommend(c,uid,role,q));
+        var recommendations=new RecommendationService().recommend(c,uid,role,q);
+        if("application/json".equals(r.getHeader("Accept")))return page("json",recommendations);
+        journeyOptions(c,r,uid,role);r.setAttribute("options",ontology.options(c));r.setAttribute("selectedThemeIds",new HashSet<>(Objects.requireNonNullElse(values(r,"themeId"),List.of())));return page("recommendations",recommendations);
     }
     public Page journeys(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -177,13 +186,8 @@ public final class WebHandler {
         var journeys=new JourneyService().list(c,uid,status);journeyCovers(c,journeys);
         r.setAttribute("journeyStatus",status);r.setAttribute("journeyText",journeyText(status));return page("journeys",journeys);
     }
-    public Page newJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        String uid=userId(user);
-        method(r,"GET");return builder(c,r,uid,null);
-    }
-    public Page editJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        String uid=userId(user);
-        method(r,"GET");return builder(c,r,uid,id(r));
+    public Page journeyBuilder(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        method(r,"GET");return builder(c,r,userId(user),r.getServletPath().equals("/journeys/edit")?id(r):null);
     }
     public Page journey(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -200,7 +204,7 @@ public final class WebHandler {
         var cards=values(r,"cardKey");
         var journey=new JourneyService().saveDraft(c,uid,journeyId,form(r,"name","travelDate"),
             cards!=null?cards:values(r,"placeId"),intent.equals("confirm"));
-        return redirect(journey.get("status").equals("PLANNING")?"/journeys/edit?id="+journey.get("id"):"/journeys/detail?id="+journey.get("id"));
+        return redirect("/journeys/"+(journey.get("status").equals("PLANNING")?"edit":"detail")+"?id="+journey.get("id"));
     }
     public Page deleteJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -291,6 +295,31 @@ public final class WebHandler {
         var events=EventCatalog.list(null);
         return Map.of("places",places.size(),"pending",places.stream().filter(p->"DRAFT".equals(p.get("reviewStatus"))&&Boolean.TRUE.equals(p.get("active"))).count(),
             "events",events.current().size()+events.past().size(),"dining",catalog.diningCards(c).size());
+    }
+    public Page journeyPhotocards(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        method(r,"GET");
+        var journey=new JourneyService().photocards(c,(String)user.get("id"),id(r));
+        var photoCards=new ArrayList<Map<String,Object>>();
+        for(var item:(List<Map<String,Object>>)journey.get("places")){
+            if(!Boolean.TRUE.equals(item.get("hasPhoto")))continue;
+            var card=new LinkedHashMap<String,Object>();card.put("name",item.get("placeName"));card.put("kindLabel","여행 기록");
+            card.put("visitedOn",item.get("visitedOn"));card.put("credit","직접 촬영한 사진");
+            card.put("image",Map.of("path","/journeys/photo?id="+journey.get("id")+"&itemId="+item.get("id"),"alt",item.get("placeName")));
+            photoCards.add(card);
+        }
+        r.setAttribute("photoCards",photoCards);
+        r.setAttribute("journeyStatus","ARCHIVED");
+        return page("journey-photocards",journey);
+    }
+    public Page journeyPhoto(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        var photos=new JourneyPhotoService();String journey=id(r),item=Input.id(param(r,"itemId")),uid=userId(user);
+        if(r.getMethod().equals("GET"))return page("photo",photos.image(c,uid,journey,item));
+        if("delete".equals(param(r,"intent")))photos.delete(c,uid,journey,item);
+        else {
+            var photo=r.getPart("photo");require(photo!=null&&photo.getSize()>0&&photo.getSize()<=JourneyPhotoService.MAX_BYTES,400,"INVALID_PHOTO");
+            try(var input=photo.getInputStream()){photos.save(c,uid,journey,item,input.readNBytes(JourneyPhotoService.MAX_BYTES+1));}
+        }
+        return redirect("/journeys/detail?id="+journey+"#record-"+item);
     }
     public Page goods(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         var cards=catalog.cards(c);

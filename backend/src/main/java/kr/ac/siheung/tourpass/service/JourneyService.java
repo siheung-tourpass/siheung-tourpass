@@ -34,6 +34,11 @@ public final class JourneyService {
         j.put("places",JourneyDao.cards(c,id));
         return j;
     }
+    public Map<String,Object> photocards(Connection c,String user,String id) throws SQLException {
+        var journey=cards(c,user,id);
+        require("ARCHIVED".equals(journey.get("status")),409,"JOURNEY_NOT_COMPLETED");
+        return journey;
+    }
     public Map<String,Object> detail(Connection c,String user,String id) throws SQLException {
         var j=cards(c,user,id);
         if(j.get("issuedPassId")!=null)j.put("benefitPass",new PassService().detail(c,user,(String)j.get("issuedPassId"),false));

@@ -66,39 +66,24 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 
 화면은 `http://localhost:8080/siheung-tourpass/`, API는 같은 주소의 `/api/v1`. 시연 계정 `visitor`, `visitor2`, `staff-a`, `staff-b`, `admin`의 초기 암호는 모두 `DemoPass!2026`이다.
 
-| 역할·화면 | 사용 흐름 |
+| 작업 | 사용 흐름 |
 | --- | --- |
-| 방문객 | 여행 만들기에서 빈 구성·템플릿 선택 → 카드 탐색·선택·순서 확인 → 이름·날짜 임시 저장 → 이어 만들기·제작 확정 → 내 패스 → 방문 기록 → 사용 완료 → 여행 기록 조회 |
-| 카드 탐색 | ‘새 여행 만들기’에서 테마 선택 → 시작 카드 선택·확인 → 덱 구성에서 가까운 카드 이어 고르기(직선거리 기준) → 여행 확인. 직접 찾기에서 검색·지역·행사 날짜·동반 유형 설정 가능. 가로 스크롤·스와이프·마우스 드래그로 탐색하고 여행 확인 화면에서 저장. 비로그인 탐색 가능, 저장 시 방문객 로그인 필요 |
-| 행사 | 로그인 없이 ‘여행 카드 둘러보기’에서 행사 종류·날짜로 검색하고 상세 확인. 변경·접수 조건은 공식 안내 링크에서 확인 |
-| 선택 혜택 | 상품에서 이용권 발급 → 여행 설정에서 연결 → 담당자에게 코드 제시 → 사용 후 피드백 |
-| 관광지 피드백 | 관광지 카드 상세에서 만족도·선택 의견 저장/수정/삭제. 관리자는 통계에서 관광지별 집계 확인 |
-| 프로필 | 계정 정보·화면 설정·로그아웃 |
-| 담당자 | 코드 입력 → 배정 혜택·잔여 확인 → 사용 확인 → 이력 조회 |
-| 관리자 | 상품·가맹점·혜택·장소·개념·관계 관리, 자료 검토, 사유 입력 후 이용권 취소. 관광 관리에서 카드의 출력 버튼 → 문구·수량·접속 주소 설정 → 미리보기 → 인쇄/PDF 저장 |
+| 여행 구성 | 여행 만들기 → 빈 구성·템플릿 선택 → 시작 카드·덱 구성 → 여행 확인 → 이름·날짜 입력 → 임시 저장 또는 제작 확정 |
+| 공개 탐색 | 여행 카드 둘러보기 → 검색·종류·지역·행사 날짜로 탐색 → 카드 상세·공식 안내 확인. 저장 시 방문객 로그인 |
+| 여행 기록 | 내 패스 → 방문 기록 → 사용 완료 → 여행 기록에서 사진 업로드·교체·삭제 → 사용 완료 여행의 포토카드 인쇄 |
+| 혜택 이용 | 상품에서 이용권 발급 → 여행 설정에서 연결 → 담당자에게 코드 제시 → 사용 후 피드백 |
+| 관광지 평가 | 관광지 상세 → 만족도·선택 의견 저장·수정·삭제 |
+| 가맹점 담당자 | 코드 입력 → 배정 혜택·잔여 확인 → 사용 확인 → 결과·이력 조회 |
+| 관리자 | 관광·혜택 자료 관리·검토, 통계 조회, 사유 입력 후 이용권 취소. 관광 관리 → 카드 상세 → 카드 출력 → 설정 → 미리보기·인쇄 |
+| 계정 | 프로필 → 계정 정보·화면 설정·로그아웃 |
 
 초기 자료의 담기 조건은 [여행 구성](docs/specs/visitor.md#담기와-보존), 추천 승인 절차는 [데이터 적재](docs/data-collection/tourism-data.md#적재)를 따른다.
 
-굿즈는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [굿즈 정책](docs/specs/admin.md#관리자-작업과-카드-출력)을 따른다.
+포토카드는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [포토카드 정책](docs/specs/admin.md#관리자-작업과-카드-출력)을 따른다.
 
 ### API
 
-`GET /api/v1/`에서 시작해 응답의 `_links`에 있는 `href`·`method`를 따른다. API는 쿠키 대신 매 요청의 `Authorization: Basic <아이디:암호의 Base64>`로 인증한다. 변경 요청에는 `X-CSRF-Token: api`, JSON 본문에는 `Content-Type: application/json`을 전달한다. 브라우저의 자동 인증에도 변경 요청의 명시적 헤더를 요구하며 교차 출처 요청을 허용하지 않는다. Basic 인증은 로컬 시연 외 접속에서 HTTPS로 전송한다. 화면 로그인은 API 인증과 별개다.
-
-```sh
-curl --user 'visitor:DemoPass!2026' http://localhost:8080/siheung-tourpass/api/v1/
-```
-
-혜택 확인 생성 응답은 `201`이며 `Location`에서 쿠키 없이 재조회할 수 있다. 순서 상대 이동은 `POST .../move`다. 기존 `/session` API는 제거되었다. 공통 계약은 [RESTful API 요구사항](spec.md#restful-api)을 따른다.
-
-Bruno에서 **Open Collection**으로 [backend/bruno](backend/bruno)를 열고 `Local` 환경을 선택한다. 서버 주소가 다르면 환경의 `baseUrl`을 변경한다. `Auth / Index` → 원하는 `Select` 요청으로 클라이언트의 인증 계정을 선택한다. 컬렉션 스크립트가 요청마다 인증·CSRF 헤더를 전달한다. [Bruno 변수 사용법](https://blog.usebruno.com/manage-variables)을 참고한다.
-
-- 공개 조회: `Public`에서 상품·가맹점·추천 조회. `Recommendations`는 첫 추천의 `placeId`를 저장한다. 추천이 없으면 화면에서 공개 장소 ID를 확인해 환경에 입력한다.
-- 여행: 방문객 계정 선택 → `Journeys / Create` → `Add place` → 필요한 수정·기록 요청. 생성 응답의 `journeyId`와 담기 응답의 `journeyItemId`를 자동 저장한다. 확정·보관 후 삭제하려면 `Restore` → `Reopen`으로 제작 중 상태로 돌아간다.
-- 혜택: 방문객으로 `Passes / Issue` → 담당자 계정 선택 → `Merchant / Lookup pass` → `Redeem` → 방문객 계정 선택 → `Feedback`에서 평가. 이용권 코드·확인 토큰·사용 이력 ID는 응답에서 자동 저장한다. 기본 담당자는 `staff-a`, 가맹점 ID는 `1`이며 다른 담당자는 선택 요청의 계정과 `merchantId`를 함께 바꾼다.
-- 관리자: 관리자 계정 선택 후 `Admin`의 목록·통계·이용권 상세·취소 요청을 선택한다. 자료 생성·수정·검토 요청은 이 컬렉션에 포함하지 않는다.
-
-요청은 필요한 것만 개별 실행한다. 전체 컬렉션 실행은 역할 전환과 데이터 변경 순서를 보장하지 않는다. 발급·혜택 사용·취소·삭제는 실제 DB를 변경하므로 테스트 DB를 사용한다. 활성 이용권이 있어 발급이 거절되면 `Passes / List`에서 ID를 환경의 `passId`에 입력한 뒤 `Detail`로 코드를 저장한다. `Auth / Clear credentials`는 클라이언트에 저장한 인증 계정을 해제한다. 개인 계정 암호·코드·토큰을 환경 파일에 저장해 커밋하지 않는다.
+`GET /api/v1/`의 링크에서 시작한다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
 
 ## 테스트
 
@@ -106,7 +91,7 @@ Bruno에서 **Open Collection**으로 [backend/bruno](backend/bruno)를 열고 `
 
 통합 검사는 DB를 변경하므로 시연·보관용 DB와 분리한다. CI의 `api`·`web`·`tourism` 작업마다 초기 자료가 다르므로 해당 작업의 초기화 순서를 따른다.
 
-카드 브라우저 검사는 Playwright와 Chrome이 있는 환경에서 `node backend/tests/cards_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다. Playwright가 외부 경로에 설치되어 있으면 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 검사에는 방문객 시연 계정이 필요하며 생성한 임시 여행은 삭제한다. 관리자·굿즈 브라우저 검사는 같은 환경에서 `node backend/tests/admin_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다.
+카드 브라우저 검사는 Playwright와 Chrome이 있는 환경에서 `node backend/tests/cards_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다. Playwright가 외부 경로에 설치되어 있으면 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 검사에는 방문객 시연 계정이 필요하며 생성한 임시 여행은 삭제한다. 사진 업로드·교체·삭제·소유권 검사는 같은 환경에서 `node backend/tests/journey_photos_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다. 관리자·포토카드 브라우저 검사는 같은 환경에서 `node backend/tests/admin_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다.
 
 ## 관련 문서
 
@@ -115,7 +100,8 @@ Bruno에서 **Open Collection**으로 [backend/bruno](backend/bruno)를 열고 `
 | 범위·공통 인증·이용권 정책·완료 기준 | [공통 요구사항](spec.md) |
 | 여행·추천·피드백·방문 기록 | [방문객 요구사항](docs/specs/visitor.md) |
 | 혜택 확인·사용 권한 | [가맹점 담당자 요구사항](docs/specs/merchant.md) |
-| 자료 관리·검토·피드백 통계·굿즈 출력 | [관리자 요구사항](docs/specs/admin.md) |
+| 자료 관리·검토·피드백 통계·포토카드 출력 | [관리자 요구사항](docs/specs/admin.md) |
+| API 인증·요청·Bruno 사용 | [API 사용 안내](docs/api-usage.md) |
 | 소스 구조·실행 범위·남은 작업 | [구현 계획](plan.md) |
 | 화면 배치·상태·접근성 | [디자인 기준](docs/design.md) |
 | 추천 점수·정렬·추론 경계 | [추천 모델](docs/tourism-semantics.md) |
