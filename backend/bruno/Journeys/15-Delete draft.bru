@@ -1,0 +1,27 @@
+meta {
+  name: Delete draft
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: 204
+}
+
+docs {
+  PLANNING 여행만 삭제할 수 있습니다. 여행과 하위 기록이 삭제됩니다.
+}

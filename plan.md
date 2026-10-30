@@ -11,7 +11,7 @@
 | 경로·원본 | 책임 |
 | --- | --- |
 | [화면 Controller](backend/src/main/kotlin/kr/ac/siheung/tourpass/controller/TourpassController.kt) · [API Controller](backend/src/main/kotlin/kr/ac/siheung/tourpass/controller/ApiController.kt) | 화면·API의 구체 경로 매핑; Handler 작업 선택 |
-| [WebHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/WebHandler.java) · [ApiHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/ApiHandler.java) | 매핑된 작업의 폼·PRG·확인 토큰·시간 표시 / JSON 계약; 요청 트랜잭션에서 인증·CSRF 검사 |
+| [WebHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/WebHandler.java) · [ApiHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/ApiHandler.java) | 매핑된 작업의 폼·PRG·확인 토큰·시간 표시 / JSON 계약; 요청 트랜잭션에서 인증·CSRF 검사; API는 무상태 인증·자원 링크·HTTP 응답을 담당 |
 | [SecurityFilter](backend/src/main/java/kr/ac/siheung/tourpass/filter/SecurityFilter.java) | 인증·역할·CSRF 검사 함수·캐시·보안 헤더 |
 | [Service](backend/src/main/java/kr/ac/siheung/tourpass/service) | 화면/API 공통 업무 규칙·소유권·상태 전이·추천 계산·입력 검증; 데이터 접근은 DAO 호출 |
 | [DAO](backend/src/main/java/kr/ac/siheung/tourpass/dao) | 기능별 조회·저장·행 잠금 SQL; Sql은 매개변수 바인딩·DB 값 변환 |
@@ -38,6 +38,8 @@
 | 관리자·굿즈 | WebHandler · [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java) · [관리자 탐색](frontend/WEB-INF/views/admin-card-browser.jspf) | 공개 대상 검증·QR 생성은 서버에서, 편집·실물 인쇄 배치는 JSP·CSS에서 처리한다. |
 | 관광 사진 | [PlaceImages](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java) | 장소 코드로 정적 사진을 연결한다. 등록·배포 기준은 [관광 데이터](docs/data-collection/tourism-data.md#이미지)를 따른다. |
 | 공통 화면 | WebHandler · [JSP 조각](frontend/WEB-INF/views) | 역할별 진입을 서버에서 결정하고 사진·추천 입력·CSRF·출처 링크를 공통 조각으로 제공한다. |
+
+API 인증은 요청별 HTTP Basic, 변경 요청은 명시적 CSRF 헤더로 보호한다. 화면 세션과 API 인증을 분리하고, 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API의 혜택 확인 자원은 DB에 저장해 세션 없이 조회·소비한다. HTTP 계약은 [RESTful API](spec.md#restful-api)를 따른다.
 
 여행 편집 조회는 여행·카드, 상세 조회는 혜택·연결 이력까지 포함한다. 제작 중 여행 삭제는 외래 키 CASCADE로 자식 카드·연결 이력을 정리한다. 피드백 사유·검토 초기화는 Service, 관리자 참조 선택 목록은 WebHandler가 담당한다.
 

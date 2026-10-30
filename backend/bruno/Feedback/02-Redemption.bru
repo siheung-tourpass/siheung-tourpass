@@ -1,0 +1,15 @@
+meta {
+  name: Redemption
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/me/redemptions/{{redemptionId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

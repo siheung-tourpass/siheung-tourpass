@@ -1,0 +1,25 @@
+meta {
+  name: Confirm
+  type: http
+  seq: 10
+}
+
+patch {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "CONFIRMED"
+  }
+}
+
+assert {
+  res.status: 200
+}

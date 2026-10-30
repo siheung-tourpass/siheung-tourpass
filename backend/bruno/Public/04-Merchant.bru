@@ -1,0 +1,15 @@
+meta {
+  name: Merchant
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/merchants/{{merchantId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

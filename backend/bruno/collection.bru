@@ -1,0 +1,5 @@
+script:pre-request {
+  const login = bru.getVar("apiLogin");
+  if (login) req.setHeader("Authorization", "Basic " + Buffer.from(login + ":" + bru.getVar("demoPassword")).toString("base64"));
+  if (!["GET", "HEAD", "OPTIONS"].includes(req.getMethod().toUpperCase())) req.setHeader("X-CSRF-Token", "api");
+}

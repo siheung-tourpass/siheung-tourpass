@@ -1,0 +1,25 @@
+meta {
+  name: Move place
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}/places/{{journeyItemId}}/move
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "direction": "UP"
+  }
+}
+
+assert {
+  res.status: 200
+}

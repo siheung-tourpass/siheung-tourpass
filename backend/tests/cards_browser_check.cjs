@@ -12,10 +12,12 @@ async function checkAccessiblePopup(page, popup) {
  await page.setViewportSize(viewport);
 }
 async function login(request, root) {
- const session=await (await request.get(root+'/api/v1/session')).json();
- const response=await request.post(root+'/api/v1/session',{headers:{'X-CSRF-Token':session.csrfToken},data:{loginId:'visitor',password:'DemoPass!2026'}});
+ const html=await (await request.get(root+'/login')).text();
+ const csrf=html.match(/name="csrf" value="([^"]+)"/)[1];
+ const response=await request.post(root+'/login',{form:{csrf,loginId:'visitor',password:'DemoPass!2026'}});
  assert.equal(response.status(),200);
- return response.json();
+ const logged=await (await request.get(root+'/profile')).text();
+ return {csrfToken:logged.match(/name="csrf" value="([^"]+)"/)[1]};
 }
 (async()=>{
  const browser=await chromium.launch({headless:true,channel:'chrome'});
@@ -31,7 +33,7 @@ async function login(request, root) {
  assert.equal(await homeCredit.locator('a').count(),2);
  await page.keyboard.press('Escape');assert(await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).evaluate(el=>el===document.activeElement));
  await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).click();await homeCredit.getByRole('button',{name:'닫기',exact:true}).click();assert.equal(await homeCredit.isVisible(),false);
- assert.equal((await page.request.delete(root+'/api/v1/session',{headers:{'X-CSRF-Token':homeSession.csrfToken}})).status(),204);
+ assert.equal((await page.request.post(root+'/logout',{form:{csrf:homeSession.csrfToken}})).status(),200);
  await page.goto(root+'/explore');await page.waitForSelector('.is-deck-mode');
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert(await page.locator('#builder-next').isDisabled());
@@ -192,7 +194,7 @@ async function login(request, root) {
  try{
   await page.waitForSelector('.is-deck-mode');
   assert.equal(await page.locator('.card-select-toggle[aria-pressed=true]').count(),3);
-  r=await page.request.get(root+'/api/v1/me/journeys/'+id);let saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order);
+  r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});let saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order);
   let expectedCover=null;
   for(const key of order){
    const photo=page.locator(`[data-card-key="${key}"] .card-background`);
@@ -227,9 +229,9 @@ async function login(request, root) {
   await page.locator('#builder-next').click();assert.deepEqual(await page.locator('#selected-places li').evaluateAll(items=>items.map(x=>x.dataset.selectedId)),order);
   await page.locator('#selected-places li').first().getByRole('button',{name:/선택 해제/}).click();assert.equal(await page.locator('#selected-places li').count(),2);
   await page.locator('#save-journey').click();await page.waitForLoadState();
-  r=await page.request.get(root+'/api/v1/me/journeys/'+id);saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order.slice(1));
+  r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order.slice(1));
   const beforeStatus=saved.places;
-  r=await page.request.patch(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':session.csrfToken},data:{status:'CONFIRMED'}});assert.equal(r.status(),200);
+  r=await page.request.patch(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':'api','Authorization':'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')},data:{status:'CONFIRMED'}});assert.equal(r.status(),200);
   for(const [current,next,label] of [['CONFIRMED','ARCHIVED','사용 완료 · 아카이브'],['ARCHIVED','CONFIRMED','제작 확정 목록으로 복원'],['CONFIRMED','PLANNING','제작 중으로 보내기']]){
    await page.goto(root+'/journeys?status='+current);
    const statusCard=page.locator('.journey-card').filter({has:page.locator(`a[href$="detail?id=${id}"]`)});
@@ -237,10 +239,10 @@ async function login(request, root) {
    await checkAccessiblePopup(page,statusCard.locator('section[id^=pass-status-]'));
    await statusCard.locator('section[id^=pass-status-]').getByRole('button',{name:label,exact:true}).click();
    await page.waitForURL(root+'/journeys?status='+next);
-   r=await page.request.get(root+'/api/v1/me/journeys/'+id);const changed=await r.json();
-   assert.equal(changed.status,next);assert.deepEqual(changed.places,beforeStatus);
+   r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});const changed=await r.json();
+   assert.equal(changed.status,next);assert.deepEqual(changed.places.map(({_links,...data})=>data),beforeStatus.map(({_links,...data})=>data));
   }
- }finally{r=await page.request.delete(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':session.csrfToken},data:{}});assert.equal(r.status(),204);}
+ }finally{r=await page.request.delete(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':'api','Authorization':'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')},data:{}});assert.equal(r.status(),204);}
  // The server-rendered cards remain usable without JavaScript.
  const plainContext=await browser.newContext({javaScriptEnabled:false});
  const plain=await plainContext.newPage();
@@ -254,10 +256,10 @@ async function login(request, root) {
  const plainId=new URL(plain.url()).searchParams.get('id');assert(plainId);
  try {
   assert.equal(await plain.locator(`input[value="${plainKey}"]`).isChecked(),true);
-  r=await plain.request.get(root+'/api/v1/me/journeys/'+plainId);const saved=await r.json();
+  r=await plain.request.get(root+'/api/v1/me/journeys/'+plainId,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});const saved=await r.json();
   assert.deepEqual(saved.places.map(item=>item.cardKey),[plainKey]);
  } finally {
-  r=await plain.request.delete(root+'/api/v1/me/journeys/'+plainId,{headers:{'X-CSRF-Token':plainSession.csrfToken},data:{}});assert.equal(r.status(),204);
+  r=await plain.request.delete(root+'/api/v1/me/journeys/'+plainId,{headers:{'X-CSRF-Token':'api','Authorization':'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')},data:{}});assert.equal(r.status(),204);
  }
  await plainContext.close();
  assert.deepEqual(errors,[]);

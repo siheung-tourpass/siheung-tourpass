@@ -1,0 +1,25 @@
+meta {
+  name: Link pass
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "issuedPassId": "{{passId}}"
+  }
+}
+
+assert {
+  res.status: 200
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Place
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/places/{{placeId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

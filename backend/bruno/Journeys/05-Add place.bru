@@ -1,0 +1,32 @@
+meta {
+  name: Add place
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}/places
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "placeId": "{{placeId}}"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const item = res.getBody().places.find(p => p.placeId === bru.getVar("placeId"));
+    if (item) bru.setVar("journeyItemId", item.id);
+  }
+}
+
+assert {
+  res.status: 200
+}

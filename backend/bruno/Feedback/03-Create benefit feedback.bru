@@ -1,0 +1,29 @@
+meta {
+  name: Create benefit feedback
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/me/redemptions/{{redemptionId}}/feedback
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "rating": 5,
+    "reasons": [
+      "COST"
+    ],
+    "comment": "Bruno 혜택 평가"
+  }
+}
+
+assert {
+  res.status: 201
+}

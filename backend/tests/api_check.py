@@ -1,4 +1,6 @@
 """Run on a fresh seeded database: python3 backend/tests/api_check.py [base URL]."""
+import base64
+import re
 import concurrent.futures
 import json
 import sys
@@ -11,22 +13,36 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://localhost:8080/siheung-tour
 class Client:
     def __init__(self, login=None):
         self.http = opener()
-        self.csrf = self.request('GET', '/session')[1]['csrfToken']
-        if login:
-            self.csrf = self.request('POST', '/session', {'loginId':login,'password':'DemoPass!2026'})[1]['csrfToken']
-    def request(self, method, path, body=None, expected=200, code=None, csrf=True):
+        self.authorization = ('Basic ' + base64.b64encode((login + ':DemoPass!2026').encode()).decode()) if login else None
+        self.login = login
+        self.web_csrf = None
+    def web_login(self):
+        if self.web_csrf is not None: return
+        web = BASE.removesuffix('/api/v1')
+        text = self.http.open(web + '/login').read().decode()
+        self.web_csrf = re.search(r'name="csrf" value="([^"]+)"', text)[1]
+        if self.login:
+            req = urllib.request.Request(web + '/login', data=urllib.parse.urlencode({'csrf': self.web_csrf, 'loginId': self.login, 'password': 'DemoPass!2026'}).encode())
+            self.http.open(req).close()
+            text = self.http.open(web + "/profile").read().decode()
+            self.web_csrf = re.search(r'name="csrf" value="([^"]+)"', text)[1]
+    def request(self, method, path, body=None, expected=None, code=None, csrf=True):
+        if expected is None:
+            expected = 201 if method == 'POST' and path == '/merchant/pass-lookups' else (200,201) if method == 'PUT' and path.startswith('/me/places/') and path.endswith('/feedback') else 200
         headers = {'Content-Type':'application/json'}
-        if csrf: headers['X-CSRF-Token'] = self.csrf if hasattr(self, 'csrf') else ''
+        if csrf: headers['X-CSRF-Token'] = 'api'
+        if self.authorization: headers['Authorization'] = self.authorization
         req = urllib.request.Request(BASE+path, data=json.dumps(body).encode() if body is not None else None, method=method, headers=headers)
-        status, _, raw = send(self.http, req)
+        status, self.headers, raw = send(self.http, req)
         data = json.loads(raw) if raw else None
         assert status in (expected if isinstance(expected, (tuple, list, set)) else (expected,)), (method, path, status, data)
         if code: assert data['error']['code'] == code, data
         return status, data
 
     def form(self, path, values, expected=200):
+        self.web_login()
         request = urllib.request.Request(BASE.removesuffix('/api/v1') + path,
-            data=urllib.parse.urlencode({'csrf': self.csrf} | values, doseq=True).encode())
+            data=urllib.parse.urlencode({'csrf': self.web_csrf} | values, doseq=True).encode())
         status, _, raw = send(self.http, request)
         text = raw.decode()
         assert status == expected, (path, status, text[:300])
@@ -38,19 +54,19 @@ def run():
     # Authorization still precedes CSRF and JSON validation in the shared transaction.
     public.request('POST','/me/passes',{'productId':1},csrf=False,expected=401,code='AUTH_REQUIRED')
     visitor.request('POST','/admin/products',{},csrf=False,expected=403,code='FORBIDDEN')
-    public.request('DELETE','/session',csrf=False,expected=401,code='AUTH_REQUIRED')
     assert public.request('GET','/products/1/')[1]['id'] == '1'
     visitor.request('GET','/admin/products',expected=403,code='FORBIDDEN')
     visitor.request('POST','/me/passes',{'productId':'1'},expected=403,code='CSRF_INVALID',csrf=False)
     visitor.request('POST','/me/passes',{'productId':1},expected=400,code='INVALID_INPUT')
     visitor.request('POST','/me/passes',{'productId':'1','ownerId':'5'},expected=400)
-    public.request('POST','/session',{'loginId':'visitor','password':'bad'},expected=401)
+    invalid = Client('visitor'); invalid.authorization = 'Basic ' + base64.b64encode(b'visitor:bad').decode()
+    invalid.request('GET','',expected=401)
     public.request('GET','/products/1/extra',expected=404)
-    for path in ('', '/unknown', '/places/1/extra', '/me/journeys/1/extra'):
+    for path in ('/unknown', '/places/1/extra', '/me/journeys/1/extra'):
         public.request('GET', path, expected=401 if path.startswith('/me/') else 404,
                        code='AUTH_REQUIRED' if path.startswith('/me/') else 'NOT_FOUND')
     public.request('GET', '/products/not-an-id', expected=400, code='INVALID_INPUT')
-    public.request('OPTIONS', '/products/1', expected=200)
+    public.request('OPTIONS', '/products/1', expected=204)
     visitor.request('GET', '/admin/ontology/places/1/review', expected=403, code='FORBIDDEN')
     visitor.request('DELETE', '/me/journeys/1', {}, csrf=False, expected=403, code='CSRF_INVALID')
 

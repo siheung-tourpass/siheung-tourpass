@@ -1,0 +1,15 @@
+meta {
+  name: Redemption
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/merchant/redemptions/{{redemptionId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

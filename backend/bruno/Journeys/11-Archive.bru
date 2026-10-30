@@ -1,0 +1,25 @@
+meta {
+  name: Archive
+  type: http
+  seq: 11
+}
+
+patch {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "ARCHIVED"
+  }
+}
+
+assert {
+  res.status: 200
+}

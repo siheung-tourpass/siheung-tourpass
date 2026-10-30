@@ -19,8 +19,8 @@ public class BoundaryCheck {
     for(String path:List.of("/journeys","/journeys/detail","/passes","/passes/issue","/feedback/edit","/api/v1/me/passes","/api/v1/me/journeys"))assert "VISITOR".equals(SecurityFilter.requiredRole(path)):path;
     for(String path:List.of("/merchant/redeem","/api/v1/merchant/redemptions"))assert "STAFF".equals(SecurityFilter.requiredRole(path)):path;
     for(String path:List.of("/admin","/admin/catalog","/api/v1/admin/ontology/places"))assert "ADMIN".equals(SecurityFilter.requiredRole(path)):path;
-    for(String path:List.of("/","/login","/places/detail","/recommendations","/journeys-extra","/admin-extra","/api/v1","/api/v1/session","/api/v1/recommendations","/api/v1/admin","/api/v1/me","/api/v1/me-extra/passes","/api/v1/journeys"))assert SecurityFilter.requiredRole(path)==null:path;
-    for(String path:List.of("/api/v1","/api/v1/","/api/v1/session"))assert SecurityFilter.isApiPath(path):path;
+    for(String path:List.of("/","/login","/places/detail","/recommendations","/journeys-extra","/admin-extra","/api/v1","/api/v1/products","/api/v1/recommendations","/api/v1/admin","/api/v1/me","/api/v1/me-extra/passes","/api/v1/journeys"))assert SecurityFilter.requiredRole(path)==null:path;
+    for(String path:List.of("/api/v1","/api/v1/","/api/v1/products"))assert SecurityFilter.isApiPath(path):path;
     for(String path:List.of("/api/v1-extra","/api/v10","/api/v","/"))assert !SecurityFilter.isApiPath(path):path;
     assert CardKey.parse("1").equals(CardKey.parse("place:1"));
     assert CardKey.parse("9223372036854775807").key().equals("place:9223372036854775807");

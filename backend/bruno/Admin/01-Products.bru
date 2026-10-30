@@ -1,0 +1,15 @@
+meta {
+  name: Products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/products?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

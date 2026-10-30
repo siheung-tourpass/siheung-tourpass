@@ -1,0 +1,23 @@
+meta {
+  name: Delete benefit feedback
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/me/redemptions/{{redemptionId}}/feedback
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: 204
+}

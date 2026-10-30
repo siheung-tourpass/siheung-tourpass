@@ -1,0 +1,32 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/me/journeys
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Bruno 시흥 여행",
+    "travelDate": null
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("journeyId", res.getBody().id);
+  }
+}
+
+assert {
+  res.status: 201
+}

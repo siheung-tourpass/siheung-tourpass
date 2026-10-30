@@ -50,6 +50,7 @@ public final class WebHandler {
                 }else if(r.getServletPath().equals("/logout"))s.invalidate();
                 else if(result.data() instanceof RedemptionService.Lookup lookup){s.setAttribute("confirmation",lookup.confirmation());result=page("confirm",lookup.response());}
                 else if(r.getServletPath().equals("/merchant/redeem/confirm"))s.setAttribute("confirmation",((RedemptionService.Confirmation)s.getAttribute("confirmation")).consume());
+                if(result.view()!=null&&result.view().equals("json")){ApiHandler.json(out,result.data());return;}
                 if(result.redirect()!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+result.redirect());return;}
                 r.setAttribute("view",result.view());r.setAttribute("data",display(result.data()));r.setAttribute("csrf",s.getAttribute("csrf"));
                 out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
@@ -164,7 +165,9 @@ public final class WebHandler {
         String uid=userId(user);
         String role=role(user);
         var q=query(r);
-        method(r,"GET");journeyOptions(c,r,uid,role);r.setAttribute("options",ontology.options(c));r.setAttribute("selectedThemeIds",new HashSet<>(Objects.requireNonNullElse(values(r,"themeId"),List.of())));return page("recommendations",new RecommendationService().recommend(c,uid,role,q));
+        method(r,"GET");
+        if("application/json".equals(r.getHeader("Accept")))return page("json",new RecommendationService().recommend(c,uid,role,q));
+        journeyOptions(c,r,uid,role);r.setAttribute("options",ontology.options(c));r.setAttribute("selectedThemeIds",new HashSet<>(Objects.requireNonNullElse(values(r,"themeId"),List.of())));return page("recommendations",new RecommendationService().recommend(c,uid,role,q));
     }
     public Page journeys(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);

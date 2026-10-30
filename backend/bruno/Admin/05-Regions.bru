@@ -1,0 +1,15 @@
+meta {
+  name: Regions
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/admin/ontology/regions?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}
