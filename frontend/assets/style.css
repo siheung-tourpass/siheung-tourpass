@@ -131,7 +131,7 @@ dl { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 3fr); }
   *, *::before, *::after { transition: none !important; }
   button:active:not(:disabled), .button:active { transform: none; }
 }
-.section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-lg); margin-top: var(--space-3xl); }
+.section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-lg); margin-top: var(--space-3xl); margin-bottom: var(--space-lg); }
 .section-heading h2 { margin: 0; }
 .section-heading > a { font-size: var(--text-sm); white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center; }
 .count { color: var(--color-accent); font-size: var(--text-base); margin-left: var(--space-sm); }
