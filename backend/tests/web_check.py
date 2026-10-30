@@ -128,7 +128,9 @@ for key in ('startsAt','expiresAt'):
     assert kst in text, (key, kst)
 code = html.unescape(re.search(r'class="code">(.*?)</p>', text).group(1))
 other.get('/passes/detail?id='+pid, 404)
-visitor.get('/products/detail?id=1'); visitor.submit('/passes/issue', expected=409)
+text=visitor.get('/products/detail?id=1'); assert '발급한 이용권 보기' in text
+csrf=re.search(r'name="csrf" value="([^"]+)"',visitor.get('/profile')).group(1)
+visitor.request('/passes/issue', {'csrf':csrf,'productId':'1'},409)
 staff.get('/merchant/redeem'); text=staff.submit('/merchant/redeem/lookup', {'merchantId':'1','code':code}, 200)
 assert code not in text
 confirm = next(f['fields'] for f in staff.forms if f['action'].endswith('/merchant/redeem/confirm'))
@@ -162,6 +164,7 @@ assert all('<span>'+label+'</span>' in nav for label in ('홈','여행 만들기
 visitor.get('/journeys/new');visitor.submit('/journeys/create', {'name':'임시 패스','placeId':['2','1']})
 draft_url=visitor.location
 assert draft_url.startswith('/journeys/edit?id=')
+visitor.get('/journeys/photocards?id='+urllib.parse.parse_qs(urllib.parse.urlsplit(draft_url).query)['id'][0],409)
 draft_id=urllib.parse.parse_qs(urllib.parse.urlsplit(draft_url).query)['id'][0]
 text=visitor.get('/')
 assert '임시 패스' in text
@@ -197,6 +200,13 @@ assert '&lt;script&gt;나의 여행' in visitor.get(journey_url)
 with visitor.api('/api/v1/me/journeys/'+jid) as response:
     created=json.load(response)
 assert [p['placeId'] for p in created['places']] == ['2','1']
+photo_url='/journeys/photocards?id='+jid
+assert '/journeys/photocards' not in visitor.get(journey_url)
+visitor.get(photo_url,409)
+other.get(photo_url,404)
+public.get(photo_url,303)
+staff.get(photo_url,403)
+admin.get(photo_url,403)
 other.get(journey_url,404)
 visitor.get(journey_url)
 csrf=next(f['fields']['csrf'] for f in visitor.forms if f['action'].endswith('/journeys/save'))
@@ -208,6 +218,10 @@ assert '#record-' in visitor.location
 assert '&lt;script&gt;여행 메모' in visitor.get(journey_url)
 visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'2026-10-01','status':'ARCHIVED','issuedPassId':pid})
 assert visitor.location.endswith('/journeys?status=ARCHIVED')
+assert '/journeys/photocards' in visitor.get(journey_url)
+text=visitor.get(photo_url)
+assert '사진을 올리면 포토카드' in text
+other.get(photo_url,404)
 text=visitor.get(journey_url)
 assert '보관된 여행입니다' in text and '이용권 연결 이력' in text and '현재 연결 중' in text
 with visitor.api('/api/v1/me/journeys/'+jid) as response:
@@ -217,6 +231,8 @@ assert linked_kst in text
 assert '나의 여행' in visitor.get('/journeys?status=ARCHIVED')
 visitor.get(journey_url); visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'','status':'CONFIRMED','issuedPassId':''})
 assert visitor.location.endswith('/journeys?status=CONFIRMED')
+visitor.get(photo_url,409)
+assert '/journeys/photocards' not in visitor.get(journey_url)
 text=visitor.get(journey_url)
 assert '연결된 이용권이 없습니다' in text and '해제:' in text
 assert '현재 연결 중' not in text and linked_kst in text

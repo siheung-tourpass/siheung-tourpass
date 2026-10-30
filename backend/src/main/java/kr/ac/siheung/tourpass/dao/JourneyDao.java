@@ -14,7 +14,7 @@ public final class JourneyDao {
         return one(c,"SELECT * FROM journey WHERE id=? AND owner_id=?"+(lock?" FOR UPDATE":""),id,user);
     }
     public static List<Map<String,Object>> cards(Connection c, Object id) throws SQLException {
-        return rows(c,"SELECT * FROM journey_place WHERE journey_id=? ORDER BY position,id",id);
+        return rows(c,"SELECT jp.*,EXISTS(SELECT 1 FROM journey_photo photo WHERE photo.item_id=jp.id) has_photo FROM journey_place jp WHERE journey_id=? ORDER BY position,id",id);
     }
     public static List<Map<String,Object>> passHistory(Connection c, Object id) throws SQLException {
         return rows(c,"SELECT h.*,p.product_name,p.starts_at,p.expires_at,p.cancelled_at,p.demo_only FROM journey_pass_history h JOIN issued_pass p ON p.id=h.issued_pass_id WHERE h.journey_id=? ORDER BY h.id DESC",id);

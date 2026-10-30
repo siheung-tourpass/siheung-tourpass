@@ -7,6 +7,7 @@
 <c:set var="headerBackPath" value=""/>
 <c:choose>
 <c:when test="${view eq 'goods'}"><c:set var="headerBackPath" value="/admin"/></c:when>
+<c:when test="${view eq 'journey-photocards'}"><c:set var="headerBackPath" value="/journeys/detail?id=${data.id}"/></c:when>
 <c:when test="${view eq 'journey'}"><c:set var="headerBackPath" value="/journeys?status=${data.status}"/></c:when>
 <c:when test="${view eq 'journey-builder'}"><c:set var="headerBackPath" value="/journeys"/></c:when>
 <c:when test="${view eq 'product' or view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
@@ -30,6 +31,7 @@
 <a class="home-card home-passes" href="${root}/journeys?status=CONFIRMED"><div><h2>내 패스</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>방문 날짜와 메모를 남겨 보세요.</p></div><span class="home-card-action">패스 보기 <span aria-hidden="true">→</span></span></a>
 </c:if>
 </div>
+<p class="home-benefits"><a href="${root}/merchants">여행 혜택 살펴보기 →</a> · <a href="${root}/passes">내 혜택 이용권</a></p>
 <details class="home-help"><summary>이용 방법</summary><ol><li>관심 있는 관광지와 함께 갈 행사·음식점·카페를 골라 여행에 담으세요.</li><li>상세에서 이용 조건을 비교하고 순서와 이름을 정해 저장하세요.</li><li>확정한 여행은 내 패스에서 확인하고 기억에 남는 경험을 기록하세요.</li></ol><p>여행 패스는 만료되지 않아요. 사용 완료한 여행은 여행 기록에서 다시 꺼내 볼 수 있어요.</p></details>
 </div>
 </c:when>
@@ -37,6 +39,7 @@
 <c:when test="${view eq 'public-card'}"><%@ include file="public-card.jspf" %></c:when>
 <c:when test="${view eq 'profile'}"><%@ include file="profile.jspf" %></c:when>
 <c:when test="${view eq 'journey-builder'}"><%@ include file="journey-builder.jspf" %></c:when>
+<c:when test="${view eq 'journey-photocards'}"><%@ include file="journey-photocards.jspf" %></c:when>
 <c:when test="${view eq 'journeys' or view eq 'journey'}"><%@ include file="journeys.jspf" %></c:when>
 <c:when test="${view eq 'error'}"><h1>요청 확인</h1><p class="error" role="alert"><c:out value="${message}"/></p><p>오류 코드: <c:out value="${errorCode}"/></p><a href="${root}/">처음으로</a></c:when>
 <c:when test="${view eq 'login'}"><%@ include file="login.jspf" %></c:when>

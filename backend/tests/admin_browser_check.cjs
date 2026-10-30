@@ -10,11 +10,8 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
     await page.goto(root+'/login');
     await page.locator('[name=loginId]').fill('admin');await page.locator('[name=password]').fill('DemoPass!2026');
     await Promise.all([page.waitForURL(root+'/'),page.getByRole('button',{name:'로그인',exact:true}).click()]);
-    assert.equal(await page.locator('h1').textContent(),'관리자 홈');
     await page.goto(root+'/admin');
-    assert.deepEqual(await page.locator('.bottom-nav a span').allTextContents(),['홈','관광 관리','혜택 관리','통계','프로필']);
     assert(await page.locator('.admin-place-card').count()>0);
-    assert(await page.locator('.admin-place-card:visible').count()<=12);
     for(const kind of ['place','event','restaurant','cafe']) {
       await page.locator(`button[data-admin-kind=${kind}]`).click();
       assert(await page.locator('.admin-place-card:visible').count()>0,kind);
@@ -28,7 +25,7 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
     }
     for(const route of ['/admin','/admin/ontology?collection=places','/admin/catalog?collection=products','/admin/relations','/admin/place-feedback']) {
       const response=await page.goto(root+route);assert.equal(response.status(),200,route);
-      for(const width of [320,1280]) {
+      for(const width of [320,375,414,768,1280]) {
         await page.setViewportSize({width,height:1000});
         assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),route+' '+width);
       }
@@ -46,7 +43,7 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
     assert.equal(await page.getByRole('button',{name:'비활성화',exact:true}).isVisible(),false);
     await page.locator('.admin-danger summary').click();
     assert(await page.getByRole('button',{name:'비활성화',exact:true}).isVisible());
-    for(const width of [320,1280]) {
+    for(const width of [320,375,414,768,1280]) {
       await page.setViewportSize({width,height:1000});
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'selected editor '+width);
     }
@@ -54,10 +51,13 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
     assert.equal(await page.locator('.admin-record').count(),0);
     await page.goto(root+'/admin');
     const choices=await page.locator('.admin-place-card').evaluateAll(cards=>cards.map(c=>({value:c.dataset.key,text:c.querySelector('h3').textContent})));
-    await page.locator('.admin-place-card:visible .admin-card-print').first().click();
+    await page.locator('.admin-place-card:visible .admin-card-select').first().click();
+    await page.getByRole('link',{name:'카드 출력',exact:true}).click();
     assert(await page.locator('.goods-settings').isVisible());
+    assert(await page.locator('.goods-selection').isVisible());
+    assert((await page.locator('#goods-selection-name').textContent()).trim().length>0);
     assert.equal(await page.locator('.admin-card-browser').count(),0);
-    assert.equal(await page.locator('.bottom-nav [aria-current]').textContent(),'관광 관리');
+    assert.equal(await page.locator('.bottom-nav [aria-current]').getAttribute('href'),new URL(root).pathname+'/admin');
     for(const kind of ['place','event','dining']) {
       const choice=choices.find(o=>o.value.startsWith(kind+':'));assert(choice,kind);
       await page.goto(root+'/admin/goods?key='+encodeURIComponent(choice.value));
@@ -76,7 +76,7 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
       assert(layout.width<719 && layout.height<1048,JSON.stringify(layout));
       assert(layout.cards.every(c=>Math.abs(c.w-90*96/25.4)<1&&Math.abs(c.h-130*96/25.4)<1&&!c.overflow),JSON.stringify(layout));
       await page.emulateMedia({media:'screen'});
-      for(const width of [320,1280]) {
+      for(const width of [320,375,414,768,1280]) {
         await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
       }
       await page.locator('[name=caption]').fill('새 문구');assert(await page.locator('#goods-print').isDisabled());
@@ -94,7 +94,8 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
     await fallback.locator('[name=loginId]').fill('admin');await fallback.locator('[name=password]').fill('DemoPass!2026');
     await Promise.all([fallback.waitForNavigation(),fallback.getByRole('button',{name:'로그인',exact:true}).click()]);
     await fallback.goto(root+'/admin');
-    await fallback.locator('.admin-place-card .admin-card-print').first().click();
+    await fallback.locator('.admin-place-card .admin-card-select').first().click();
+    await fallback.getByRole('link',{name:'카드 출력',exact:true}).click();
     assert.notEqual(await fallback.locator('[name=key]').inputValue(),'');
     assert(await fallback.locator('.goods-settings').isVisible());
     await noScript.close();

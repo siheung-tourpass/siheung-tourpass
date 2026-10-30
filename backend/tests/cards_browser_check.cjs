@@ -37,29 +37,77 @@ async function login(request, root) {
  await page.goto(root+'/explore');await page.waitForSelector('.is-deck-mode');
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert(await page.locator('#builder-next').isDisabled());
+ assert.equal(await page.locator('#bar-count').textContent(),'마음에 드는 한 장을 골라 주세요');
  assert.equal(await page.locator('#deck-summary').isVisible(),false);
- const themes=page.locator('.builder-theme-options input[name=themeId]:not([value=""])');
+ assert(await page.locator('#start-preferences').isVisible());
+ // A single proposal has no deck controls; multiple proposals reveal navigation.
+ const proposals=await page.locator('[data-card-kind=place]').evaluateAll(cards=>cards.slice(0,2).map(card=>({place:{id:Number(card.dataset.cardKey.split(':')[1])},explanation:'조건에 맞는 관광지'})));
+ assert.equal(proposals.length,2);
+ let proposalItems=proposals.slice(0,1);
+ await page.route('**/recommendations?**',route=>route.fulfill({json:{items:proposalItems}}));
+ await page.locator('[name=themeId]').selectOption({index:1});
+ await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
+ assert.equal(await page.locator('.deck-navigation').isVisible(),false);
+ assert.equal(await page.locator('#start-alternatives').isVisible(),false);
+ assert.equal(await page.locator('.builder-card:visible').count(),1);
+ proposalItems=proposals;
+ await page.locator('[name=themeId]').selectOption({index:2});
+ await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
+ assert(await page.locator('.deck-navigation').isVisible());
+ assert(await page.locator('#start-alternatives').isVisible());
+ await page.unroute('**/recommendations?**');
+ await page.locator('[name=themeId]').selectOption('');
+ await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
+ const themes=page.locator('select[name=themeId] option:not([value=""])');
  assert(await themes.count()>=2);
- await themes.nth(1).check();
+ await page.locator('[name=themeId]').selectOption(await themes.nth(1).getAttribute('value'));
  const theme=themes.first();
  const themeId=await theme.getAttribute('value');
  const recommended=page.waitForResponse(response=>response.url().includes('/recommendations?')&&new URL(response.url()).searchParams.getAll('themeId').includes(themeId));
- await theme.check();
+ await page.locator('[name=themeId]').selectOption(themeId);
  const recommendation=await (await recommended).json();
- assert.equal(await page.locator('.builder-theme-options input:checked').count(),1);
- assert(await theme.isChecked());
+ assert.equal(await page.locator('select[name=themeId] option:checked').count(),1);
+ assert.equal(await page.locator('[name=themeId]').inputValue(),themeId);
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  if(recommendation.items.length)assert.equal(await page.locator('.builder-card.is-current').getAttribute('data-card-key'),'place:'+recommendation.items[0].place.id);
+ // Start modes show their own candidates and keep deck composition on the next page.
+ await page.locator('[name=startMode]').selectOption('region');
+ const regionId=await page.locator('#start-region option:not([value=""])').first().getAttribute('value');
+ await page.locator('#start-region').selectOption(regionId);
+ await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
+ assert(await page.locator('.builder-card:visible').count()>0);
+ assert(await page.locator('.builder-card:visible').evaluateAll((cards,region)=>cards.every(card=>card.dataset.cardKind==='place'&&card.dataset.regionId===region),regionId));
+ await page.locator('[name=startMode]').selectOption('event');
+ assert(await page.locator('#start-event-panel').isVisible());
+ assert(await page.locator('.builder-card:visible').count()>0);
+ assert(await page.locator('.builder-card:visible').evaluateAll(cards=>cards.every(card=>card.dataset.cardKind==='event')));
+ await page.locator('#start-event-date').fill('1900-01-01');
+ assert(await page.locator('#builder-empty').isVisible());
+ await page.locator('#start-event-date').fill('');
+ await page.locator('.builder-card.is-current .card-select-toggle').click();
+ await page.locator('#builder-next').click();
+ assert(await page.locator('#deck-summary').isVisible());
+ assert.equal(await page.locator('#builder-first-card').isVisible(),false);
+ await page.locator('#builder-back').click();
+ assert.equal(await page.locator('[name=startMode]').inputValue(),'event');
+ await page.locator('.builder-card.is-selected .card-select-toggle').click();
+ await page.locator('[name=startMode]').selectOption('theme');
+ assert.equal(await page.locator('[name=themeId]').inputValue(),themeId);
+ await page.locator('[name=startMode]').selectOption('direct');
+ assert(await page.locator('#builder-search-panel').evaluate(el=>el.open));
  // Choosing a card keeps it in view and ranks unselected cards by straight-line distance.
  const anchor=await page.locator('.builder-card[data-card-kind=place]').evaluateAll(cards=>{
   const card=cards.find(card=>card.dataset.latitude&&card.dataset.longitude);
   return card?{key:card.dataset.cardKey,name:card.querySelector('h3').textContent,region:card.dataset.regionId}:null;
  });
  assert(anchor,'The fixture needs a tourism card with sourced coordinates');
+ await page.locator('[name=startMode]').selectOption('direct');
  await page.locator('#builder-search-panel').evaluate(el=>el.open=true);
  await page.locator('.builder-filter-panel summary').click();
  await page.locator('#card-search').fill(anchor.name);
  await page.locator(`.builder-card[data-card-key="${anchor.key}"] .card-select-toggle`).click();
+ assert.equal(await page.locator('#bar-count').textContent(),anchor.name);
+ assert.equal(await page.locator('#bar-label').textContent(),'시작 카드');
  await page.locator('#card-search').fill('');
  assert(await page.locator('#builder-first-card').isVisible());
  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'start');
@@ -93,6 +141,7 @@ async function login(request, root) {
  await page.locator('#builder-back').click();
  assert(await page.locator('#builder-first-card').isVisible());
  assert.equal(await page.locator('#builder-first-card').evaluate(el=>el.disabled),false);
+ await page.locator('[name=startMode]').selectOption('direct');
  await page.locator('#builder-search-panel').evaluate(el=>el.open=true);
  await page.locator('.builder-filter-panel summary').click();
  for(const width of [320,1280]){
@@ -124,6 +173,8 @@ async function login(request, root) {
  assert(await picker.locator('.journey-template').count()>0);
  await checkAccessiblePopup(page,picker);
  await picker.getByRole('link',{name:'빈 구성으로 시작',exact:true}).click();await page.waitForSelector('.is-deck-mode');await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
+ assert(await page.locator('#start-preferences').isVisible());
+ await page.locator('[name=startMode]').selectOption('direct');
  const keys=[];
  for(const kind of ['event','dining','place']){
   await page.locator(`[data-card-type=${kind}]`).click();const card=page.locator('.builder-card.is-current');keys.push(await card.getAttribute('data-card-key'));await card.locator('.card-select-toggle').click({position:{x:80,y:100}});
@@ -136,7 +187,7 @@ async function login(request, root) {
   const card=cards.find(card=>!keys.includes(card.dataset.cardKey));
   return {key:card.dataset.cardKey,name:card.querySelector('h3').textContent};
  },keys);
- await page.locator('#builder-search-panel > summary').click();
+ assert(await page.locator('#builder-search-panel').evaluate(el=>el.open));
  await page.locator('#card-search').fill(replacement.name);
  await page.locator(`[data-card-key="${replacement.key}"] .card-select-toggle`).click();
  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'start');

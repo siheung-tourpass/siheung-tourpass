@@ -25,23 +25,17 @@
 
 ## 기능별 구현 경계
 
-업무 정책은 [공통·역할별 요구사항](spec.md#역할별-요구사항), 배치·조작은 [디자인](docs/design.md)을 원본으로 관리한다. 아래 표는 수정할 구현을 찾기 위한 안내다.
+업무 정책은 [공통·역할별 요구사항](spec.md#역할별-요구사항), 화면 구성은 [디자인](docs/design.md)이 담당한다.
 
-| 영역 | 구현 원본 | 변경 시 유지할 경계 |
-| --- | --- | --- |
-| 여행 | [JourneyService](backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyService.java) | 부모 여행 행 잠금으로 변경을 직렬화하고 카드·스냅샷·방문 기록·연결 이력을 함께 저장한다. 카드 키 해석은 `JourneyService.CardKey`로 공유하며 기존 `placeId` API와 `MERCHANT` 기록을 유지한다. |
-| 템플릿·표지 | [JourneyTemplates](backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyTemplates.java) · JourneyService · WebHandler | 표지는 화면 표시 정보이며 API·저장 스냅샷에 추가하지 않는다. |
-| 카드 탐색·선택 | [공통 보드](frontend/WEB-INF/views/journey-builder.jspf) · [선택 상태](frontend/assets/journey-builder.js) · [스크롤](frontend/assets/card-scroll.js) | 공개 탐색·생성·편집은 보드를 공유하며 선택 스크립트가 단계 화면·이전 이동·선택 보존을 담당한다. 여행 기록은 같은 카드 이동·키보드·포커스 처리를 사용한다. |
-| 관광·추천·피드백 | [추천 모델과 구현 원본](docs/tourism-semantics.md) | 탐색·추천 승인 조건을 구분하고 의미 자료 변경·검토·버전 갱신을 트랜잭션으로 처리한다. |
-| 관광지 피드백 | [PlaceFeedbackService](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceFeedbackService.java) · [DAO](backend/src/main/java/kr/ac/siheung/tourpass/dao/PlaceFeedbackDao.java) | 방문객·관광지별 현재 평가를 저장하고 관리자에게 익명 집계만 제공한다. 추천·여행 기록·혜택 평가와 분리한다. |
-| 안내 카탈로그 | [CatalogService](backend/src/main/java/kr/ac/siheung/tourpass/service/CatalogService.java) · [EventCatalog](backend/src/main/java/kr/ac/siheung/tourpass/service/EventCatalog.java) · [DiningCatalog](backend/src/main/java/kr/ac/siheung/tourpass/service/DiningCatalog.java) · [좌표 연결](backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java) | 여행·관리자·굿즈가 같은 카드 구성을 사용한다. 수집 JSON 로딩·이미지 변환은 `CatalogResources`를 공유하며 행사 필드명은 로딩 시 공통 카드 형식으로 변환한다. |
-| 관리자·굿즈 | WebHandler · [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java) · [관리자 탐색](frontend/WEB-INF/views/admin-card-browser.jspf) | 공개 대상 검증·QR 생성은 서버에서, 편집·실물 인쇄 배치는 JSP·CSS에서 처리한다. |
-| 관광 사진 | [PlaceImages](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java) | 장소 코드로 정적 사진을 연결한다. 등록·배포 기준은 [관광 데이터](docs/data-collection/tourism-data.md#이미지)를 따른다. |
-| 공통 화면 | WebHandler · [JSP 조각](frontend/WEB-INF/views) | 역할별 진입을 서버에서 결정하고 사진·추천 입력·CSRF·출처 링크를 공통 조각으로 제공한다. |
+| 영역 | 구현 진입점·경계 |
+| --- | --- |
+| 여행 | [JourneyService](backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyService.java)가 구성·스냅샷·방문 기록·이용권 연결을 관리한다. 여행 행 잠금으로 변경을 직렬화한다. |
+| 탐색·선택 | [공통 보드](frontend/WEB-INF/views/journey-builder.jspf)와 [선택 상태](frontend/assets/journey-builder.js)를 공개 탐색·생성·편집에서 공유한다. [카드 이동](frontend/assets/card-scroll.js)은 여행 기록에서도 사용한다. |
+| 추천·평가 | [추천 모델](docs/tourism-semantics.md#구현-원본)의 서비스가 추론·순위·혜택 피드백을 담당한다. [관광지 평가](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceFeedbackService.java)는 별도로 저장·집계한다. |
+| 안내 자료 | [CatalogService](backend/src/main/java/kr/ac/siheung/tourpass/service/CatalogService.java)가 여행·관리자·출력에 공통 카드 자료를 제공한다. [좌표](backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)·[관광 사진](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java)은 코드로 연결한다. |
+| 포토카드 | [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java)가 관리자 출력 대상 검증·QR을 담당하고 JSP·CSS가 인쇄 배치를 담당한다. 방문객 조회는 JourneyService가 소유권·상태를 검사한다. JourneyPhotoService·JourneyPhotoDao는 본인 사진 검증·비공개 DB 저장을 담당하며 공통 포토카드 뷰로 출력한다. |
 
-API 인증은 요청별 HTTP Basic, 변경 요청은 명시적 CSRF 헤더로 보호한다. 화면 세션과 API 인증을 분리하고, 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API의 혜택 확인 자원은 DB에 저장해 세션 없이 조회·소비한다. HTTP 계약은 [RESTful API](spec.md#restful-api)를 따른다.
-
-여행 편집 조회는 여행·카드, 상세 조회는 혜택·연결 이력까지 포함한다. 제작 중 여행 삭제는 외래 키 CASCADE로 자식 카드·연결 이력을 정리한다. 피드백 사유·검토 초기화는 Service, 관리자 참조 선택 목록은 WebHandler가 담당한다.
+화면은 세션·CSRF를, API는 요청별 Basic 인증·CSRF 헤더를 사용한다. 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API 혜택 확인 자원은 DB에서 조회·소비한다. 요청 방법은 [API 사용 안내](docs/api-usage.md), 계약은 [RESTful API](spec.md#restful-api)를 따른다.
 
 ## 실행 범위
 
@@ -54,5 +48,5 @@ API 인증은 요청별 HTTP Basic, 변경 요청은 명시적 CSRF 헤더로 �
 | 미확보 음식점·카페 사진 | [이미지 조사](docs/data-collection/dining-images.md)의 미확보 업소는 촬영 대상 또는 재사용 조건 미확인 | 대상 일치·이용 조건 확인 후 등록 |
 | 행사 자료 | 수집 내용 관리자 검토 대기 | [행사 데이터](docs/data-collection/events-data.md)의 공식 안내를 재확인하고 검토 |
 | 관광 운영 조건 | 최신 운영기관 자료 미확보 | [검토 기준](docs/data-collection/tourism-data.md#검토)에 따라 운영·예약·접근 조건을 확인 후 보완 |
-| 사용자 검증 | 참여자 미확보 | [완료 기준](spec.md#완료-기준)의 참여자 확보 후 [지역 문제별 과제](docs/project-validation.md#검증-과제) 수행 |
+| 사용자 검증 | 참여자 미확보 | [검증 절차](docs/project-validation.md#검증-절차)의 참여자 확보 후 과제 수행 |
 | AWS 배포 | 공식 배포 요구 미확인 | 요구 확인 후 범위·설계 결정 |

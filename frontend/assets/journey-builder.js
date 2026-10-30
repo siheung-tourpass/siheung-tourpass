@@ -25,6 +25,10 @@
   const status = document.querySelector('#builder-status');
   const search = document.querySelector('#card-search');
   const date = document.querySelector('#card-date');
+  const searchPanel = filters.querySelector('#builder-search-panel');
+  const startRegion = filters.querySelector('#start-region');
+  const startDate = filters.querySelector('#start-event-date');
+  let startMode = 'theme';
   const typeButtons = [...form.querySelectorAll('[data-card-type]')];
   const searchText = new Map(cards.map(card => [card, card.textContent.toLocaleLowerCase('ko')]));
   const stage = form.querySelector('#deck-stage');
@@ -43,6 +47,17 @@
   let kind = 'all';
   let request;
   let rankedCards = [...cards];
+  let suggestedKeys;
+  let reveal;
+
+  function revealSuggestion() {
+    reveal?.cancel();
+    if (step !== 'start' || !activeCard || form.dataset.suggesting === 'true') return;
+    const reduced = document.documentElement.dataset.reduceMotion === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    reveal = stage.animate(reduced ? [{ opacity: 0 }, { opacity: 1 }]
+      : [{ opacity: 0, transform: 'translateY(16px) scale(.92)' }, { opacity: 1, transform: 'translateY(0) scale(1)' }],
+    { duration: reduced ? 100 : 360, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+  }
 
   function point(card) {
     if (!card || card.dataset.savedOnly === 'true' || !card.dataset.latitude || !card.dataset.longitude) return;
@@ -79,7 +94,7 @@
     if (browse.contains(focused)) focused.focus({ preventScroll: true });
     document.querySelector('#builder-browse-title').textContent = anchor ? '다음 후보' : '시작할 카드';
     document.querySelector('#builder-context').textContent = !anchor
-      ? step === 'start' ? '시작할 카드 한 장을 고른 뒤 ‘이 카드로 시작’을 눌러 주세요.' : '카드를 담으면 가까운 후보부터 보여드려요.'
+      ? step === 'start' ? '좌우로 넘겨 보고, + 버튼으로 선택하세요.' : '카드를 담으면 가까운 후보부터 보여드려요.'
       : origin ? `${controls.get(anchor).name}에서 가까운 순서예요 · 대표 지점 간 직선거리로, 실제 이동거리와 달라요.`
       : `${controls.get(anchor).name}의 좌표가 없어 같은 지역 카드부터 보여드려요. 거리는 미확인이에요.`;
     filterCards();
@@ -91,16 +106,24 @@
   }
 
   function filterCards() {
-    const region = filters.elements.regionId.value;
-    const term = search.value.trim().toLocaleLowerCase('ko');
+    const direct = step !== 'start' || startMode === 'direct';
+    const region = direct ? filters.elements.regionId.value : startMode === 'region' ? startRegion.value : '';
+    const eventDate = direct ? date.value : startMode === 'event' ? startDate.value : '';
+    const cardKind = direct ? kind : startMode === 'event' ? 'event' : 'place';
+    const term = direct ? search.value.trim().toLocaleLowerCase('ko') : '';
     filteredCards = [...browse.children].filter(card => {
       const wrongRegion = card.dataset.cardKind !== 'event' && card.dataset.savedOnly !== 'true' && region && card.dataset.regionId !== region;
-      const wrongDate = card.dataset.cardKind === 'event' && card.dataset.savedOnly !== 'true' && date.value &&
-        (date.value < card.dataset.startDate || date.value > card.dataset.endDate);
-      card.hidden = !!(wrongRegion || wrongDate || (kind !== 'all' && kind !== card.dataset.cardKind) || !searchText.get(card).includes(term));
+      const wrongDate = card.dataset.cardKind === 'event' && card.dataset.savedOnly !== 'true' && eventDate &&
+        (eventDate < card.dataset.startDate || eventDate > card.dataset.endDate);
+      const outsideSuggestions = step === 'start' && suggestedKeys && !suggestedKeys.has(card.dataset.cardKey);
+      card.hidden = !!(outsideSuggestions || wrongRegion || wrongDate || (cardKind !== 'all' && cardKind !== card.dataset.cardKind) || !searchText.get(card).includes(term));
       return !card.hidden;
     });
     stage.hidden = filteredCards.length === 0;
+    const multiple = filteredCards.length > 1;
+    form.querySelector('.deck-navigation').hidden = step === 'start' && !multiple;
+    form.querySelector('#start-alternatives').hidden = step !== 'start' || !multiple;
+    form.dataset.multiple = String(multiple);
     activate(filteredCards.includes(activeCard) ? activeCard : filteredCards[0]);
     form.querySelector('#builder-empty').hidden = filteredCards.length > 0;
     form.querySelector('#card-count').textContent = `${filteredCards.length}장 찾음`;
@@ -117,6 +140,7 @@
       if (card) {
         card.classList.add('is-current');
         card.setAttribute('aria-current', 'true');
+        revealSuggestion();
       }
     }
     form.querySelector('#deck-position').textContent = activeCard ? `${index + 1} / ${total}` : '0 / 0';
@@ -180,13 +204,22 @@
     title.textContent = { start: '시작 카드 고르기', build: '덱 만들기', review: '여행 확인' }[step];
     const hint = document.querySelector('#builder-step-hint');
     hint.hidden = step === 'start' && selected.size < 2;
+    filters.querySelector('#start-preferences').hidden = step !== 'start';
+    if (step !== 'start') reveal?.cancel();
     hint.textContent = { start: selected.size > 1 ? '시작 카드를 다시 고르면 첫 카드만 바뀌고, 나머지 구성은 유지돼요.' : '어디에서 여행을 시작할까요? 마음에 드는 한 장을 골라 주세요.', build: '카드를 더 담고, 방문할 순서를 정해 보세요.', review: '여행 순서를 확인하고 이름을 붙여 저장하세요.' }[step];
     document.querySelectorAll('#builder-steps [data-step]').forEach(item => {
       if (item.dataset.step === step) item.setAttribute('aria-current', 'step');
       else item.removeAttribute('aria-current');
     });
     filters.hidden = step === 'review';
-    filters.querySelector('#builder-search-panel').open = step === 'build';
+    const direct = step !== 'start' || startMode === 'direct';
+    searchPanel.hidden = !direct;
+    searchPanel.open = direct;
+    form.querySelector('.card-tools').hidden = !direct;
+    filters.querySelector('#start-theme-panel').hidden = startMode !== 'theme';
+    filters.querySelector('#start-theme-panel').disabled = step !== 'start' || startMode !== 'theme';
+    filters.querySelector('#start-region-panel').hidden = startMode !== 'region';
+    filters.querySelector('#start-event-panel').hidden = startMode !== 'event';
     status.hidden = step === 'review';
     form.querySelector('.builder-catalog').hidden = step === 'review';
     summary.hidden = step === 'start';
@@ -198,6 +231,7 @@
     firstCard.disabled = step !== 'start';
     renderSelection();
     if (focus) { title.focus(); title.scrollIntoView({ block: 'start' }); }
+    recommend();
   }
 
   function goStep(value) {
@@ -216,8 +250,13 @@
   form.addEventListener('submit', event => {
     if (step !== 'review') { event.preventDefault(); goStep('review'); }
   });
+  function closeSearch(event) {
+    event.preventDefault();
+    searchPanel.open = false;
+    stage.focus({ preventScroll: true });
+  }
   search.addEventListener('keydown', event => {
-    if (event.key === 'Enter') { event.preventDefault(); filters.querySelector('details').open = false; stage.focus({ preventScroll: true }); }
+    if (event.key === 'Enter') closeSearch(event);
   });
 
   search.addEventListener('input', filterCards);
@@ -261,11 +300,15 @@
       const { checkbox, label, toggle } = controls.get(card);
       checkbox.checked = selected.has(card.dataset.cardKey);
       card.classList.toggle('is-selected', checked);
-      label.textContent = checked ? '✓ 내 여행에 담김' : '여행에 담기';
+      label.textContent = step === 'start' ? checked ? '✓ 시작 카드로 선택됨' : '시작 카드로 선택' : checked ? '✓ 내 여행에 담김' : '여행에 담기';
+      toggle.setAttribute('aria-label', `${controls.get(card).name} ${step === 'start' ? checked ? '시작 카드 선택 해제' : '시작 카드로 선택' : checked ? '여행에서 빼기' : '여행에 담기'}`);
       toggle.setAttribute('aria-pressed', String(checked));
     });
     form.querySelector('#selection-count').textContent = `${selected.size}장`;
-    form.querySelector('#bar-count').textContent = `${selected.size}장 선택`;
+    form.querySelector('#bar-label').textContent = step === 'start' ? '시작 카드' : '담은 카드';
+    form.querySelector('#bar-count').textContent = step === 'start'
+      ? selected.size ? controls.get(byId.get(ids[0])).name : '마음에 드는 한 장을 골라 주세요'
+      : `${selected.size}장 선택`;
     form.querySelector('#selection-empty').hidden = selected.size > 0;
     const save = form.querySelector('#confirm-journey');
     if (save) save.disabled = selected.size === 0;
@@ -311,11 +354,13 @@
   }
   function selectCard(card, checked) {
     const id = card.dataset.cardKey;
-    if (checked && step === 'start') selected = new Set([id, ...[...selected].slice(1).filter(key => key !== id)]);
+    if (checked && step === 'start') selected = new Set([id, ...[...selected].slice(1)]);
     else if (checked) selected.add(id);
     else selected.delete(id);
     renderSelection();
-    feedback.textContent = `${controls.get(card).name} ${checked ? '여행에 담았어요' : '여행에서 뺐어요'} · 총 ${selected.size}장`;
+    feedback.textContent = step === 'start'
+      ? checked ? `${controls.get(card).name}에서 시작해요. ‘이 카드로 시작’을 누르면 다음 카드를 담을 수 있어요.` : '시작 카드 선택을 해제했어요. 다른 한 장을 골라 주세요.'
+      : `${controls.get(card).name} ${checked ? '여행에 담았어요' : '여행에서 뺐어요'} · 총 ${selected.size}장`;
   }
   browse.addEventListener('change', event => {
     if (event.target.matches('input[type=checkbox]')) selectCard(event.target.closest('.builder-card'), event.target.checked);
@@ -333,7 +378,7 @@
     });
     const ranked = [...results.keys()].map(id => byId.get(id)).filter(Boolean);
     rankedCards = [...ranked, ...cards.filter(card => !results.has(card.dataset.cardKey))];
-    if (!selected.size) activate(null);
+    if (step === 'start' || !selected.size) activate(null);
     arrangeCards();
   }
 
@@ -341,33 +386,56 @@
     request?.abort();
     const current = new AbortController();
     request = current;
+    suggestedKeys = null;
+    form.dataset.suggesting = String(step === 'start');
     setStatus('loading', '취향에 맞는 카드를 찾고 있어요…');
     filters.setAttribute('aria-busy', 'true');
     try {
-      const query = new URLSearchParams([...new FormData(filters)].filter(([, value]) => value !== ''));
+      if (step === 'start' && (startMode === 'event' || startMode === 'direct')) {
+        showResults([]);
+        setStatus('success', startMode === 'event' ? '일정과 공식 안내를 확인하고 시작할 행사 한 장을 골라 주세요.' : '검색과 조건으로 시작할 카드 한 장을 골라 주세요.');
+        return;
+      }
+      const query = new URLSearchParams([...new FormData(filters)].filter(([name, value]) => ['themeId', 'regionId', 'companionId'].includes(name) && value !== ''));
+      if (step === 'start' && startMode !== 'direct') {
+        query.delete('regionId');
+        query.delete('companionId');
+        if (startMode === 'region' && startRegion.value) query.set('regionId', startRegion.value);
+      }
       const response = await fetch(`${filters.dataset.recommendationsUrl}?${query}`, { signal: current.signal, headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error('recommendations');
       const data = await response.json();
       if (request !== current) return;
+      suggestedKeys = step === 'start' && data.items.length ? new Set(data.items.map(item => `place:${item.place.id}`)) : null;
       showResults(data.items);
-      setStatus(!data.items.length && filters.querySelector('[name=themeId]:checked') ? 'empty' : 'success', step !== 'start' ? '담은 카드 주변에서 다음 카드를 골라 보세요.' : data.items.length ? '첫 관광지 후보를 찾았어요. 한 장을 고르고 ‘이 카드로 시작’을 눌러 주세요.' : '추천할 관광지가 아직 없어요. 공개된 카드에서 직접 골라 시작해 보세요.');
+      setStatus(!data.items.length && filters.elements.themeId.value ? 'empty' : 'success', step !== 'start' ? '담은 카드 주변에서 다음 카드를 골라 보세요.' : data.items.length ? '첫 관광지 후보를 찾았어요. 한 장을 고르고 ‘이 카드로 시작’을 눌러 주세요.' : '추천할 관광지가 아직 없어요. 공개된 카드에서 직접 골라 시작해 보세요.');
     } catch (error) {
       if (error.name === 'AbortError' || request !== current) return;
       showResults([]);
       setStatus('error', '추천을 불러오지 못했어요. 테마를 다시 선택하거나 카드에서 직접 골라 주세요.');
     } finally {
-      if (request === current) filters.removeAttribute('aria-busy');
+      if (request === current) {
+        filters.removeAttribute('aria-busy');
+        form.dataset.suggesting = 'false';
+        revealSuggestion();
+      }
     }
   }
 
   filters.addEventListener('change', event => {
-    if (!event.target.matches('[name=themeId], [name=regionId], [name=companionId]')) return;
+    if (event.target.matches('[name=startMode]')) {
+      startMode = event.target.value;
+      activate(null);
+      showStep(step, false);
+      return;
+    }
+    if (event.target !== startRegion && event.target !== startDate && !event.target.matches('[name=themeId], [name=regionId], [name=companionId]')) return;
     activate(null);
     filterCards();
     recommend();
   });
-  filters.addEventListener('submit', event => { event.preventDefault(); filters.querySelector('details').open = false; stage.focus({ preventScroll: true }); });
-  filters.addEventListener('reset', () => { setTimeout(() => { setKind('all'); recommend(); }, 0); });
+  filters.addEventListener('submit', closeSearch);
+  filters.addEventListener('reset', () => { setTimeout(() => { startMode = 'theme'; setKind('all'); showStep(step, false); }, 0); });
   window.addEventListener('pageshow', () => {
     selected = readSelection();
     renderSelection();
@@ -407,8 +475,5 @@
   document.querySelector('#builder-steps').hidden = false;
   history.replaceState(null, '', `#${step}`);
   showStep(step, false);
-  form.querySelector('.deck-navigation').hidden = false;
   bar.hidden = false;
-  form.querySelector('.card-tools').hidden = false;
-  recommend();
 })();

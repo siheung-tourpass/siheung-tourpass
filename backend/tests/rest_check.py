@@ -65,11 +65,14 @@ follow(visitor, journey['_links']['delete'], expected=204)
 # DELETE can be repeated without resurrecting the resource.
 follow(visitor, journey['_links']['delete'], expected=404)
 # Relationship and paging links preserve filter parameters.
-relations = admin.request('GET','/admin/ontology/relations?type=has-theme&size=1')[1]
-follow(admin, relations['items'][0]['_links']['self'])
-if 'next' in relations['_links']:
-    next_page = follow(admin, relations['_links']['next'])
-    assert next_page['page'] == 2 and next_page['size'] == 1
+for relation_type in ('has-theme', 'suitable-for', 'sub-theme-of'):
+    relations = admin.request('GET', f'/admin/ontology/relations?type={relation_type}&size=1')[1]
+    item = relations['items'][0]
+    linked = follow(admin, item['_links']['self'])
+    assert all(linked[key] == value for key, value in item.items() if key != '_links')
+    if 'next' in relations['_links']:
+        next_page = follow(admin, relations['_links']['next'])
+        assert next_page['page'] == 2 and next_page['size'] == 1
 # PUT creates the named resource once, then replaces it on retries.
 feedback='/me/places/1/feedback'
 visitor.request('DELETE',feedback,expected=204)

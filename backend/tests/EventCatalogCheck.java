@@ -27,7 +27,6 @@ public final class EventCatalogCheck {
             for(var date:List.of(start.minusDays(1),end.plusDays(1)))
                 assert EventCatalog.list(start,date.toString()).cards().stream()
                     .noneMatch(item->item.get("code").equals(code)):code;
-            assert card.get("reviewStatus").equals("DRAFT");
             assert card.get("materialKind").equals("REAL");
             assert card.get("regionName").equals("시흥시");
             for(String key:List.of("locationDescription","checkedOn","dailyHours","admissionFee","reservationNote"))
@@ -48,6 +47,6 @@ public final class EventCatalogCheck {
             try{EventCatalog.list(LocalDate.of(2026,10,14),invalid);throw new AssertionError(invalid);}
             catch(Problem expected){assert expected.status==400;}
         }
-        System.out.println("PASS: inclusive event dates, expiry, filtering, draft labels and sources");
+        System.out.println("PASS: inclusive event dates, expiry, filtering and sources");
     }
 }

@@ -4,10 +4,17 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.multipart.MaxUploadSizeExceededException
+import kr.ac.siheung.tourpass.service.Problem
 
 @Controller
 class TourpassController {
     private val web = WebHandler()
+
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun oversizedPhoto(request: HttpServletRequest, response: HttpServletResponse) =
+        WebHandler.error(request, response, Problem(413, "INVALID_PHOTO"))
 
     @RequestMapping("/login")
     fun login(request: HttpServletRequest, response: HttpServletResponse) =
@@ -49,13 +56,17 @@ class TourpassController {
     fun journeys(request: HttpServletRequest, response: HttpServletResponse) =
         web.handle(request, response, web::journeys)
 
-    @RequestMapping("/explore", "/journeys/new")
-    fun newJourney(request: HttpServletRequest, response: HttpServletResponse) =
-        web.handle(request, response, web::newJourney)
+    @RequestMapping("/explore", "/journeys/new", "/journeys/edit")
+    fun journeyBuilder(request: HttpServletRequest, response: HttpServletResponse) =
+        web.handle(request, response, web::journeyBuilder)
 
-    @RequestMapping("/journeys/edit")
-    fun editJourney(request: HttpServletRequest, response: HttpServletResponse) =
-        web.handle(request, response, web::editJourney)
+    @RequestMapping("/journeys/photo")
+    fun journeyPhoto(request: HttpServletRequest, response: HttpServletResponse) =
+        web.handle(request, response, web::journeyPhoto)
+
+    @RequestMapping("/journeys/photocards")
+    fun journeyPhotocards(request: HttpServletRequest, response: HttpServletResponse) =
+        web.handle(request, response, web::journeyPhotocards)
 
     @RequestMapping("/journeys/detail")
     fun journey(request: HttpServletRequest, response: HttpServletResponse) =
