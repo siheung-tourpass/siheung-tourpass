@@ -345,7 +345,7 @@
     filters.setAttribute('aria-busy', 'true');
     try {
       const query = new URLSearchParams([...new FormData(filters)].filter(([, value]) => value !== ''));
-      const response = await fetch(`${filters.dataset.recommendationsUrl}?${query}`, { signal: current.signal });
+      const response = await fetch(`${filters.dataset.recommendationsUrl}?${query}`, { signal: current.signal, headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error('recommendations');
       const data = await response.json();
       if (request !== current) return;

@@ -1,0 +1,22 @@
+meta {
+  name: Detail
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/me/passes/{{passId}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    bru.setVar("passId", res.getBody().id);
+    bru.setVar("passCode", res.getBody().code);
+  }
+}
+
+assert {
+  res.status: 200
+}

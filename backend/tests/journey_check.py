@@ -22,12 +22,12 @@ with concurrent.futures.ThreadPoolExecutor(2) as pool:
 j=v.request('GET',p)[1];assert len(j['places'])==1
 first=j['places'][0];a=first['id']
 j=v.request('POST',p+'/places',{'placeId':'2'})[1];b=j['places'][1]['id']
-v.request('PUT',p+'/places/'+b+'/move',{'direction':'UP'})
+v.request('POST',p+'/places/'+b+'/move',{'direction':'UP'})
 assert [x['id'] for x in v.request('GET',p)[1]['places']]==[b,a]
-v.request('PUT',p+'/places/'+a+'/move',{'direction':'UP'})
+v.request('POST',p+'/places/'+a+'/move',{'direction':'UP'})
 # Boundary moves are no-ops; both directions preserve the other place.
 for item,direction,expected in ((a,'UP',[a,b]),(b,'DOWN',[a,b]),(a,'DOWN',[b,a]),(a,'UP',[a,b])):
-    moved=v.request('PUT',p+'/places/'+item+'/move',{'direction':direction})[1]
+    moved=v.request('POST',p+'/places/'+item+'/move',{'direction':direction})[1]
     assert [place['id'] for place in moved['places']]==expected
 record=p+'/places/'+a+'/record'
 future=(datetime.now(ZoneInfo('Asia/Seoul')).date()+timedelta(days=1)).isoformat()
@@ -42,13 +42,13 @@ v.request('DELETE',p,expected=409)
 before_reopen=v.request('GET',p)[1]
 other.request('PATCH',p,{'status':'PLANNING'},expected=404)
 reopened=v.request('PATCH',p,{'status':'PLANNING'})[1]
-assert reopened['status']=='PLANNING' and reopened['places']==before_reopen['places']
+assert reopened['status']=='PLANNING' and [{k:v for k,v in place.items() if k!='_links'} for place in reopened['places']]==[{k:v for k,v in place.items() if k!='_links'} for place in before_reopen['places']]
 v.request('PATCH',p,{'status':'CONFIRMED'})
 v.request('PATCH',p,{'status':'ARCHIVED'})
 v.request('PATCH',p,{'status':'PLANNING'},expected=409)
 v.request('POST',p+'/places',{'placeId':'3'},expected=409)
 v.request('DELETE',p+'/places/'+b,expected=409)
-v.request('PUT',p+'/places/'+a+'/move',{'direction':'DOWN'},expected=409)
+v.request('POST',p+'/places/'+a+'/move',{'direction':'DOWN'},expected=409)
 assert j['id'] in [x['id'] for x in v.request('GET','/me/journeys?status=ARCHIVED')[1]['items']]
 v.request('PUT',record,{'visitedOn':None,'note':None,'rating':None})
 v.request('PUT',record,{'visitedOn':'2026-10-01','note':'재시작 여행 기록','rating':4})
@@ -114,6 +114,7 @@ saved=v.request('GET',draft_path)[1]['places'][0]
 v.request('PUT',draft_path+'/places/'+saved['id']+'/record',{'visitedOn':'2026-10-01','note':'보존할 기록','rating':3})
 admin.request('PATCH','/admin/ontology/places/2',{'active':False})
 web_base=BASE.removesuffix('/api/v1')
+v.web_login()
 with v.http.open(web_base+'/journeys/edit?id='+draft['id']) as response:
     text=response.read().decode()
 assert '현재 공개되지 않은 장소' in text and 'data-saved-only="true"' in text

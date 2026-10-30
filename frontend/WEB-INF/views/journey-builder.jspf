@@ -4,7 +4,7 @@
 <nav id="builder-steps" aria-label="여행 만들기 단계" hidden><ol><li data-step="start">1. 시작 카드</li><li data-step="build">2. 덱 구성</li><li data-step="review">3. 여행 확인</li></ol></nav>
 <p id="builder-step-hint" hidden></p>
 <p class="builder-intro">관심 있는 관광지에서 시작해 행사·음식점·카페도 함께 골라 보세요. 담은 카드 주변의 후보를 비교하며 여행을 이어 갈 수 있어요.</p>
-<form id="journey-filters" method="get" action="${root}/journeys/new" data-recommendations-url="${root}/api/v1/recommendations">
+<form id="journey-filters" method="get" action="${root}/journeys/new" data-recommendations-url="${root}/recommendations">
 <fieldset id="builder-filters" disabled>
 
 <fieldset id="builder-first-card" class="builder-themes"><legend>어떤 테마로 여행을 시작할까요?</legend><div class="builder-theme-options"><label><input type="radio" name="themeId" value="" checked><span>테마 없이 둘러보기</span></label><c:forEach var="item" items="${options.themes}"><label><input type="radio" name="themeId" value="${item.id}"><span><c:out value="${item.name}"/></span></label></c:forEach></div></fieldset>

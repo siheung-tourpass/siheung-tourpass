@@ -1,0 +1,23 @@
+meta {
+  name: Remove place
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}/places/{{journeyItemId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: 200
+}

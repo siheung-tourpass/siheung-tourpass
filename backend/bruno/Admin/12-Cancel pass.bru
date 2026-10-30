@@ -1,0 +1,29 @@
+meta {
+  name: Cancel pass
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{baseUrl}}/admin/passes/{{passId}}/cancellation
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "reason": "Bruno 시연 취소"
+  }
+}
+
+assert {
+  res.status: 200
+}
+
+docs {
+  이용권을 실제 취소합니다. 취소 후 혜택을 사용할 수 없습니다.
+}

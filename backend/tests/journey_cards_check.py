@@ -61,7 +61,7 @@ event = next(item for item in saved if item['cardKind'] == 'EVENT')
 visitor.request('PUT', path + '/places/' + event['id'] + '/record', {
     'visitedOn': '2026-10-01', 'note': '행사 방문 기록', 'rating': 4
 })
-visitor.request('PUT', path + '/places/' + event['id'] + '/move', {'direction': 'UP'})
+visitor.request('POST', path + '/places/' + event['id'] + '/move', {'direction': 'UP'})
 assert visitor.request('GET', path)[1]['places'][1]['cardKey'] == keys['event']
 visitor.request('DELETE', path, expected=204)
 # A non-place card by itself is sufficient for confirmation.

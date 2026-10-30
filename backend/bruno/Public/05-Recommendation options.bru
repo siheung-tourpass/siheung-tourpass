@@ -1,0 +1,15 @@
+meta {
+  name: Recommendation options
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/recommendation-options
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

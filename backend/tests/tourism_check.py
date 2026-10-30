@@ -21,7 +21,7 @@ assert '검토 대기' in browse_html and '승인 후 담기' not in browse_html
 assert '좌우 스크롤로 카드 탐색' in browse_html
 
 options = public.request('GET', '/recommendation-options')[1]
-ids = {key: {x['code']: x['id'] for x in rows} for key, rows in options.items()}
+ids = {key: {x['code']: x['id'] for x in rows} for key, rows in options.items() if key != '_links'}
 sources = {s['code']: s for s in data['sources']}
 
 def place_path(code):

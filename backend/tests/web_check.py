@@ -1,4 +1,5 @@
 """Exercise actual JSP forms on a fresh seeded test DB; stdlib only."""
+import base64
 import html
 import json
 from datetime import datetime
@@ -38,12 +39,17 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 class Client:
     def __init__(self, login=None):
+        self.login = login
         self.http = opener(NoRedirect())
         if login:
             self.get('/login')
             self.submit('/login', {'loginId':login, 'password':'DemoPass!2026'})
             assert self.location == ('/merchant/redeem' if login.startswith('staff') else '/')
             self.get(self.location)
+    def api(self, path):
+        headers = {}
+        if self.login: headers['Authorization'] = 'Basic ' + base64.b64encode((self.login+':DemoPass!2026').encode()).decode()
+        return self.http.open(urllib.request.Request(BASE+path, headers=headers))
     def request(self, path, body=None, expected=200):
         data = urllib.parse.urlencode(body, doseq=True).encode() if body is not None else None
         status, headers, raw = send(self.http, urllib.request.Request(BASE+path, data=data))
@@ -115,7 +121,7 @@ visitor.get('/products/detail?id=1'); visitor.submit('/passes/issue')
 pid = urllib.parse.parse_qs(urllib.parse.urlsplit(visitor.location).query)['id'][0]
 text = visitor.get(visitor.location)
 assert '사용 가능' in text and 'ê' not in text
-with visitor.http.open(BASE+'/api/v1/me/passes/'+pid) as response:
+with visitor.api('/api/v1/me/passes/'+pid) as response:
     issued = json.load(response)
 for key in ('startsAt','expiresAt'):
     kst = datetime.fromisoformat(issued[key]).astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S 한국 시간')
@@ -170,25 +176,25 @@ csrf=next(f['fields']['csrf'] for f in other.forms if f['action'].endswith('/log
 other.request('/journeys/delete', {'csrf':csrf,'id':draft_id},404)
 visitor.get(draft_url);visitor.submit('/journeys/update', {'name':'수정 임시 패스','placeId':['1','2']})
 visitor.get(visitor.location)
-with visitor.http.open(BASE+'/api/v1/me/journeys/'+draft_id) as response:
+with visitor.api('/api/v1/me/journeys/'+draft_id) as response:
     edited=json.load(response)
 assert edited['name']=='수정 임시 패스' and [p['placeId'] for p in edited['places']]==['1','2']
 visitor.submit('/journeys/delete');visitor.get(draft_url,404)
 assert '수정 임시 패스' not in visitor.get('/')
 visitor.get('/journeys/new')
 # The whole create rolls back if any place is unavailable.
-with visitor.http.open(BASE+'/api/v1/me/journeys') as response:
+with visitor.api('/api/v1/me/journeys') as response:
     before_journeys = json.load(response)
 visitor.get('/journeys/new')
 visitor.submit('/journeys/create', {'name':'실패 여행','placeId':['1','999999']},404)
-with visitor.http.open(BASE+'/api/v1/me/journeys') as response:
+with visitor.api('/api/v1/me/journeys') as response:
     assert json.load(response) == before_journeys
 visitor.get('/journeys/new')
 visitor.submit('/journeys/create', {'name':'<script>나의 여행</script>','travelDate':'2026-10-01','placeId':['2','1','2'],'intent':'confirm'})
 journey_url=visitor.location
 jid=urllib.parse.parse_qs(urllib.parse.urlsplit(journey_url).query)['id'][0]
 assert '&lt;script&gt;나의 여행' in visitor.get(journey_url)
-with visitor.http.open(BASE+'/api/v1/me/journeys/'+jid) as response:
+with visitor.api('/api/v1/me/journeys/'+jid) as response:
     created=json.load(response)
 assert [p['placeId'] for p in created['places']] == ['2','1']
 other.get(journey_url,404)
@@ -204,7 +210,7 @@ visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'2026-10-0
 assert visitor.location.endswith('/journeys?status=ARCHIVED')
 text=visitor.get(journey_url)
 assert '보관된 여행입니다' in text and '이용권 연결 이력' in text and '현재 연결 중' in text
-with visitor.http.open(BASE+'/api/v1/me/journeys/'+jid) as response:
+with visitor.api('/api/v1/me/journeys/'+jid) as response:
     history=json.load(response)['benefitPassHistory']
 linked_kst=datetime.fromisoformat(history[0]['linkedAt']).astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S 한국 시간')
 assert linked_kst in text
@@ -227,7 +233,7 @@ admin.get('/admin/catalog?collection=products&id=1')
 admin.submit('/admin/catalog/save', {'name':'<script>상품</script>','description':'시연 상품','active':'true'})
 assert '&lt;script&gt;' in public.get('/products/detail?id=1')
 def revision():
-    with public.http.open(BASE+'/api/v1/recommendations') as response:
+    with public.api('/api/v1/recommendations') as response:
         return int(json.load(response)['modelRevision'])
 
 # Create, revise and deactivate a concept through forms.

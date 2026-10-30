@@ -1,0 +1,26 @@
+meta {
+  name: Recommendations
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/recommendations
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    const first = res.getBody().items[0];
+    if (first) bru.setVar("placeId", first.place.id);
+  }
+}
+
+assert {
+  res.status: 200
+}
+
+docs {
+  추천이 있으면 첫 장소 ID를 저장합니다. 결과가 비어 있으면 화면의 공개 장소 ID를 Local 환경의 placeId에 입력하세요. 필터는 recommendation-options 응답의 ID를 사용합니다.
+}
