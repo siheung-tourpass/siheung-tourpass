@@ -1,0 +1,29 @@
+meta {
+  name: Update benefit feedback
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/me/redemptions/{{redemptionId}}/feedback
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "rating": 4,
+    "reasons": [
+      "COST"
+    ],
+    "comment": "평가 수정"
+  }
+}
+
+assert {
+  res.status: 200
+}

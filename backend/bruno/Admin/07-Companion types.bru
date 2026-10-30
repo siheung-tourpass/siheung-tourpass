@@ -1,0 +1,15 @@
+meta {
+  name: Companion types
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/admin/ontology/companion-types?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

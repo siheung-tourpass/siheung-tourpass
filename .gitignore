@@ -10,8 +10,16 @@ Desktop.ini
 *.swp
 *.swo
 
-# Local build and verification
+# Build output
 /backend/target/
-/.runtime/
 __pycache__/
+
+# Local environment
+.env
+.env.*
+!.env.example
+/backend/bruno/environments/*.local.bru
+
+# Local tools and verification
 /.hallmark/
+/.runtime/

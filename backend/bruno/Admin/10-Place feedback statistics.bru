@@ -1,0 +1,15 @@
+meta {
+  name: Place feedback statistics
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/admin/place-feedback?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

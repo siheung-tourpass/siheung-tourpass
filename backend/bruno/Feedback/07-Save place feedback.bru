@@ -1,0 +1,28 @@
+meta {
+  name: Save place feedback
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/me/places/{{placeId}}/feedback
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "rating": 4,
+    "comment": "Bruno 관광지 평가"
+  }
+}
+
+tests {
+  test("Created or replaced", function () {
+    expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+}

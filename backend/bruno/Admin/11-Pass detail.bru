@@ -1,0 +1,15 @@
+meta {
+  name: Pass detail
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/admin/passes/{{passId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

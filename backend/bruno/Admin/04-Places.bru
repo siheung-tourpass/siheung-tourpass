@@ -1,0 +1,15 @@
+meta {
+  name: Places
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/admin/ontology/places?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}
