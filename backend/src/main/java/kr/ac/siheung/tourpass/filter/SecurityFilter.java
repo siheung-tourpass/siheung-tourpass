@@ -24,20 +24,41 @@ public final class SecurityFilter implements Filter {
         var r=(HttpServletRequest)req;var out=(HttpServletResponse)res;r.setCharacterEncoding("UTF-8");out.setCharacterEncoding("UTF-8");out.setHeader("X-Content-Type-Options","nosniff");out.setHeader("Cache-Control","no-store");out.setHeader("Content-Security-Policy","default-src 'self'; frame-ancestors 'none'; base-uri 'none'");
         try{
             if(r.getServletPath().startsWith("/assets/")){chain.doFilter(req,res);return;}
+            if(isApiPath(r.getServletPath())){chain.doFilter(req,res);return;}
             var session=r.getSession();if(session.getAttribute("csrf")==null)session.setAttribute("csrf",AuthService.token());
             chain.doFilter(req,res);
         }catch(Problem e){if(isApiPath(r.getServletPath()))ApiHandler.error(out,e);else WebHandler.error(r,out,e);}
     }
     public static Map<String,Object> authorize(java.sql.Connection c,HttpServletRequest r) throws java.sql.SQLException {
+        if(isApiPath(r.getServletPath()))return authorizeApi(c,r);
         var session=r.getSession();
-        String id=(String)session.getAttribute("userId");boolean api=isApiPath(r.getServletPath());String path=api?r.getServletPath().substring("/api/v1".length()):r.getServletPath();String role=requiredRole(r.getServletPath());
+        String id=(String)session.getAttribute("userId");String role=requiredRole(r.getServletPath());
         var user=new AuthService().current(c,id,role);r.setAttribute("user",user);
-        if("DELETE".equals(r.getMethod())&&"/session".equals(path)&&user==null)throw new Problem(401,"AUTH_REQUIRED");
         if(!Set.of("GET","HEAD","OPTIONS").contains(r.getMethod())){
-            String supplied=api?r.getHeader("X-CSRF-Token"):r.getParameter("csrf");String expected=(String)session.getAttribute("csrf");
+            String supplied=r.getParameter("csrf");String expected=(String)session.getAttribute("csrf");
             Problem.require(supplied!=null&&MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),supplied.getBytes(StandardCharsets.UTF_8)),403,"CSRF_INVALID");
         }
         return user;
+    }
+
+    private static Map<String,Object> authorizeApi(java.sql.Connection c,HttpServletRequest r) throws java.sql.SQLException {
+        String authorization=r.getHeader("Authorization");Map<String,Object> user=null;
+        if(authorization!=null){
+            Problem.require(authorization.length()<=4096&&authorization.regionMatches(true,0,"Basic ",0,6),401,"INVALID_CREDENTIALS");
+            String credentials;
+            try{credentials=new String(Base64.getDecoder().decode(authorization.substring(6)),StandardCharsets.UTF_8);}
+            catch(IllegalArgumentException e){throw new Problem(401,"INVALID_CREDENTIALS");}
+            int colon=credentials.indexOf(':');Problem.require(colon>0,401,"INVALID_CREDENTIALS");
+            try{user=new AuthService().login(c,Map.of("loginId",credentials.substring(0,colon),"password",credentials.substring(colon+1)));}
+            catch(Problem e){throw new Problem(401,"INVALID_CREDENTIALS");}
+            catch(Exception e){throw new Problem(500,"INTERNAL_ERROR");}
+        }
+        String role=requiredRole(r.getServletPath());
+        user=new AuthService().current(c,user==null?null:(String)user.get("id"),role);
+        // Browsers may cache Basic credentials; cross-origin forms cannot set this header.
+        if(!Set.of("GET","HEAD","OPTIONS").contains(r.getMethod()))
+            Problem.require("api".equals(r.getHeader("X-CSRF-Token")),403,"CSRF_INVALID");
+        r.setAttribute("user",user);return user;
     }
 
 }

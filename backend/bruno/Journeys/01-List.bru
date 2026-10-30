@@ -1,0 +1,15 @@
+meta {
+  name: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/me/journeys?page=1&size=20
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: 200
+}

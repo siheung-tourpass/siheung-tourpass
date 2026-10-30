@@ -1,0 +1,27 @@
+meta {
+  name: Record visit
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}/places/{{journeyItemId}}/record
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "visitedOn": null,
+    "note": "Bruno 여행 메모",
+    "rating": null
+  }
+}
+
+assert {
+  res.status: 200
+}

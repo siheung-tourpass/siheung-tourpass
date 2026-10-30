@@ -1,0 +1,25 @@
+meta {
+  name: Reopen
+  type: http
+  seq: 13
+}
+
+patch {
+  url: {{baseUrl}}/me/journeys/{{journeyId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "PLANNING"
+  }
+}
+
+assert {
+  res.status: 200
+}

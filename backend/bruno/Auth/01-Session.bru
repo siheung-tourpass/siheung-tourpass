@@ -1,0 +1,20 @@
+meta {
+  name: Index
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  bru.deleteVar("apiLogin");
+  req.deleteHeader("Authorization");
+}
+
+assert {
+  res.status: 200
+}

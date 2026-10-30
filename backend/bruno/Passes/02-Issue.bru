@@ -1,0 +1,36 @@
+meta {
+  name: Issue
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/me/passes
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "productId": "{{productId}}"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("passId", res.getBody().id);
+    bru.setVar("passCode", res.getBody().code);
+  }
+}
+
+assert {
+  res.status: 201
+}
+
+docs {
+  실제로 이용권을 발급합니다. 활성 이용권이 있으면 409 ACTIVE_PASS_EXISTS입니다. List에서 해당 ID를 passId에 입력하고 Detail을 실행해 코드를 저장하세요.
+}
