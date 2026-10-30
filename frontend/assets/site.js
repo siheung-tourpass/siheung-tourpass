@@ -17,3 +17,15 @@
     }
   });
 })();
+
+(() => {
+  // Links that open a popover keep their href as a fallback for browsers without the Popover API.
+  document.querySelectorAll('[data-popover-open]').forEach((link) => {
+    const popover = document.getElementById(link.dataset.popoverOpen);
+    if (!popover || typeof popover.showPopover !== 'function') return;
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      popover.showPopover();
+    });
+  });
+})();

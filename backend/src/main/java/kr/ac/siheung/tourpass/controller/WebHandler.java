@@ -137,6 +137,7 @@ public final class WebHandler {
             var drafts=journeys.stream().filter(j->"PLANNING".equals(j.get("status"))).toList();
             r.setAttribute("homeDraftCount",drafts.size());
             if(!drafts.isEmpty())r.setAttribute("homeLatestDraft",drafts.get(0));
+            r.setAttribute("journeyTemplates",JourneyTemplates.list(ontology.browsePlaces(c)));
             r.setAttribute("homePassCount",journeys.stream().filter(j->"CONFIRMED".equals(j.get("status"))).count());
         }
         return page(user==null?"landing":"home",null);

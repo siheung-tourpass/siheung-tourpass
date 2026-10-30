@@ -23,7 +23,8 @@
 <header class="home-heading"><h1>나만의 시흥 여행을 담다</h1><p>새로운 여행을 찾고, 준비하던 여행을 이어가세요.</p></header>
 <div class="home-photo"><c:set var="imagePlace" value="${homePhoto}"/><%@ include file="place-image.jspf" %></div>
 <div class="home-card-grid">
-<a class="home-card home-start" href="${root}/explore"><div><span class="home-card-label">장소 · 행사 · 음식점</span><h2>새 여행 만들기</h2><p>마음에 드는 카드를 골라<br>나만의 여행을 시작하세요.</p></div><span class="home-card-action">카드 둘러보기 <span aria-hidden="true">↗</span></span></a>
+<c:if test="${user.role eq 'VISITOR'}"><%@ include file="journey-start-picker.jspf" %></c:if>
+<a class="home-card home-start" href="${root}${user.role eq 'VISITOR' ? '/journeys' : '/explore'}" ${user.role eq 'VISITOR' ? 'data-popover-open="journey-start-picker" aria-haspopup="dialog"' : ''}><div><span class="home-card-label">장소 · 행사 · 음식점</span><h2>새 여행 만들기</h2><p>마음에 드는 카드를 골라<br>나만의 여행을 시작하세요.</p></div><span class="home-card-action">카드 둘러보기 <span aria-hidden="true">↗</span></span></a>
 <c:if test="${user.role eq 'VISITOR'}">
 <a class="home-card home-drafts" href="${root}/journeys"><div><h2>만들던 여행</h2><strong class="home-card-count">${homeDraftCount}<span>개 제작 중</span></strong><p class="home-draft-name"><c:out value="${empty homeLatestDraft ? '아직 제작 중인 여행이 없어요.' : homeLatestDraft.name}"/></p></div><span class="home-card-action">${empty homeLatestDraft ? '제작 중 목록' : '이어 만들기'} <span aria-hidden="true">→</span></span></a>
 <a class="home-card home-passes" href="${root}/journeys?status=CONFIRMED"><div><h2>내 패스</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>방문 날짜와 메모를 남겨 보세요.</p></div><span class="home-card-action">패스 보기 <span aria-hidden="true">→</span></span></a>
