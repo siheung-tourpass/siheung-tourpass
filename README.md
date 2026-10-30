@@ -111,3 +111,4 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 | 공식 지정 업소·공개·이미지 예외 | [음식점 데이터](docs/data-collection/dining-data.md) |
 | 사진 후보 근거·미확보 사유 | [음식점 이미지 조사](docs/data-collection/dining-images.md) |
 | 문서와 코드 변경 원칙 | [작업 지침](AGENTS.md) |
+| 이슈·PR 제목과 본문 작성 방법 | [이슈·PR 작성 규칙](docs/collaboration.md) |

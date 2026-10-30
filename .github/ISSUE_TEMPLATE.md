@@ -1,3 +1,6 @@
+<!-- 제목 예: [Bug] 이용권 만료 후에도 사용 버튼이 표시됨 -->
+<!-- 작성 규칙: https://github.com/siheung-tourpass/siheung-tourpass/blob/main/docs/collaboration.md -->
+
 ## 문제 또는 요청
 
 <!-- 영향을 받는 화면·기능과 기대하는 결과를 적어 주세요. -->
