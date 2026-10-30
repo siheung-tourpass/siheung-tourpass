@@ -7,7 +7,19 @@
 <form id="journey-filters" method="get" action="${root}/journeys/new" data-recommendations-url="${root}/recommendations">
 <fieldset id="builder-filters" disabled>
 
-<fieldset id="builder-first-card" class="builder-themes"><legend>어떤 테마로 여행을 시작할까요?</legend><div class="builder-theme-options"><label><input type="radio" name="themeId" value="" checked><span>테마 없이 둘러보기</span></label><c:forEach var="item" items="${options.themes}"><label><input type="radio" name="themeId" value="${item.id}"><span><c:out value="${item.name}"/></span></label></c:forEach></div></fieldset>
+<details id="start-preferences" open><summary>취향 바꾸기</summary>
+<fieldset id="builder-first-card"><legend>어디서부터 골라 볼까요?</legend>
+<div class="builder-start-options">
+<label><input type="radio" name="startMode" value="theme" checked><span><strong>테마</strong><small>취향에 맞는 관광지</small></span></label>
+<label><input type="radio" name="startMode" value="region"><span><strong>지역</strong><small>가고 싶은 동네</small></span></label>
+<label><input type="radio" name="startMode" value="event"><span><strong>행사</strong><small>일정에 맞는 행사</small></span></label>
+<label><input type="radio" name="startMode" value="direct"><span><strong>직접 찾기</strong><small>이름으로 빠르게 검색</small></span></label>
+</div>
+<fieldset id="start-theme-panel" class="builder-themes"><legend>어떤 테마로 여행을 시작할까요?</legend><div class="builder-theme-options"><label><input type="radio" name="themeId" value="" checked><span>테마 없이 둘러보기</span></label><c:forEach var="item" items="${options.themes}"><label><input type="radio" name="themeId" value="${item.id}"><span><c:out value="${item.name}"/></span></label></c:forEach></div></fieldset>
+<div id="start-region-panel" hidden><label>시작할 지역<select id="start-region"><option value="">시흥시 전체</option><c:forEach var="item" items="${options.regions}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label></div>
+<div id="start-event-panel" hidden><label>참여하고 싶은 날짜 · 선택<input id="start-event-date" type="date"></label><p class="form-hint">행사 일정과 공식 안내를 확인하고 첫 카드로 골라 보세요. 검토 대기 행사는 안내 자료이며 개최·예약 가능 여부는 공식 출처에서 확인해 주세요.</p></div>
+</fieldset>
+</details>
 <details id="builder-search-panel" open><summary>직접 찾기 · 검색·세부 조건</summary>
 <label class="deck-search-label">카드 검색<input id="card-search" type="search" placeholder="이름, 위치, 소개로 찾기" autocomplete="off"></label>
 <details class="builder-filter-panel"><summary>세부 조건</summary><div class="builder-advanced">
@@ -33,6 +45,7 @@
 <button type="button" id="shuffle-cards" class="secondary">섞기 ↻</button><p id="card-count" role="status" aria-live="polite"></p>
 </div>
 <section id="builder-browse-section" aria-labelledby="builder-browse-title"><div class="deck-heading"><h2 id="builder-browse-title">발견할 카드</h2><div class="deck-navigation" hidden><button type="button" id="deck-previous" class="secondary" aria-label="이전 카드">←</button><span id="deck-position" role="status" aria-live="polite"></span><button type="button" id="deck-next" class="secondary" aria-label="다음 카드">→</button></div></div>
+<p id="start-alternatives" class="form-hint" hidden>다른 카드도 있어요</p>
 <p id="builder-context" class="form-hint"></p>
 <p id="builder-empty" class="empty-state" ${empty data ? '' : 'hidden'}>조건에 맞는 카드가 없습니다. 검색어·카드 종류·날짜·지역을 바꿔 보세요.</p>
 <div id="deck-stage" class="deck-stage" tabindex="0" role="group" aria-label="여행 카드 덱 · 좌우로 밀어 탐색"><div id="browse-cards" class="builder-cards" tabindex="0" role="region" aria-label="좌우 스크롤로 카드 탐색"><c:forEach var="card" items="${data}"><c:choose><c:when test="${card.kind eq 'place'}"><c:set var="place" value="${card}"/>
@@ -81,7 +94,7 @@
 <p class="form-hint">장소를 담아도 예약이나 혜택 발급은 되지 않아요. 혜택 이용권은 저장 후 연결할 수 있어요.</p>
 </c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
 </aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button></div><p class="form-hint">확정한 패스는 내 패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
-<div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span id="bar-count" role="status" aria-live="polite">0장 선택</span><button type="button" id="builder-next">이 카드로 시작</button></div>
+<div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span class="builder-selection-info"><small id="bar-label">담은 카드</small><span id="bar-count" role="status" aria-live="polite">0장 선택</span></span><button type="button" id="builder-next">이 카드로 시작</button></div>
 </form>
 <c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>
 <script src="${root}/assets/card-scroll.js" defer></script><script src="${root}/assets/journey-builder.js" defer></script>

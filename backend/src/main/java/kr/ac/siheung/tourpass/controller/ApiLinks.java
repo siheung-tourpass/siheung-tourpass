@@ -1,17 +1,20 @@
 package kr.ac.siheung.tourpass.controller;
 
 import java.util.*;
+import kr.ac.siheung.tourpass.service.OntologyService;
 
 /** Hypermedia stays in the API representation; services return domain data. */
 public final class ApiLinks {
     private ApiLinks() {}
     private static Map<String,Object> link(String base,String path,String method){return Map.of("href",base+path,"method",method);}
     private static void add(Map<String,Object> links,String rel,String base,String path,String method){links.put(rel,link(base,path,method));}
+    private static LinkedHashMap<String,Object> copy(Map<?,?> map){
+        var copy=new LinkedHashMap<String,Object>();map.forEach((key,value)->copy.put(key.toString(),value));return copy;
+    }
     public static Object represent(String base,String path,ApiHandler.Reply reply,Set<String> allowed,Object user,Map<String,String[]> query){
         Object body=reply.body();
-        var result=new LinkedHashMap<String,Object>();
-        if(body instanceof Map<?,?> map)map.forEach((key,value)->result.put(key.toString(),value));
-        else result.put("items",body);
+        var result=body instanceof Map<?,?> map?copy(map):new LinkedHashMap<String,Object>();
+        if(!(body instanceof Map<?,?>))result.put("items",body);
         String self=reply.location()==null?path:reply.location();
         String role=user instanceof Map<?,?> map?Objects.toString(map.get("role"),""):"";
         var links=new LinkedHashMap<String,Object>();
@@ -33,18 +36,8 @@ public final class ApiLinks {
         }
         if(path.isEmpty()&&role.equals("ADMIN"))for(String type:List.of("has-theme","suitable-for","sub-theme-of"))
             add(links,type,base,"/admin/ontology/relations?type="+type,"GET");
-        if(path.equals("/admin/ontology/relations")&&result.get("items") instanceof List<?> items&&query.get("type")!=null){
-            String type=query.get("type")[0];var copies=new ArrayList<Object>();
-            for(Object item:items){
-                var copy=new LinkedHashMap<String,Object>();((Map<?,?>)item).forEach((k,v)->copy.put(k.toString(),v));
-                String from=type.equals("sub-theme-of")?"childThemeId":"placeId";
-                String to=type.equals("has-theme")?"themeId":type.equals("suitable-for")?"companionTypeId":"parentThemeId";
-                copy.put("_links",Map.of("self",link(base,path+"/"+type+"/"+copy.get(from)+"/"+copy.get(to),"GET")));copies.add(copy);
-            }
-            result.put("items",copies);
-        }
         if(reply.location()==null||reply.location().equals(path))for(String method:allowed)if(!Set.of("GET","HEAD","OPTIONS").contains(method))add(links,method.toLowerCase(Locale.ROOT),base,path,method);
-        decorate(base,self,result,links,role);
+        decorate(base,self,result,links,role,query);
         if(result.get("page") instanceof Number page&&result.get("size") instanceof Number size&&result.get("total") instanceof Number total){
             int current=page.intValue();
             if(current>1)add(links,"prev",base,pagePath(path,query,current-1),"GET");
@@ -61,14 +54,17 @@ public final class ApiLinks {
         query.forEach((key,values)->{for(String value:values)parts.add(java.net.URLEncoder.encode(key,java.nio.charset.StandardCharsets.UTF_8)+"="+java.net.URLEncoder.encode(value,java.nio.charset.StandardCharsets.UTF_8));});
         return path+(parts.isEmpty()?"":"?"+String.join("&",parts));
     }
-    private static void decorate(String base,String path,Map<String,Object> result,Map<String,Object> links,String role){
+    private static void decorate(String base,String path,Map<String,Object> result,Map<String,Object> links,String role,Map<String,String[]> query){
         if(result.get("items") instanceof List<?> items){
             var copies=new ArrayList<Object>();
             for(Object item:items){
                 if(!(item instanceof Map<?,?> map)){copies.add(item);continue;}
-                var copy=new LinkedHashMap<String,Object>();map.forEach((k,v)->copy.put(k.toString(),v));
-                var itemLinks=new LinkedHashMap<String,Object>();
-                if(copy.get("_links") instanceof Map<?,?> existing)existing.forEach((k,v)->itemLinks.put(k.toString(),v));
+                var copy=copy(map);
+                var itemLinks=copy.get("_links") instanceof Map<?,?> existing?copy(existing):new LinkedHashMap<String,Object>();
+                if(path.equals("/admin/ontology/relations")&&query.get("type")!=null){
+                    String type=query.get("type")[0];var fields=OntologyService.relationFields(type);
+                    add(itemLinks,"self",base,path+"/"+type+"/"+copy.get(fields.get("fromKey"))+"/"+copy.get(fields.get("toKey")),"GET");
+                }
                 if(copy.get("id")!=null&&!path.equals("/recommendations")&&!path.endsWith("place-feedback")){
                     String itemPath=path+"/"+copy.get("id");
                     add(itemLinks,"self",base,itemPath,"GET");
@@ -87,7 +83,7 @@ public final class ApiLinks {
             if(result.get("places") instanceof List<?> places){
                 var copies=new ArrayList<Object>();
                 for(Object item:places){
-                    var place=new LinkedHashMap<String,Object>();((Map<?,?>)item).forEach((k,v)->place.put(k.toString(),v));
+                    var place=copy((Map<?,?>)item);
                     var actions=new LinkedHashMap<String,Object>();String itemPath=path+"/places/"+place.get("id");
                     add(actions,"record",base,itemPath+"/record","PUT");
                     if(planning){add(actions,"move",base,itemPath+"/move","POST");add(actions,"delete",base,itemPath,"DELETE");}

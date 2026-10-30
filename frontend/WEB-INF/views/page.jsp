@@ -7,6 +7,7 @@
 <c:set var="headerBackPath" value=""/>
 <c:choose>
 <c:when test="${view eq 'goods'}"><c:set var="headerBackPath" value="/admin"/></c:when>
+<c:when test="${view eq 'journey-photocards'}"><c:set var="headerBackPath" value="/journeys/detail?id=${data.id}"/></c:when>
 <c:when test="${view eq 'journey'}"><c:set var="headerBackPath" value="/journeys?status=${data.status}"/></c:when>
 <c:when test="${view eq 'journey-builder'}"><c:set var="headerBackPath" value="/journeys"/></c:when>
 <c:when test="${view eq 'product' or view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
@@ -37,6 +38,7 @@
 <c:when test="${view eq 'public-card'}"><%@ include file="public-card.jspf" %></c:when>
 <c:when test="${view eq 'profile'}"><%@ include file="profile.jspf" %></c:when>
 <c:when test="${view eq 'journey-builder'}"><%@ include file="journey-builder.jspf" %></c:when>
+<c:when test="${view eq 'journey-photocards'}"><%@ include file="journey-photocards.jspf" %></c:when>
 <c:when test="${view eq 'journeys' or view eq 'journey'}"><%@ include file="journeys.jspf" %></c:when>
 <c:when test="${view eq 'error'}"><h1>요청 확인</h1><p class="error" role="alert"><c:out value="${message}"/></p><p>오류 코드: <c:out value="${errorCode}"/></p><a href="${root}/">처음으로</a></c:when>
 <c:when test="${view eq 'login'}"><%@ include file="login.jspf" %></c:when>

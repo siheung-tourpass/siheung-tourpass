@@ -1,0 +1,13 @@
+<%@ page pageEncoding="UTF-8" %>
+<h1><c:out value="${data.name}"/> 포토카드</h1>
+<p>사용 완료한 여행의 추억입니다. 장소 이름과 위치는 여행에 담을 당시 기준이며 방문 기록은 본인이 남긴 내용입니다.</p>
+<div class="journey-photocards"><c:forEach var="p" items="${data.places}"><c:set var="image" value="${cardImages[p.cardKey]}"/>
+<article class="journey-photocard">
+<div class="journey-photocard-image"><c:choose><c:when test="${not empty image}"><img src="${root}${fn:escapeXml(image.path)}" alt="${fn:escapeXml(image.alt)}" loading="lazy"></c:when><c:otherwise><span>시흥에서 남긴 추억</span></c:otherwise></c:choose></div>
+<div class="journey-photocard-memory"><h2><c:out value="${p.placeName}"/></h2><p><c:out value="${p.regionName}"/> · <c:out value="${p.locationDescription}"/></p>
+<c:if test="${not empty p.visitedOn}"><p>다녀온 날 · <c:out value="${p.visitedOn}"/></p></c:if>
+<c:if test="${not empty p.note}"><p class="journey-photocard-note"><c:out value="${p.note}"/></p></c:if>
+<c:if test="${not empty image}"><p class="photo-credit"><c:out value="${image.attribution}"/> · <c:set var="creditImage" value="${image}"/><c:set var="creditSourceLabel" value="사진 출처"/><%@ include file="image-credit-links.jspf" %></p></c:if>
+</div></article></c:forEach></div>
+<c:if test="${empty data.places}"><p class="empty-state">저장된 장소가 없습니다. 여행 기록으로 돌아가 확인해 주세요.</p></c:if>
+<p><a href="${root}/journeys/detail?id=${data.id}">여행 기록으로 돌아가기 →</a></p>

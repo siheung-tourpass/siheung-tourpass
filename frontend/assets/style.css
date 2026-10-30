@@ -667,3 +667,68 @@ body.page-landing, body.page-login { padding-bottom: 0; }
 #builder-search-panel > summary { padding-block: var(--space-md); color: var(--color-muted); font-size: var(--text-sm); }
 #builder-search-panel > .deck-search-label { margin-block: var(--space-md); }
 #journey-builder[data-step=start] .card-tools { padding-top: 0; }
+
+.builder-start-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); margin-bottom: var(--space-lg); }
+.builder-start-options label { display: flex; align-items: center; gap: var(--space-sm); min-height: 52px; margin: 0; padding: var(--space-sm); border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: var(--color-surface); cursor: pointer; }
+.builder-start-options label:has(:checked) { border-color: var(--color-accent); background: var(--color-soft); font-weight: 700; }
+.builder-start-options input { width: auto; min-height: auto; margin: 0; }
+
+/* Hallmark · macrostructure: Split workbench · tone: calm · anchor hue: existing green */
+.builder-start-options label { position: relative; padding: var(--space-md); border-color: var(--color-border); align-items: flex-start; }
+.builder-start-options input[type=radio] { appearance: auto; flex: 0 0 auto; width: 16px; height: 16px; min-height: 0; margin: var(--space-xs) 0 0; padding: 0; accent-color: var(--color-accent); }
+.builder-start-options strong, .builder-start-options small { display: block; }
+.builder-start-options strong { color: var(--color-ink); font-size: var(--text-sm); }
+.builder-start-options small { font-size: var(--text-sm); font-weight: 400; margin-top: var(--space-xs); }
+.builder-start-options label:hover { border-color: var(--color-accent); }
+.builder-start-options label:has(:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+.is-deck-mode #builder-first-card { border: 0; margin: 0; padding: 0; }
+#builder-first-card > legend { margin-bottom: var(--space-md); }
+#builder-first-card .builder-theme-options { flex-wrap: wrap; overflow: visible; gap: var(--space-sm); }
+#builder-first-card .builder-theme-options span { padding: var(--space-md); }
+#builder-first-card .builder-theme-options label { white-space: normal; max-width: 100%; }
+#builder-first-card .builder-themes { margin-bottom: 0; }
+#builder-first-card .builder-themes legend { margin-bottom: var(--space-sm); }
+#start-region-panel label, #start-event-panel label { margin-block: 0; }
+.builder-selection-info { min-width: 0; display: grid; gap: var(--space-xs); }
+.builder-selection-info small { color: var(--color-muted); font-size: var(--text-sm); font-weight: 400; }
+.builder-selection-info #bar-count { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--text-sm); }
+.is-deck-mode #journey-builder[data-step=start] .builder-selection-bar #builder-next { min-height: var(--control-height); }
+@media (min-width: 960px) {
+  .page-journey-builder.is-deck-mode main:has(#journey-builder[data-step=start]) { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); column-gap: var(--space-3xl); align-items: start; }
+  .is-deck-mode main:has(#journey-builder[data-step=start]) > :is(h1, nav, #builder-step-hint, .builder-template-note) { grid-column: 1 / -1; }
+  .is-deck-mode main:has(#journey-builder[data-step=start]) #journey-filters { grid-column: 1; grid-row: auto / span 3; }
+  .is-deck-mode main:has(#journey-builder[data-step=start]) #journey-builder { grid-column: 2; min-width: 0; }
+  .is-deck-mode main:has(#journey-builder[data-step=start]) #builder-status:is([data-state=error], [data-state=empty]) { grid-column: 2; }
+}
+@media (max-width: 639px) {
+  .builder-start-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .builder-start-options label { justify-content: center; align-items: center; padding: var(--space-sm) var(--space-xs); border-radius: var(--radius-control); }
+  .builder-start-options input[type=radio] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .builder-start-options small { display: none; }
+  .builder-start-options label:has(:checked) strong::before { content: '✓ '; }
+  .page-journey-builder main:has(#journey-builder[data-step=start]) #builder-step-hint { display: none; }
+}
+
+/* Hallmark · macrostructure: Single-card reveal · tone: minimal · anchor hue: existing green */
+/* Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 */
+.page-journey-builder.is-deck-mode main:has(#journey-builder[data-step=start]) { display: block; }
+.is-deck-mode main:has(#journey-builder[data-step=start]) #journey-filters { max-width: 640px; margin-inline: auto; }
+#start-preferences { padding: 0; margin: 0; background: transparent; box-shadow: none; }
+#start-preferences > summary { color: var(--color-accent); font-size: var(--text-sm); text-align: center; }
+#start-preferences[open] > summary { margin-bottom: var(--space-md); }
+.is-deck-mode #journey-builder[data-step=start] .deck-heading { justify-content: center; margin-bottom: var(--space-md); }
+.is-deck-mode #journey-builder[data-step=start] #builder-browse-section { position: relative; display: flex; flex-direction: column; align-items: center; }
+.is-deck-mode #journey-builder[data-step=start] #builder-browse-title,
+.is-deck-mode #journey-builder[data-step=start] #builder-context,
+.is-deck-mode #journey-builder[data-step=start] #deck-feedback { display: none; }
+.is-deck-mode #journey-builder[data-step=start] .deck-stage { order: -1; --deck-card-width: min(320px, calc(100vw - 80px), max(200px, calc((100svh - 560px) * 2 / 3))); width: calc(var(--deck-card-width) + var(--space-xl) * 2); max-width: 100%; }
+.is-deck-mode #journey-builder[data-step=start] .builder-cards { gap: var(--space-3xl); scrollbar-width: none; }
+.is-deck-mode #journey-builder[data-step=start] .builder-card { transform: none; }
+.is-deck-mode #journey-builder[data-step=start] .builder-card:not(.is-current) { visibility: hidden; }
+.is-deck-mode #journey-builder[data-step=start][data-suggesting=true] .deck-stage { visibility: hidden; }
+#start-alternatives { margin-inline: auto; margin-block: 0 var(--space-sm); font-size: var(--text-sm); text-align: center; }
+.is-deck-mode #journey-builder[data-step=start] .deck-heading { order: 2; }
+.is-deck-mode #journey-builder[data-step=start] .deck-navigation { gap: var(--space-xl); }
+.is-deck-mode #journey-builder[data-step=start] .builder-selection-info { display: none; }
+.is-deck-mode #journey-builder[data-step=start] .builder-selection-bar { position: static; display: flex; justify-content: center; width: min(360px, 100%); transform: none; margin: var(--space-lg) auto; padding: 0; background: transparent; border: 0; box-shadow: none; }
+.is-deck-mode #journey-builder[data-step=start] #builder-next { width: 100%; }

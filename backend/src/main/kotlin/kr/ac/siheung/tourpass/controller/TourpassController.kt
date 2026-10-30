@@ -49,13 +49,13 @@ class TourpassController {
     fun journeys(request: HttpServletRequest, response: HttpServletResponse) =
         web.handle(request, response, web::journeys)
 
-    @RequestMapping("/explore", "/journeys/new")
-    fun newJourney(request: HttpServletRequest, response: HttpServletResponse) =
-        web.handle(request, response, web::newJourney)
+    @RequestMapping("/explore", "/journeys/new", "/journeys/edit")
+    fun journeyBuilder(request: HttpServletRequest, response: HttpServletResponse) =
+        web.handle(request, response, web::journeyBuilder)
 
-    @RequestMapping("/journeys/edit")
-    fun editJourney(request: HttpServletRequest, response: HttpServletResponse) =
-        web.handle(request, response, web::editJourney)
+    @RequestMapping("/journeys/photocards")
+    fun journeyPhotocards(request: HttpServletRequest, response: HttpServletResponse) =
+        web.handle(request, response, web::journeyPhotocards)
 
     @RequestMapping("/journeys/detail")
     fun journey(request: HttpServletRequest, response: HttpServletResponse) =

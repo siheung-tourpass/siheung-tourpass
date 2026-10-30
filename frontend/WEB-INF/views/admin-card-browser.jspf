@@ -17,7 +17,7 @@
 <c:if test="${empty card.image}"><%@ include file="card-placeholder.jspf" %></c:if>
 <div class="card-overview"><c:choose><c:when test="${card.kind eq 'event'}"><c:set var="event" value="${card}"/><%@ include file="event-overview.jspf" %></c:when><c:otherwise><h3><c:out value="${card.name}"/></h3><c:if test="${card.kind eq 'dining'}"><p><c:out value="${card.regionName}"/> · <c:out value="${card.designation}"/></p></c:if><p><c:if test="${card.kind eq 'place'}"><c:out value="${card.regionName}"/> · </c:if><c:out value="${card.locationDescription}"/></p></c:otherwise></c:choose></div>
 <span class="admin-card-action card-flip">${card.kind eq 'place' ? '정보·검토' : '안내 확인'} <span aria-hidden="true">→</span></span></a>
-<a class="admin-card-print button secondary" href="${fn:escapeXml(cardGoodsUrl)}#goods-settings" aria-label="${fn:escapeXml(card.name)} 카드 출력">카드 출력</a>
+<div class="admin-card-actions"><a class="admin-card-print button secondary" href="${fn:escapeXml(cardGoodsUrl)}#goods-settings" aria-label="${fn:escapeXml(card.name)} 카드 출력"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V8h16v9h-3M7 14h10v7H7z"/><path d="M16 11h1"/></svg><span>카드 출력</span><span aria-hidden="true">→</span></a></div>
 </article></c:forEach></div>
 <p class="admin-browser-empty" hidden>조건에 맞는 카드가 없습니다. 검색어나 종류를 바꿔 주세요.</p>
 <button type="button" class="secondary admin-browser-more" hidden>카드 더 보기</button>
