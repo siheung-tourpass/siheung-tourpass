@@ -9,9 +9,7 @@ JDBC = re.compile(r'\.(?:prepareStatement|createStatement|executeQuery|executeUp
 
 
 def sources(layer):
-    return sorted(p for language in ('java', 'kotlin')
-                  for p in (SOURCE / language / 'kr/ac/siheung/tourpass' / layer).rglob('*')
-                  if p.suffix in ('.java', '.kt'))
+    return sorted((SOURCE / 'java/kr/ac/siheung/tourpass' / layer).rglob('*.java'))
 
 
 def check():

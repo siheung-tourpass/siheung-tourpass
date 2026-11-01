@@ -79,6 +79,11 @@ const root = process.argv[2] || 'http://localhost:8081/siheung-tourpass';
       for(const width of [320,375,414,768,1280]) {
         await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
       }
+      await page.evaluate(() => { window.print = () => { window.printed = true; }; });
+      await page.locator('#goods-print').click();
+      await page.waitForFunction(() => window.printed === true);
+      assert.equal(await page.locator('#goods-print-status').textContent(),'');
+      assert.equal(await page.locator('#goods-print').isDisabled(),false);
       await page.locator('[name=caption]').fill('새 문구');assert(await page.locator('#goods-print').isDisabled());
     }
     await page.goto(root+'/admin/catalog?collection=products');

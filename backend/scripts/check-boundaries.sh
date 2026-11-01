@@ -11,3 +11,6 @@ javac -encoding UTF-8 -cp "$classpath" -d target/checks "$@"
 for check in $checks; do
     java -ea -cp "$classpath" "$check"
 done
+
+javac -encoding UTF-8 -cp "$classpath" -d target/checks tests/KakaoLoginCheck.java
+java -ea -cp "$classpath" kr.ac.siheung.tourpass.service.KakaoLoginCheck

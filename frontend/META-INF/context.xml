@@ -1,1 +1,1 @@
-<Context><CookieProcessor sameSiteCookies="strict" /></Context>
+<Context><CookieProcessor sameSiteCookies="lax" /></Context>

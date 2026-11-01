@@ -1,6 +1,8 @@
-# API 사용 안내
+# API 사용 안내 — 시흥 투어패스
 
-서버 실행·시연 계정은 [README](../README.md#시작하기), HTTP 계약은 [공통 요구사항](../spec.md#restful-api)을 따른다. 아래 경로는 서비스 기본 주소 `http://localhost:8080/siheung-tourpass`에 상대적이다.
+[문서 안내](../README.md#관련-문서)
+
+서버 실행은 [시작하기](../README.md#시작하기), 시연 계정은 [사용 방법](../README.md#사용-방법), HTTP 계약은 [공통 요구사항](../spec.md#restful-api)을 따른다. 아래 경로는 서비스 기본 주소 `http://localhost:8080/siheung-tourpass`에 상대적이다.
 
 ## 인증과 요청
 
@@ -21,5 +23,6 @@ Bruno에서 **Open Collection**으로 [backend/bruno](../backend/bruno)를 열�
 - 혜택: 방문객으로 `Passes / Issue` → 담당자 계정 선택 → `Merchant / Lookup pass` → `Redeem` → 방문객 계정 선택 → `Feedback`에서 평가. 이용권 코드·확인 토큰·사용 이력 ID는 응답에서 자동 저장한다. 기본 담당자는 `staff-a`, 가맹점 ID는 `1`이며 다른 담당자는 선택 요청의 계정과 `merchantId`를 함께 바꾼다.
 - 관리자: 관리자 계정 선택 후 `Admin`의 목록·통계·이용권 상세·취소 요청을 선택한다. 자료 생성·수정·검토 요청은 이 컬렉션에 포함하지 않는다.
 
-요청은 필요한 것만 개별 실행한다. 전체 컬렉션 실행은 역할 전환과 데이터 변경 순서를 보장하지 않는다. 발급·혜택 사용·취소·삭제는 실제 DB를 변경하므로 테스트 DB를 사용한다. 활성 이용권이 있어 발급이 거절되면 `Passes / List`에서 ID를 환경의 `passId`에 입력한 뒤 `Detail`로 코드를 저장한다. `Auth / Clear credentials`는 클라이언트에 저장한 인증 계정을 해제한다. 개인 계정 암호·코드·토큰을 환경 파일에 저장해 커밋하지 않는다.
+### 실행 시 주의사항
 
+요청은 필요한 것만 개별 실행한다. 전체 컬렉션 실행은 역할 전환과 데이터 변경 순서를 보장하지 않는다. 발급·혜택 사용·취소·삭제는 실제 DB를 변경하므로 테스트 DB를 사용한다. 활성 이용권이 있어 발급이 거절되면 `Passes / List`에서 ID를 환경의 `passId`에 입력한 뒤 `Detail`로 코드를 저장한다. `Auth / Clear credentials`는 클라이언트에 저장한 인증 계정을 해제한다. 개인 계정 암호·코드·토큰을 환경 파일에 저장해 커밋하지 않는다.

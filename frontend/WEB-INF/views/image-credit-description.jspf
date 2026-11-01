@@ -1,0 +1,6 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:choose><c:when test="${not empty creditImage.attribution}"><c:out value="${creditImage.attribution}"/></c:when><c:otherwise>
+<c:out value="${creditImage.alt}"/> · 사진: <c:out value="${creditImage.author}"/>
+<c:if test="${not empty creditImage.capturedYear}"> · <c:out value="${creditImage.capturedYear}"/>년 촬영</c:if>
+<c:if test="${not empty creditImage.publishedOn}"> · <c:out value="${creditImage.publishedOn}"/> 게시 (촬영일 미확인)</c:if>
+</c:otherwise></c:choose>

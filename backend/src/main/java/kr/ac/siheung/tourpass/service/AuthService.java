@@ -23,6 +23,12 @@ public final class AuthService {
         boolean valid=verify(password,hash);require(valid&&u!=null&&Boolean.TRUE.equals(u.get("active")),401,"INVALID_CREDENTIALS");
         return new LinkedHashMap<>(Map.of("id",u.get("id"),"displayName",u.get("displayName"),"role",u.get("role")));
     }
+    public Map<String,Object> kakaoLogin(Connection c,long kakaoId) throws SQLException {
+        require(kakaoId>0,401,"KAKAO_FAILED");
+        var user=AuthDao.kakaoUser(c,kakaoId,"kakao_"+token());
+        require(Boolean.TRUE.equals(user.get("active"))&&"VISITOR".equals(user.get("role")),403,"FORBIDDEN");
+        user.remove("active");return user;
+    }
     public static boolean verify(String password,String encoded) throws Exception {
         String[] p=encoded.split("\\$");if(p.length!=4||!p[0].equals("pbkdf2-sha256"))return false;
         byte[] salt=Base64.getDecoder().decode(p[2]),expected=Base64.getDecoder().decode(p[3]);
