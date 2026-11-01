@@ -8,6 +8,6 @@ import kr.ac.siheung.tourpass.service.AuthService;
 final class SessionState {
     static void login(HttpServletRequest request,Map<String,Object> user){
         request.changeSessionId();var session=request.getSession();
-        session.setAttribute("userId",user.get("id"));session.setAttribute("csrf",AuthService.token());session.removeAttribute("confirmation");
+        session.setAttribute("userId",user.get("id"));session.setAttribute("csrf",AuthService.token());session.removeAttribute("confirmation");session.removeAttribute("kakaoAttempt");
     }
 }

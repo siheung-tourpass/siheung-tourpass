@@ -50,6 +50,7 @@ jobs:
         run: |
           sh backend/scripts/check-boundaries.sh
           node backend/tests/card_scroll_check.cjs
+          node backend/tests/photocard_print_check.cjs
           python3 backend/tests/tourism_sql_check.py
       - name: Seed test database
         run: |
@@ -67,6 +68,7 @@ jobs:
       - name: API, database and journey checks
         if: matrix.suite == 'api'
         run: |
+          java -ea -cp 'backend/target/classes:backend/target/checks:backend/target/siheung-tourpass/WEB-INF/lib/*' kr.ac.siheung.tourpass.service.KakaoLoginCheck "$TOURPASS_DB_URL"
           python3 backend/tests/api_check.py "$API_URL"
           python3 backend/tests/db_check.py 127.0.0.1
           python3 backend/tests/rest_check.py "$API_URL"

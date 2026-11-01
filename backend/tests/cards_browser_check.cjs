@@ -26,11 +26,32 @@ async function login(request, root) {
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const homeSession=await login(page.request,root);
  await page.goto(root+'/');
- const homePhoto=page.locator('.home-photo'),homeCredit=page.locator('#home-photo-credit');
+ const homePhoto=page.locator('.home-background'),homeCredit=page.locator('#home-photo-credit');
+ const track=homePhoto.locator('.home-card-track'),groups=homePhoto.locator('.home-card-group');
+ assert.equal(await groups.count(),2);
+ assert.equal(await groups.nth(1).getAttribute('aria-hidden'),'true');
+ assert.equal(await groups.nth(0).textContent(),await groups.nth(1).textContent());
+ assert(await groups.first().locator('.home-event-card').count()>0);
+ assert(await groups.first().locator('.home-preview-card:not(.home-event-card)').count()>0);
+ assert(await track.evaluate(el=>el.getAnimations().length===1));
+ const before=await track.evaluate(el=>new DOMMatrix(getComputedStyle(el).transform).m41);
+ await page.waitForTimeout(150);
+ assert(await track.evaluate(el=>new DOMMatrix(getComputedStyle(el).transform).m41)<before);
+ await page.getByLabel('카드 이동 일시정지').check();
+ assert.equal(await track.evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+ await page.getByLabel('카드 이동 일시정지').uncheck();
+ await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await track.evaluate(el=>el.getAnimations().length),0);
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ for(const width of [320,375,414,768,1280]) {
+  await page.setViewportSize({width,height:900});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ }
+
  assert.equal(await homeCredit.isVisible(),false);
  await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).click();
  await checkAccessiblePopup(page,homeCredit);
- assert.equal(await homeCredit.locator('a').count(),2);
+ assert.equal(await homeCredit.locator('a').count(),2 * await homePhoto.locator('.home-card-group').first().locator('img').count());
  await page.keyboard.press('Escape');assert(await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).evaluate(el=>el===document.activeElement));
  await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).click();await homeCredit.getByRole('button',{name:'닫기',exact:true}).click();assert.equal(await homeCredit.isVisible(),false);
  assert.equal((await page.request.post(root+'/logout',{form:{csrf:homeSession.csrfToken}})).status(),200);

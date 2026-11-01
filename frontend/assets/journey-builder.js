@@ -74,7 +74,8 @@
   }
 
   function arrangeCards() {
-    const anchor = step === 'start' ? null : byId.get([...selected].at(-1));
+    const selectedCards = [...selected].map(id => byId.get(id));
+    const anchor = step === 'start' ? null : selectedCards.at(-1);
     const origin = point(anchor);
     const region = anchor?.dataset.savedOnly !== 'true' ? anchor?.dataset.regionId : '';
     const available = rankedCards.filter(card => !selected.has(card.dataset.cardKey));
@@ -90,7 +91,7 @@
       else delete card.dataset.distanceKm;
     });
     const focused = document.activeElement;
-    browse.append(...(anchor ? [anchor] : []), ...available, ...[...selected].map(id => byId.get(id)).filter(card => card !== anchor));
+    browse.append(...(anchor ? [anchor] : []), ...available, ...selectedCards.filter(card => card !== anchor));
     if (browse.contains(focused)) focused.focus({ preventScroll: true });
     document.querySelector('#builder-browse-title').textContent = anchor ? '다음 후보' : '시작할 카드';
     document.querySelector('#builder-context').textContent = !anchor
@@ -123,7 +124,6 @@
     const multiple = filteredCards.length > 1;
     form.querySelector('.deck-navigation').hidden = step === 'start' && !multiple;
     form.querySelector('#start-alternatives').hidden = step !== 'start' || !multiple;
-    form.dataset.multiple = String(multiple);
     activate(filteredCards.includes(activeCard) ? activeCard : filteredCards[0]);
     form.querySelector('#builder-empty').hidden = filteredCards.length > 0;
     form.querySelector('#card-count').textContent = `${filteredCards.length}장 찾음`;
@@ -397,7 +397,7 @@
         return;
       }
       const query = new URLSearchParams([...new FormData(filters)].filter(([name, value]) => ['themeId', 'regionId', 'companionId'].includes(name) && value !== ''));
-      if (step === 'start' && startMode !== 'direct') {
+      if (step === 'start') {
         query.delete('regionId');
         query.delete('companionId');
         if (startMode === 'region' && startRegion.value) query.set('regionId', startRegion.value);

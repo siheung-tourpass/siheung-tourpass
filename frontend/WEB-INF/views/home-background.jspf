@@ -1,0 +1,29 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:if test="${not empty homeCards}">
+<section class="home-background" aria-label="시흥 관광지와 행사 카드">
+<input id="home-background-paused" type="checkbox"><label for="home-background-paused">카드 이동 일시정지</label>
+<button type="button" class="pass-cover-trigger" popovertarget="home-photo-credit" aria-haspopup="dialog">사진 출처</button>
+<div class="home-card-window"><div class="home-card-track">
+<c:forEach begin="0" end="1" var="copy">
+<div class="home-card-group" ${copy eq 1 ? 'aria-hidden="true"' : ''}>
+<c:forEach var="card" items="${homeCards}">
+<div class="home-preview-card ${card.kind eq 'event' ? 'home-event-card' : ''}">
+<p class="card-kind"><%@ include file="card-kind-icon.jspf" %><c:out value="${card.kindLabel}"/></p>
+<c:choose><c:when test="${not empty card.image}"><img src="${root}${fn:escapeXml(card.image.path)}" alt="" width="${card.image.width}" height="${card.image.height}" decoding="async" draggable="false"></c:when><c:otherwise><div class="home-card-placeholder" aria-hidden="true"><%@ include file="card-kind-icon.jspf" %></div></c:otherwise></c:choose>
+<div class="home-preview-info"><h2><c:out value="${card.name}"/></h2><p><c:choose><c:when test="${card.kind eq 'event'}"><time datetime="${fn:escapeXml(card.startDate)}"><c:out value="${card.startDate}"/></time> ~ <time datetime="${fn:escapeXml(card.endDate)}"><c:out value="${card.endDate}"/></time></c:when><c:otherwise><c:out value="${card.regionName}"/></c:otherwise></c:choose></p></div>
+</div>
+</c:forEach>
+</div>
+</c:forEach>
+</div></div>
+<section id="home-photo-credit" class="pass-cover-popover" popover role="dialog" aria-labelledby="home-photo-credit-title"><div class="pass-cover-popover-heading"><h2 id="home-photo-credit-title">사진 출처</h2><button type="button" class="secondary" popovertarget="home-photo-credit" popovertargetaction="hide" autofocus>닫기</button></div>
+<c:forEach var="card" items="${homeCards}"><c:if test="${not empty card.image}">
+<h3><c:out value="${card.name}"/></h3>
+<p><c:set var="creditImage" value="${card.image}"/><%@ include file="image-credit-description.jspf" %>
+<c:if test="${not empty card.image.publisher}"> · <c:out value="${card.image.publisher}"/></c:if>
+<c:set var="creditSourceLabel" value="${empty card.image.sourceTitle ? '이미지 출처' : card.image.sourceTitle}"/><c:set var="creditLicenseLabel" value="${card.image.license}"/><%@ include file="image-credit-links.jspf" %>
+ · 화면 크기에 맞춰 축소 표시 · ${card.kind eq 'event' ? '원본 비율 유지·전체 이미지 표시' : '세로 크롭'} · 원본 파일 보존</p>
+</c:if></c:forEach>
+</section>
+</section>
+</c:if>

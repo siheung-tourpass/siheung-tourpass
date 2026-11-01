@@ -1,4 +1,6 @@
-# 이슈·PR 작성 규칙
+# 이슈·PR 작성 규칙 — 시흥 투어패스
+
+[문서 안내](../README.md#관련-문서)
 
 작성은 [이슈 템플릿](../.github/ISSUE_TEMPLATE.md)·[PR 템플릿](../.github/PULL_REQUEST_TEMPLATE.md)에서 시작한다. 요구사항·문서의 관리 원칙은 [작업 지침](../AGENTS.md)을 따른다.
 

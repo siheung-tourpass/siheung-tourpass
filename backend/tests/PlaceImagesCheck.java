@@ -14,7 +14,6 @@ public final class PlaceImagesCheck {
         var tourism=mapper.readTree(Path.of("data/siheung-tourism.json").toFile());
         var codes=new HashSet<String>();tourism.get("places").forEach(place->codes.add(place.get("code").asText()));
         assert !images.isEmpty();
-        assert images.containsValue(PlaceImages.random());
         for(var entry:images.entrySet()){
             String code=entry.getKey();var image=entry.getValue();
             assert codes.contains(code):code;

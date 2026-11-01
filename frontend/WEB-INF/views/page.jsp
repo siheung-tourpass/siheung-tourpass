@@ -14,15 +14,15 @@
 <c:when test="${view eq 'place'}"><c:set var="headerBackPath" value="/explore"/></c:when>
 <c:when test="${view eq 'pass'}"><c:set var="headerBackPath" value="${user.role eq 'ADMIN' ? '/admin/passes' : '/passes'}"/></c:when>
 </c:choose>
-<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/tourpass-icon.png" width="24" height="24" alt="">시흥 투어패스</a><div aria-hidden="true"></div></div></header>
+<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div></header>
 <main id="main" tabindex="-1">
 <c:choose>
 <c:when test="${view eq 'landing'}"><%@ include file="landing.jspf" %></c:when>
 <c:when test="${view eq 'home' and user.role eq 'ADMIN'}"><%@ include file="admin-home.jspf" %></c:when>
 <c:when test="${view eq 'home'}">
 <div class="home-layout home-dashboard">
-<header class="home-heading"><h1>나만의 시흥 여행을 담다</h1><p>새로운 여행을 찾고, 준비하던 여행을 이어가세요.</p></header>
-<div class="home-photo"><c:set var="imagePlace" value="${homePhoto}"/><%@ include file="place-image.jspf" %></div>
+<header class="home-heading home-welcome"><img class="welcome-character" src="${root}/assets/siheung_character.png" width="640" height="640" alt=""><div><h1>나만의 시흥 여행을 담다</h1><p>새로운 여행을 찾고, 준비하던 여행을 이어가세요.</p></div></header>
+<%@ include file="home-background.jspf" %>
 <div class="home-card-grid">
 <c:if test="${user.role eq 'VISITOR'}"><%@ include file="journey-start-picker.jspf" %></c:if>
 <a class="home-card home-start" href="${root}${user.role eq 'VISITOR' ? '/journeys' : '/explore'}" ${user.role eq 'VISITOR' ? 'data-popover-open="journey-start-picker" aria-haspopup="dialog"' : ''}><div><span class="home-card-label">장소 · 행사 · 음식점</span><h2>새 여행 만들기</h2><p>마음에 드는 카드를 골라<br>나만의 여행을 시작하세요.</p></div><span class="home-card-action">카드 둘러보기 <span aria-hidden="true">↗</span></span></a>

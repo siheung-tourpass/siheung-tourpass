@@ -1,0 +1,3 @@
+BEGIN;
+ALTER TABLE app_user ADD COLUMN kakao_id BIGINT UNIQUE CHECK (kakao_id > 0);
+COMMIT;

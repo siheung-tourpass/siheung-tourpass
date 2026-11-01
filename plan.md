@@ -1,6 +1,6 @@
-# 구현 계획
+# 구현 계획 — 시흥 투어패스
 
-[기술 구조](#기술-구조) · [남은 작업](#남은-작업) · [요구사항](spec.md)
+[요구사항](spec.md)을 구현하는 소스 구조·검증 전략·남은 작업을 관리한다. 설치·실행·테스트 명령은 [README](README.md)를 따른다.
 
 ## 기술 구조
 
@@ -10,7 +10,7 @@
 
 | 경로·원본 | 책임 |
 | --- | --- |
-| [화면 Controller](backend/src/main/kotlin/kr/ac/siheung/tourpass/controller/TourpassController.kt) · [API Controller](backend/src/main/kotlin/kr/ac/siheung/tourpass/controller/ApiController.kt) | 화면·API의 구체 경로 매핑; Handler 작업 선택 |
+| [화면 Controller](backend/src/main/java/kr/ac/siheung/tourpass/controller/TourpassController.java) · [API Controller](backend/src/main/java/kr/ac/siheung/tourpass/controller/ApiController.java) | 화면·API의 구체 경로 매핑; Handler 작업 선택 |
 | [WebHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/WebHandler.java) · [ApiHandler](backend/src/main/java/kr/ac/siheung/tourpass/controller/ApiHandler.java) | 매핑된 작업의 폼·PRG·확인 토큰·시간 표시 / JSON 계약; 요청 트랜잭션에서 인증·CSRF 검사; API는 무상태 인증·자원 링크·HTTP 응답을 담당 |
 | [SecurityFilter](backend/src/main/java/kr/ac/siheung/tourpass/filter/SecurityFilter.java) | 인증·역할·CSRF 검사 함수·캐시·보안 헤더 |
 | [Service](backend/src/main/java/kr/ac/siheung/tourpass/service) | 화면/API 공통 업무 규칙·소유권·상태 전이·추천 계산·입력 검증; 데이터 접근은 DAO 호출 |
@@ -35,11 +35,19 @@
 | 안내 자료 | [CatalogService](backend/src/main/java/kr/ac/siheung/tourpass/service/CatalogService.java)가 여행·관리자·출력에 공통 카드 자료를 제공한다. [좌표](backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)·[관광 사진](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java)은 코드로 연결한다. |
 | 포토카드 | [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java)가 관리자 출력 대상 검증·QR을 담당하고 JSP·CSS가 인쇄 배치를 담당한다. 방문객 조회는 JourneyService가 소유권·상태를 검사한다. JourneyPhotoService·JourneyPhotoDao는 본인 사진 검증·비공개 DB 저장을 담당하며 공통 포토카드 뷰로 출력한다. |
 
+카카오 인증은 KakaoLoginService가 외부 인가 코드·회원번호 확인을, AuthService·AuthDao가 방문객 계정 조회·생성을 담당한다. WebHandler는 state·세션·콜백을 처리하며 외부 호출 후 DB 트랜잭션을 연다.
+
 화면은 세션·CSRF를, API는 요청별 Basic 인증·CSRF 헤더를 사용한다. 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API 혜택 확인 자원은 DB에서 조회·소비한다. 요청 방법은 [API 사용 안내](docs/api-usage.md), 계약은 [RESTful API](spec.md#restful-api)를 따른다.
 
 ## 실행 범위
 
 로컬 PostgreSQL 16 시연을 기본으로 하며 CI만 PostgreSQL 16 컨테이너를 사용한다. 기존 DB 갱신은 [README](README.md#시작하기)의 마이그레이션 절차를 따른다. JPA·운영 Docker·RDS·로드밸런서·오토스케일링·S3·CloudFront·자동 배포는 범위에 포함하지 않는다.
+
+## 검증 전략
+
+테스트는 정책 경계·권한·저장 결과·사용자 조작을 검증하며, 단순 문구·장식 스타일·데이터의 고정 개수는 고정하지 않는다.
+
+자동 검사의 환경·명령·DB 분리는 [README 테스트](README.md#테스트)를 따른다. 자동 검사 통과와 자료 최신성 검토·사용자 검증은 별도로 확인하며, 최종 판정은 [완료 기준](spec.md#완료-기준)을 따른다.
 
 ## 남은 작업
 

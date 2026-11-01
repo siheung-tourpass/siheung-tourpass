@@ -1,10 +1,12 @@
-# 관광 데이터
+# 관광 데이터 — 시흥 투어패스
+
+[문서 안내](../../README.md#관련-문서)
+
+관광 자료의 적재·검토·사진 배포를 다룬다. 출처·좌표·이미지의 공통 원칙은 [데이터 수집 공통 기준](common.md)을 따른다.
 
 ## 원본
 
 [siheung-tourism.json](../../backend/data/siheung-tourism.json)의 `sources`·`source_ids`에 출처·근거를 둔다. 장소 목록·건수·추천 예시는 JSON만 갱신한다.
-
-관광 자료의 적재·검토·사진 배포를 다룬다. 출처·좌표·이미지의 공통 원칙은 [데이터 수집 공통 기준](common.md)을 따른다.
 
 - 사실 요약 `SOURCE_FACT`, 서비스 분류 `PROJECT_CLASSIFICATION`, 자체 개념 `PROJECT_MODEL`을 구분한다. 실제 자료는 `REAL`, 자체 테마 부모는 `DEMO`·`PROJECT_MODEL`; 실제 가맹점·혜택 연결은 없다.
 - 지역은 행정구역이 아닌 검색 분류. 장소당 지역 1개, `region_code`와 `locatedIn` 일치, `전체` 미저장. 표시명 변경 시 코드 유지·시연 ID와 분리.

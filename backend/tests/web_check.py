@@ -66,6 +66,12 @@ class Client:
         return self.request(suffix, form['fields'] | (values or {}), expected)
 
 public, visitor, other, staff, admin = [Client(name) for name in (None,'visitor','visitor2','staff-a','admin')]
+# OAuth entry requires form CSRF; unsolicited callbacks cannot create a session.
+public.get('/login/kakao', 405)
+public.request('/login/kakao', {}, 403)
+public.get('/login/kakao/callback?code=untrusted&state=untrusted', 401)
+assert '카카오 로그인 요청이 만료' in public.text
+public.get('/passes', 303); assert public.location == '/login'
 # Tourism feedback forms use PRG, escape private opinions and expose aggregate statistics only.
 assert '아직 피드백이 없습니다' in admin.get('/admin/place-feedback')
 assert '/login' in public.get('/cards/detail?key=place:1')
@@ -90,8 +96,10 @@ assert 'aria-label="주 메뉴"' not in public.get('/login')
 for client, destination in ((visitor, '/'), (admin, '/'), (staff, '/merchant/redeem')):
     client.get('/login', 303)
     assert client.location == destination
-for client in (visitor, staff):
-    assert '/assets/places/' in client.get('/')
+for client in (public, visitor, staff):
+    text=client.get('/')
+    assert 'class="home-background"' in text and 'class="home-card-track"' in text
+    assert 'home-event-card' in text and '카드 이동 일시정지' in text
 admin.get('/')
 public.get('/missing',404)
 public.request('/missing',{},403)

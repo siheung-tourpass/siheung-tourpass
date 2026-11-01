@@ -8,9 +8,23 @@
 
 ![시흥 투어패스 핵심 기능](docs/assets/key-features.svg)
 
+### 주요 화면
+
+로컬 시연 환경에서 촬영했다. 관광·행사 자료의 운영 조건은 검토 대상이며, 화면의 혜택은 시연용이다. 이미지를 누르면 원본 크기로 볼 수 있다.
+
+| 서비스 소개 | 여행 덱 구성 |
+| --- | --- |
+| [![관광지와 행사 카드를 보여주는 서비스 소개](docs/assets/landing.png)](docs/assets/landing.png) | [![시작 관광지 주변의 후보를 비교하고 여행 카드 선택](docs/assets/journey-builder.png)](docs/assets/journey-builder.png) |
+| 관광지·행사 카드를 둘러보고 여행 만들기를 시작한다. | 담은 장소 주변의 후보를 비교하고 여행에 추가한다. |
+
+| 카드 상세 안내 | 여행 확인 |
+| --- | --- |
+| [![카드의 소개와 공식 안내 확인](docs/assets/card-details.png)](docs/assets/card-details.png) | [![여행 순서와 이름을 확인하는 저장 전 화면](docs/assets/journey-review.png)](docs/assets/journey-review.png) |
+| 카드의 소개·이용 조건과 공식 출처를 확인한다. | 카드 순서·여행 이름·날짜를 정하고 임시 저장하거나 제작을 확정한다. |
+
 ## 기술 스택
 
-Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 구현 경계는 [구현 계획](plan.md#기술-구조)을 따른다.
+Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 구현 경계는 [구현 계획](plan.md#기술-구조)을 따른다.
 
 ![시흥 투어패스 시스템 아키텍처](docs/assets/architecture.svg)
 
@@ -62,6 +76,12 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 
 실제 관광 자료의 승인·기존 DB 전환은 [데이터 안내](docs/data-collection/tourism-data.md#적재)를 따른다.
 
+### 카카오 로그인 설정
+
+[카카오 로그인 REST API 안내](https://developers.kakao.com/docs/ko/kakaologin/rest-api)에 따라 카카오 앱에서 로그인을 활성화하고 Redirect URI를 등록한다. 로컬 기본 주소는 `http://localhost:8080/siheung-tourpass/login/kakao/callback`이다. 배포 시에는 실제 HTTPS 주소를 등록하고 아래 값도 동일하게 설정한다. 회원번호만 사용하므로 이메일·프로필 동의 항목은 필요하지 않다.
+
+앱 실행 환경에 `TOURPASS_KAKAO_CLIENT_ID`(REST API 키), `TOURPASS_KAKAO_REDIRECT_URI`(등록한 전체 콜백 주소)를 설정한다. Client Secret이 활성화되어 있으면 `TOURPASS_KAKAO_CLIENT_SECRET`도 설정한다. 비밀값은 저장소·채팅에 올리지 않고 로컬 환경으로만 전달한다. 설정 후 앱을 재시작한다. 키 또는 콜백 주소가 없으면 로그인 버튼은 준비 중으로 표시된다. 기존 DB에는 시작하기의 절차에 따라 미적용 마이그레이션을 적용한다.
+
 ## 사용 방법
 
 화면은 `http://localhost:8080/siheung-tourpass/`, API는 같은 주소의 `/api/v1`. 시연 계정 `visitor`, `visitor2`, `staff-a`, `staff-b`, `admin`의 초기 암호는 모두 `DemoPass!2026`이다.
@@ -75,6 +95,7 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 | 관광지 평가 | 관광지 상세 → 만족도·선택 의견 저장·수정·삭제 |
 | 가맹점 담당자 | 코드 입력 → 배정 혜택·잔여 확인 → 사용 확인 → 결과·이력 조회 |
 | 관리자 | 관광·혜택 자료 관리·검토, 통계 조회, 사유 입력 후 이용권 취소. 관광 관리 → 카드 상세 → 카드 출력 → 설정 → 미리보기·인쇄 |
+| 카카오 로그인 | 로그인 → 카카오톡으로 로그인 → 카카오 동의 → 방문객 홈. 처음 로그인하면 별도 방문객 계정을 생성하며 기존 여행은 기존 계정에 유지된다. 서비스 로그아웃은 카카오 계정 로그아웃과 별개다. |
 | 계정 | 프로필 → 계정 정보·화면 설정·로그아웃 |
 
 초기 자료의 담기 조건은 [여행 구성](docs/specs/visitor.md#담기와-보존), 추천 승인 절차는 [데이터 적재](docs/data-collection/tourism-data.md#적재)를 따른다.
@@ -87,7 +108,7 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 
 ## 테스트
 
-[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 검사 명령과 결과는 워크플로·Actions에서 확인한다. 공통 검사는 한 작업에서 실행하고, 상태를 변경하는 API·화면·관광 통합 검사는 별도 DB에서 실행한다. 테스트는 정책 경계·권한·저장 결과·사용자 조작을 검증하며, 단순 문구·장식 스타일·데이터의 고정 개수는 고정하지 않는다.
+[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 검사 명령과 결과는 워크플로·Actions에서 확인한다. 공통 검사는 한 작업에서 실행하고, 상태를 변경하는 API·화면·관광 통합 검사는 별도 DB에서 실행한다. 검증 범위와 판정 기준은 [구현 계획](plan.md#검증-전략)을 따른다.
 
 통합 검사는 DB를 변경하므로 시연·보관용 DB와 분리한다. CI의 `api`·`web`·`tourism` 작업마다 초기 자료가 다르므로 해당 작업의 초기화 순서를 따른다.
 
@@ -95,21 +116,22 @@ Kotlin·Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이�
 
 ## 관련 문서
 
-| 필요한 내용 | 문서 |
+| 문서 | 내용 |
 | --- | --- |
-| 범위·공통 인증·이용권 정책·완료 기준 | [공통 요구사항](spec.md) |
-| 여행·추천·피드백·방문 기록 | [방문객 요구사항](docs/specs/visitor.md) |
-| 혜택 확인·사용 권한 | [가맹점 담당자 요구사항](docs/specs/merchant.md) |
-| 자료 관리·검토·피드백 통계·포토카드 출력 | [관리자 요구사항](docs/specs/admin.md) |
-| API 인증·요청·Bruno 사용 | [API 사용 안내](docs/api-usage.md) |
-| 소스 구조·실행 범위·남은 작업 | [구현 계획](plan.md) |
-| 화면 배치·상태·접근성 | [디자인 기준](docs/design.md) |
-| 추천 점수·정렬·추론 경계 | [추천 모델](docs/tourism-semantics.md) |
-| 지역 문제 제안·기능 연결·사용자 검증 과제 | [지역 문제와 사용자 검증](docs/project-validation.md) |
-| 공통 출처·좌표·이미지 기준 | [데이터 수집 공통 기준](docs/data-collection/common.md) |
-| 관광 적재·검토·사진 배포 | [관광 데이터](docs/data-collection/tourism-data.md) |
-| 행사 일정·연결·이미지 예외 | [행사 데이터](docs/data-collection/events-data.md) |
-| 공식 지정 업소·공개·이미지 예외 | [음식점 데이터](docs/data-collection/dining-data.md) |
-| 사진 후보 근거·미확보 사유 | [음식점 이미지 조사](docs/data-collection/dining-images.md) |
-| 문서와 코드 변경 원칙 | [작업 지침](AGENTS.md) |
-| 이슈·PR 제목과 본문 작성 방법 | [이슈·PR 작성 규칙](docs/collaboration.md) |
+| [공통 요구사항](spec.md) | 범위·공통 인증·이용권 정책·완료 기준 |
+| [방문객 요구사항](docs/specs/visitor.md) | 여행·추천·피드백·방문 기록 |
+| [가맹점 담당자 요구사항](docs/specs/merchant.md) | 혜택 확인·사용 권한 |
+| [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·포토카드 출력 |
+| [API 사용 안내](docs/api-usage.md) | API 인증·요청·Bruno 사용 |
+| [구현 계획](plan.md) | 현재 구조·구현 방향·검증 전략·남은 작업 |
+| [디자인 기준](docs/design.md) | 화면 배치·상태·접근성 |
+| [추천 모델](docs/tourism-semantics.md) | 추천 점수·정렬·추론 경계 |
+| [지역 문제와 사용자 검증](docs/project-validation.md) | 지역 문제 제안·기능 연결·사용자 검증 과제 |
+| [최종 발표 준비 기준](docs/final-presentation.md) | 최종 발표 심사기준·자료 구성·근거 준비·제출 점검 |
+| [데이터 수집 공통 기준](docs/data-collection/common.md) | 공통 출처·좌표·이미지 기준 |
+| [관광 데이터](docs/data-collection/tourism-data.md) | 관광 적재·검토·사진 배포 |
+| [행사 데이터](docs/data-collection/events-data.md) | 행사 일정·연결·이미지 예외 |
+| [음식점 데이터](docs/data-collection/dining-data.md) | 공식 지정 업소·공개·이미지 예외 |
+| [음식점 이미지 조사](docs/data-collection/dining-images.md) | 사진 후보 근거·미확보 사유 |
+| [작업 지침](AGENTS.md) | 문서와 코드 변경 원칙 |
+| [이슈·PR 작성 규칙](docs/collaboration.md) | 이슈·PR 제목과 본문 작성 방법 |

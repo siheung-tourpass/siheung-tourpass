@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "Siheung Tourpass",
+  "name": "siheung-tourpass",
   "type": "collection",
   "ignore": [
     "node_modules",

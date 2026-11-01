@@ -51,7 +51,7 @@ public final class WebHandler {
                 else if(result.data() instanceof RedemptionService.Lookup lookup){s.setAttribute("confirmation",lookup.confirmation());result=page("confirm",lookup.response());}
                 else if(r.getServletPath().equals("/merchant/redeem/confirm"))s.setAttribute("confirmation",((RedemptionService.Confirmation)s.getAttribute("confirmation")).consume());
                 if("photo".equals(result.view())){out.setContentType("image/jpeg");out.getOutputStream().write((byte[])result.data());return;}
-                if(result.view()!=null&&result.view().equals("json")){ApiHandler.json(out,result.data());return;}
+                if("json".equals(result.view())){ApiHandler.json(out,result.data());return;}
                 if(result.redirect()!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+result.redirect());return;}
                 r.setAttribute("view",result.view());r.setAttribute("data",display(result.data()));r.setAttribute("csrf",s.getAttribute("csrf"));
                 out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
@@ -62,11 +62,46 @@ public final class WebHandler {
         try{Database.transaction(c->SecurityFilter.authorize(c,r));out.sendError(404);}
         catch(Problem e){error(r,out,e);}
     }
+    private static final KakaoLoginService kakao=new KakaoLoginService();
+    public void kakaoLogin(HttpServletRequest r,HttpServletResponse out) throws IOException,ServletException {
+        try{
+            var session=r.getSession();
+            synchronized(session){
+                if(r.getServletPath().equals("/login/kakao")){
+                    method(r,"POST");
+                    var user=Database.transaction(c->SecurityFilter.authorize(c,r));
+                    if(user!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+loginDestination(user));return;}
+                    var attempt=KakaoLoginService.Attempt.create();
+                    String url=kakao.authorizationUrl(attempt.state());session.setAttribute("kakaoAttempt",attempt);
+                    out.setStatus(303);out.setHeader("Location",url);return;
+                }
+                method(r,"GET");
+                var attempt=(KakaoLoginService.Attempt)session.getAttribute("kakaoAttempt");
+                session.removeAttribute("kakaoAttempt");
+                require(attempt!=null,401,"KAKAO_STATE_INVALID");attempt.validate(param(r,"state"));
+                require(param(r,"error")==null,401,"KAKAO_CANCELLED");
+                long kakaoId=kakao.identify(param(r,"code"),attempt.state());
+                var user=Database.transaction(true,c->{
+                    var current=SecurityFilter.authorize(c,r);
+                    require(current==null,409,"KAKAO_FAILED");
+                    return new AuthService().kakaoLogin(c,kakaoId);
+                });
+                SessionState.login(r,user);
+                out.setStatus(303);out.setHeader("Location",r.getContextPath()+loginDestination(user));
+            }
+        }catch(Problem e){error(r,out,e);}
+        catch(Exception e){error(r,out,new Problem(502,"KAKAO_FAILED"));}
+    }
     public static void error(HttpServletRequest r,HttpServletResponse out,Problem e) throws IOException,ServletException {
         if(e.code.equals("AUTH_REQUIRED")){out.setStatus(303);out.setHeader("Location",r.getContextPath()+"/login");return;}
-        r.setAttribute("view",r.getServletPath().equals("/login") && Set.of("INVALID_CREDENTIALS","INVALID_INPUT","CSRF_INVALID").contains(e.code)?"login":"error");r.setAttribute("message",message(e.code));r.setAttribute("errorCode",e.code);r.setAttribute("csrf",r.getSession().getAttribute("csrf"));out.setStatus(e.status);out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
+        r.setAttribute("kakaoEnabled",kakao.enabled());
+        r.setAttribute("view",e.code.startsWith("KAKAO_") ? "login" : r.getServletPath().equals("/login") && Set.of("INVALID_CREDENTIALS","INVALID_INPUT","CSRF_INVALID").contains(e.code)?"login":"error");r.setAttribute("message",message(e.code));r.setAttribute("errorCode",e.code);r.setAttribute("csrf",r.getSession().getAttribute("csrf"));out.setStatus(e.status);out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
     }
     public static String message(String code){return switch(code){
+        case "KAKAO_UNAVAILABLE"->"카카오 로그인 설정을 준비 중입니다. 아이디와 비밀번호로 로그인해 주세요.";
+        case "KAKAO_CANCELLED"->"카카오 로그인을 취소했습니다. 다시 시도할 수 있습니다.";
+        case "KAKAO_STATE_INVALID"->"카카오 로그인 요청이 만료되었거나 유효하지 않습니다. 다시 시작해 주세요.";
+        case "KAKAO_FAILED"->"카카오 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.";
         case "INVALID_PHOTO"->"JPEG·PNG 사진을 선택해 주세요. 8MB 이하, 1,600만 화소까지 저장할 수 있습니다.";
         case "INVALID_INPUT","INVALID_CONCEPT"->"입력값을 확인해 주세요.";
         case "INVALID_CREDENTIALS"->"아이디와 비밀번호를 확인해 주세요.";
@@ -124,6 +159,7 @@ public final class WebHandler {
     private static String loginDestination(Map<String,Object> user){return "STAFF".equals(role(user))?"/merchant/redeem":"/";}
 
     public Page login(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        r.setAttribute("kakaoEnabled",kakao.enabled());
         boolean post=r.getMethod().equals("POST");
         if(!post && user!=null)return redirect(loginDestination(user));
         return post?page("login",new AuthService().login(c,form(r,"loginId","password"))):page("login",null);
@@ -134,7 +170,13 @@ public final class WebHandler {
     public Page home(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
         if("ADMIN".equals(role(user)))return page("home",adminOverview(c));
-        r.setAttribute("homePhoto",Map.of("materialKind","REAL","image",PlaceImages.random()));
+        var available=new ArrayList<>(catalog.cards(c));
+        Collections.shuffle(available);
+        var background=new ArrayList<Map<String,Object>>();
+        for(String kind:List.of("place","event"))
+            background.addAll(available.stream().filter(card->kind.equals(card.get("kind"))).limit(6).toList());
+        Collections.shuffle(background);
+        r.setAttribute("homeCards",display(background));
         if("VISITOR".equals(role(user))) {
             var journeys=new JourneyService().list(c,(String)user.get("id"),null);
             var drafts=journeys.stream().filter(j->"PLANNING".equals(j.get("status"))).toList();
@@ -322,9 +364,9 @@ public final class WebHandler {
         return redirect("/journeys/detail?id="+journey+"#record-"+item);
     }
     public Page goods(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        var cards=catalog.cards(c);
-        if(param(r,"key")==null)return redirect("/admin");
-        var card=GoodsService.find(cards,param(r,"key"));
+        String key=param(r,"key");
+        if(key==null)return redirect("/admin");
+        var card=GoodsService.find(catalog.cards(c),key);
         r.setAttribute("selectedCard",display(card));
         if(r.getMethod().equals("POST")){
             var preview=GoodsService.preview(card,param(r,"baseUrl"),param(r,"caption"),param(r,"copies"));

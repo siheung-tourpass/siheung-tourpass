@@ -21,7 +21,8 @@ public final class PassService {
     public List<Map<String,Object>> list(Connection c,String owner,Map<String,List<String>> q) throws SQLException {
         String filter=Input.param(q.get("status"));if(filter!=null)Input.choice(filter,"ACTIVE","EXPIRED","CANCELLED","NOT_STARTED");
         var all=PassDao.list(c,owner);Instant now=Instant.now();
-        all.removeIf(p->{p.put("status",status(p,now));CatalogService.demo(p);return filter!=null&&!filter.equals(p.get("status"));});return all;
+        for(var p:all){p.put("status",status(p,now));CatalogService.demo(p);}
+        if(filter!=null)all.removeIf(p->!filter.equals(p.get("status")));return all;
     }
     public Map<String,Object> issue(Connection c,String user,Map<String,Object> body) throws SQLException {
         Input.fields(body,"productId");String productId=Input.id(body.get("productId"));

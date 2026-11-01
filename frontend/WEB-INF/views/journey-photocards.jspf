@@ -4,4 +4,4 @@
 <div class="goods-sheet"><c:forEach var="photoCard" items="${photoCards}"><c:set var="photoCaption" value="${data.name}"/><c:set var="photoQr" value="${null}"/><%@ include file="photocard.jspf" %></c:forEach></div>
 <c:if test="${empty photoCards}"><div class="empty-state"><h2>내 사진으로 추억을 남겨 보세요</h2><p>여행 기록에서 장소별 사진을 올리면 포토카드가 만들어집니다.</p></div></c:if>
 <p role="status" data-photo-print-status></p><p class="photo-return"><a href="${root}/journeys/detail?id=${data.id}">사진 관리 · 여행 기록으로 돌아가기 →</a></p>
-<script src="${root}/assets/journey-photos.js" defer></script>
+<script src="${root}/assets/photocard-print.js" defer></script>
