@@ -1,0 +1,37 @@
+services:
+  db:
+    build:
+      context: .
+      target: db
+    environment:
+      POSTGRES_DB: siheung_tourpass
+      POSTGRES_USER: tourpass
+      POSTGRES_PASSWORD: tourpass_local
+      POSTGRES_INITDB_ARGS: --encoding=UTF8
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tourpass -d siheung_tourpass"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  app:
+    build:
+      context: .
+      target: app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TOURPASS_DB_URL: jdbc:postgresql://db:5432/siheung_tourpass
+      TOURPASS_DB_USER: tourpass
+      TOURPASS_DB_PASSWORD: tourpass_local
+      TOURPASS_KAKAO_CLIENT_ID: ${TOURPASS_KAKAO_CLIENT_ID:-}
+      TOURPASS_KAKAO_CLIENT_SECRET: ${TOURPASS_KAKAO_CLIENT_SECRET:-}
+      TOURPASS_KAKAO_REDIRECT_URI: ${TOURPASS_KAKAO_REDIRECT_URI:-}
+    ports:
+      - "127.0.0.1:${TOURPASS_PORT:-8080}:8080"
+
+volumes:
+  db-data:
