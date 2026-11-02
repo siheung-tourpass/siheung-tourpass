@@ -33,6 +33,7 @@ public final class WebHandler {
     public record Page(String view,Object data,String redirect) {}
     private static Page page(String view,Object data){return new Page(view,data,null);}
     private static Page redirect(String path){return new Page(null,null,path);}
+    private static void seeOther(HttpServletResponse out,String location){out.setStatus(303);out.setHeader("Location",location);}
     @FunctionalInterface public interface Action { Page run(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception; }
     public void handle(HttpServletRequest r,HttpServletResponse out,Action action) throws IOException,ServletException {
         try{
@@ -52,7 +53,7 @@ public final class WebHandler {
                 else if(r.getServletPath().equals("/merchant/redeem/confirm"))s.setAttribute("confirmation",((RedemptionService.Confirmation)s.getAttribute("confirmation")).consume());
                 if("photo".equals(result.view())){out.setContentType("image/jpeg");out.getOutputStream().write((byte[])result.data());return;}
                 if("json".equals(result.view())){ApiHandler.json(out,result.data());return;}
-                if(result.redirect()!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+result.redirect());return;}
+                if(result.redirect()!=null){seeOther(out,r.getContextPath()+result.redirect());return;}
                 r.setAttribute("view",result.view());r.setAttribute("data",display(result.data()));r.setAttribute("csrf",s.getAttribute("csrf"));
                 out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
             }
@@ -70,10 +71,10 @@ public final class WebHandler {
                 if(r.getServletPath().equals("/login/kakao")){
                     method(r,"POST");
                     var user=Database.transaction(c->SecurityFilter.authorize(c,r));
-                    if(user!=null){out.setStatus(303);out.setHeader("Location",r.getContextPath()+loginDestination(user));return;}
+                    if(user!=null){seeOther(out,r.getContextPath()+loginDestination(user));return;}
                     var attempt=KakaoLoginService.Attempt.create();
                     String url=kakao.authorizationUrl(attempt.state());session.setAttribute("kakaoAttempt",attempt);
-                    out.setStatus(303);out.setHeader("Location",url);return;
+                    seeOther(out,url);return;
                 }
                 method(r,"GET");
                 var attempt=(KakaoLoginService.Attempt)session.getAttribute("kakaoAttempt");
@@ -87,13 +88,13 @@ public final class WebHandler {
                     return new AuthService().kakaoLogin(c,kakaoId);
                 });
                 SessionState.login(r,user);
-                out.setStatus(303);out.setHeader("Location",r.getContextPath()+loginDestination(user));
+                seeOther(out,r.getContextPath()+loginDestination(user));
             }
         }catch(Problem e){error(r,out,e);}
         catch(Exception e){error(r,out,new Problem(502,"KAKAO_FAILED"));}
     }
     public static void error(HttpServletRequest r,HttpServletResponse out,Problem e) throws IOException,ServletException {
-        if(e.code.equals("AUTH_REQUIRED")){out.setStatus(303);out.setHeader("Location",r.getContextPath()+"/login");return;}
+        if(e.code.equals("AUTH_REQUIRED")){seeOther(out,r.getContextPath()+"/login");return;}
         r.setAttribute("kakaoEnabled",kakao.enabled());
         r.setAttribute("view",e.code.startsWith("KAKAO_") ? "login" : r.getServletPath().equals("/login") && Set.of("INVALID_CREDENTIALS","INVALID_INPUT","CSRF_INVALID").contains(e.code)?"login":"error");r.setAttribute("message",message(e.code));r.setAttribute("errorCode",e.code);r.setAttribute("csrf",r.getSession().getAttribute("csrf"));out.setStatus(e.status);out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
     }
@@ -182,7 +183,7 @@ public final class WebHandler {
             var drafts=journeys.stream().filter(j->"PLANNING".equals(j.get("status"))).toList();
             r.setAttribute("homeDraftCount",drafts.size());
             if(!drafts.isEmpty())r.setAttribute("homeLatestDraft",drafts.get(0));
-            r.setAttribute("journeyTemplates",JourneyTemplates.list(ontology.browsePlaces(c)));
+            r.setAttribute("journeyTemplates",JourneyTemplates.list(available.stream().filter(card->"place".equals(card.get("kind"))).toList()));
             r.setAttribute("homePassCount",journeys.stream().filter(j->"CONFIRMED".equals(j.get("status"))).count());
         }
         return page(user==null?"landing":"home",null);

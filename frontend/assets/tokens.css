@@ -34,6 +34,10 @@
   --color-card-ink: var(--color-ink);
   --color-card-empty: oklch(94% 0.025 160);
   --color-card-art: oklch(70% 0.065 160);
+  --color-selection-background: #26352f;
+  --selection-photo-shade: linear-gradient(90deg, rgb(0 0 0 / .92), rgb(0 0 0 / .75) 60%, rgb(0 0 0 / .12));
+  --selection-card-width: 512px;
+  --selection-card-height: 128px;
   --text-card-heading: clamp(1.375rem, 2.6vw, 1.75rem);
   --color-danger: #a3312a;
   --color-danger-soft: #fff0ed;

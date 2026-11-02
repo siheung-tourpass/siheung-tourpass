@@ -21,7 +21,7 @@ public final class PlaceFeedbackService {
         PlaceFeedbackDao.delete(c,user,place);
     }
     public Map<String,Object> current(Connection c,String user,String place) throws SQLException {
-        var feedback=PlaceFeedbackDao.find(c,user,place);return feedback==null?Map.of():feedback;
+        return Objects.requireNonNullElse(PlaceFeedbackDao.find(c,user,place),Map.of());
     }
     public List<Map<String,Object>> statistics(Connection c) throws SQLException {
         return PlaceFeedbackDao.statistics(c);

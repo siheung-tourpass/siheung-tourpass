@@ -88,7 +88,7 @@ assert passes
 issued = visitor.request('GET','/me/passes/'+passes[0]['id'])[1]
 lookup = staff.request('POST','/merchant/pass-lookups',{'merchantId':'1','code':issued['code']})[1]
 assert staff.headers['Location'] == lookup['_links']['self']['href']
-assert follow(Client('staff-a'), lookup['_links']['self'])['id'] == lookup['id']
+assert follow(Client('staff-a'), lookup['_links']['self']) == lookup
 follow(other_staff, lookup['_links']['self'], expected=404)
 # Two independent lookups stay valid instead of overwriting a session slot.
 second = staff.request('POST','/merchant/pass-lookups',{'merchantId':'1','code':issued['code']})[1]
@@ -97,6 +97,7 @@ assert follow(Client('staff-a'), lookup['_links']['self'])['id'] != second['id']
 owner = Client('visitor2')
 issued = owner.request('POST','/me/passes',{'productId':'1'},expected=201)[1]
 lookup = staff.request('POST','/merchant/pass-lookups',{'merchantId':'1','code':issued['code']})[1]
+assert follow(Client('staff-a'), lookup['_links']['self']) == lookup
 wrong = issued['benefits'][1]['id']
 payload = {'confirmationToken':lookup['id'],'issuedBenefitId':wrong}
 staff.request('POST','/merchant/redemptions',payload,expected=403)

@@ -2,7 +2,7 @@
 
 [문서 안내](../README.md#관련-문서)
 
-추천의 개념 계층·점수 계산·정렬을 관리한다. 입력·후보 조건은 [방문객 요구사항](specs/visitor.md#추천피드백), 자료 승인·출처는 [관광 데이터](data-collection/tourism-data.md)를 따른다.
+추천의 개념 계층·점수 계산·정렬을 관리한다. 입력·피드백 조건은 [방문객 요구사항](specs/visitor.md#추천피드백), 자료 승인·출처는 [관광 데이터](data-collection/tourism-data.md), 담당 서비스는 [구현 계획](../plan.md#기능별-구현-경계)을 따른다.
 
 ## 계층
 
@@ -21,11 +21,3 @@
 | 기본 점수 | 선택 테마 일치당 2점 + 동반 일치 1점 |
 | 개인 보정 | 방문객 기능 6에 해당하는 평가의 `(만족도−3)` 평균. 평가가 없으면 기본 순위 유지 |
 | 정렬 | 기본 점수와 개인 보정의 합계 내림차순 → 장소 ID 오름차순 |
-
-## 구현 원본
-
-| 원본 | 책임 |
-| --- | --- |
-| [OntologyService](../backend/src/main/java/kr/ac/siheung/tourpass/service/OntologyService.java) | 타입·순환·승인 경로·추론·검토 |
-| [RecommendationService](../backend/src/main/java/kr/ac/siheung/tourpass/service/RecommendationService.java) | 후보 제외·분수 정렬·이유·이용권 사용 가능 판정 |
-| [FeedbackService](../backend/src/main/java/kr/ac/siheung/tourpass/service/FeedbackService.java) | 성공 이력 소유권·최초 테마 보존·평가 변경 |

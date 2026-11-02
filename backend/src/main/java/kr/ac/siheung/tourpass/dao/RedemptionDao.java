@@ -8,8 +8,8 @@ public final class RedemptionDao {
     private RedemptionDao() {}
     static final String HISTORY="SELECT r.id,ib.pass_id,ib.id issued_benefit_id,ib.merchant_id,ib.merchant_name,ib.benefit_name,r.used_at,(f.id IS NOT NULL) has_feedback FROM redemption r JOIN issued_benefit ib ON ib.id=r.issued_benefit_id JOIN issued_pass p ON p.id=ib.pass_id LEFT JOIN feedback f ON f.redemption_id=r.id";
 
-    public static void createLookup(Connection c,String token,String staff,String merchant,String pass,java.time.Instant expires) throws SQLException {
-        update(c,"INSERT INTO pass_lookup(token,staff_user_id,merchant_id,pass_id,expires_at) VALUES(?,?,?,?,?)",token,staff,merchant,pass,expires);
+    public static Map<String,Object> createLookup(Connection c,String token,String staff,String merchant,String pass,java.time.Instant expires) throws SQLException {
+        return one(c,"INSERT INTO pass_lookup(token,staff_user_id,merchant_id,pass_id,expires_at) VALUES(?,?,?,?,?) RETURNING token id,expires_at confirmation_expires_at,used",token,staff,merchant,pass,expires);
     }
     public static Map<String,Object> passLookup(Connection c,String token,String staff,boolean lock) throws SQLException {
         return one(c,"SELECT * FROM pass_lookup WHERE token=? AND staff_user_id=?"+(lock?" FOR UPDATE":""),token,staff);

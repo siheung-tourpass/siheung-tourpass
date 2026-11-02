@@ -21,12 +21,12 @@ public final class Database {
                 // READ COMMITTED sees the preceding writer after waiting for this lock.
                 if(write)kr.ac.siheung.tourpass.dao.Sql.one(c,"SELECT revision FROM ontology_revision WHERE id=1 FOR UPDATE");
                 T result=work.run(c);c.commit();return result;} catch(Exception e){c.rollback();throw e;}
-        } catch(Problem e){throw e;} catch(SQLException e){
-            if(Set.of("40001","40P01","55P03").contains(e.getSQLState()))throw new Problem(503,"RETRY_LATER");
-            if("23505".equals(e.getSQLState()))throw new Problem(409,"DUPLICATE_RESOURCE");
+        } catch(Problem e){throw e;} catch(Exception e){
+            if(e instanceof SQLException sql){
+                if(Set.of("40001","40P01","55P03").contains(sql.getSQLState()))throw new Problem(503,"RETRY_LATER");
+                if("23505".equals(sql.getSQLState()))throw new Problem(409,"DUPLICATE_RESOURCE");
+            }
             System.getLogger(Database.class.getName()).log(System.Logger.Level.ERROR,"Database transaction failed",e);
-            throw new Problem(500,"INTERNAL_ERROR");
-        } catch(Exception e){System.getLogger(Database.class.getName()).log(System.Logger.Level.ERROR,"Database transaction failed",e);
             throw new Problem(500,"INTERNAL_ERROR");}
     }
 }

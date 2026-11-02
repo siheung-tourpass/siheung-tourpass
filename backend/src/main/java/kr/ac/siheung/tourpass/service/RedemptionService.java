@@ -21,8 +21,9 @@ public final class RedemptionService {
     }
     public Map<String,Object> createLookup(Connection c,String user,Map<String,Object> body) throws SQLException {
         var result=lookup(c,user,body);var token=result.confirmation();
-        RedemptionDao.createLookup(c,token.token(),user,token.merchantId(),token.passId(),token.expiresAt());
-        return getLookup(c,user,token.token());
+        var response=new LinkedHashMap<>(result.response());
+        response.putAll(RedemptionDao.createLookup(c,token.token(),user,token.merchantId(),token.passId(),token.expiresAt()));
+        return response;
     }
     public Map<String,Object> getLookup(Connection c,String user,String id) throws SQLException {
         var token=storedLookup(c,user,id,false);assigned(c,user,token.merchantId());
