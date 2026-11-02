@@ -111,28 +111,17 @@ public class ApiController {
 
     @RequestMapping({"/me/journeys/{id}/places", "/me/journeys/{id}/places/"})
     public void addCard(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        api.handle(request, response, "POST", x -> {
-            var key = Input.id(id);
-            return ok(journeys.add(x.connection(), x.userId(), key, x.body()));
-        });
+        api.handle(request, response, "POST", x -> ok(journeys.add(x.connection(), x.userId(), Input.id(id), x.body())));
     }
 
     @RequestMapping({"/me/journeys/{id}/places/{item}", "/me/journeys/{id}/places/{item}/"})
     public void deleteCard(@PathVariable String id, @PathVariable String item, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        api.handle(request, response, "DELETE", x -> {
-            var key = Input.id(id);
-            var itemId = Input.id(item);
-            return ok(journeys.item(x.connection(), x.userId(), key, itemId, "delete", x.body()));
-        });
+        api.handle(request, response, "DELETE", x -> ok(journeys.item(x.connection(), x.userId(), Input.id(id), Input.id(item), "delete", x.body())));
     }
 
     @RequestMapping({"/me/journeys/{id}/places/{item}/{action:record|move}", "/me/journeys/{id}/places/{item}/{action:record|move}/"})
     public void updateCard(@PathVariable String id, @PathVariable String item, @PathVariable String action, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        api.handle(request, response, action.equals("move") ? "POST" : "PUT", x -> {
-            var key = Input.id(id);
-            var itemId = Input.id(item);
-            return ok(journeys.item(x.connection(), x.userId(), key, itemId, action, x.body()));
-        });
+        api.handle(request, response, action.equals("move") ? "POST" : "PUT", x -> ok(journeys.item(x.connection(), x.userId(), Input.id(id), Input.id(item), action, x.body())));
     }
 
     @RequestMapping({"/me/passes", "/me/passes/"})
@@ -159,10 +148,7 @@ public class ApiController {
 
     @RequestMapping({"/me/redemptions/{id}", "/me/redemptions/{id}/"})
     public void redemption(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        api.handle(request, response, "GET", x -> {
-            var key = Input.id(id);
-            return ok(redemption.detail(x.connection(), x.userId(), key, false));
-        });
+        api.handle(request, response, "GET", x -> ok(redemption.detail(x.connection(), x.userId(), Input.id(id), false)));
     }
 
     @RequestMapping({"/me/redemptions/{id}/feedback", "/me/redemptions/{id}/feedback/"})

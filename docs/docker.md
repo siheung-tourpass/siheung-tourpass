@@ -37,7 +37,8 @@ TOURPASS_PORT=8081 docker compose up --build
 | 바꾼 내용 | 명령어 |
 | --- | --- |
 | Java·JSP·CSS·JS, 행사·음식점 JSON | `docker compose up -d --build app` |
-| `schema.sql`·`seed.sql`, 관광 JSON | `docker compose down -v` 후 `docker compose up -d --build` |
+| 기존 DB의 스키마·관광 자료 | [마이그레이션](../README.md#시작하기)·[추가 적재](data-collection/tourism-data.md#추가-적재시연-자료-전환) 절차 적용 |
+| 보관할 데이터가 없는 DB를 초기 자료로 재생성 | [초기화](#초기화) 후 `docker compose up -d --build` |
 
 프론트엔드 파일도 WAR에 포함되므로 화면만 고쳐도 다시 빌드한다. 초기화 SQL은 DB 볼륨이 비어 있을 때만 실행된다.
 
@@ -52,7 +53,7 @@ TOURPASS_PORT=8081 docker compose up --build
 
 ## 초기 자료
 
-스키마·시연 자료·관광 자료를 자동으로 적재한다. [직접 설치 절차](../README.md#시작하기)와 달리 관광 자료를 `--replace-demo` 없이 적재한다. 이 옵션은 가상 장소를 비활성화해 이용권을 발급할 수 없게 하므로, 혜택 흐름을 시연할 수 있도록 가상 장소를 유지한다. 실제 관광지는 검토 대기 상태이므로 [승인](data-collection/tourism-data.md#적재) 전까지 추천에는 가상 장소만 표시된다.
+스키마·시연 자료·관광 자료를 자동으로 적재한다. [직접 설치 절차](../README.md#시작하기)와 달리 관광 자료를 `--replace-demo` 없이 적재해 혜택 흐름을 시연할 가상 장소를 유지한다. 옵션의 동작과 실제 자료의 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재)를 따른다.
 
 ## 카카오 로그인
 

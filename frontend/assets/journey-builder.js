@@ -216,10 +216,10 @@
     searchPanel.hidden = !direct;
     searchPanel.open = direct;
     form.querySelector('.card-tools').hidden = !direct;
-    filters.querySelector('#start-theme-panel').hidden = startMode !== 'theme';
+    for (const mode of ['theme', 'region', 'event']) {
+      filters.querySelector(`#start-${mode}-panel`).hidden = startMode !== mode;
+    }
     filters.querySelector('#start-theme-panel').disabled = step !== 'start' || startMode !== 'theme';
-    filters.querySelector('#start-region-panel').hidden = startMode !== 'region';
-    filters.querySelector('#start-event-panel').hidden = startMode !== 'event';
     status.hidden = step === 'review';
     form.querySelector('.builder-catalog').hidden = step === 'review';
     summary.hidden = step === 'start';
@@ -268,12 +268,11 @@
   }
   typeButtons.forEach(control => control.addEventListener('click', () => setKind(control.dataset.cardType)));
   form.querySelector('#shuffle-cards').addEventListener('click', () => {
-    const shuffled = [...cards];
-    for (let index = shuffled.length - 1; index > 0; index--) {
+    rankedCards = [...cards];
+    for (let index = rankedCards.length - 1; index > 0; index--) {
       const other = Math.floor(Math.random() * (index + 1));
-      [shuffled[index], shuffled[other]] = [shuffled[other], shuffled[index]];
+      [rankedCards[index], rankedCards[other]] = [rankedCards[other], rankedCards[index]];
     }
-    rankedCards = shuffled;
     activate(null);
     arrangeCards();
     setStatus('success', '카드를 섞었어요. 선택한 관광지와 여행 순서는 그대로예요.');
@@ -283,9 +282,17 @@
     list.replaceChildren();
     const ids = [...selected];
     ids.forEach((id, index) => {
-      const name = controls.get(byId.get(id)).name;
+      const card = byId.get(id);
+      const name = controls.get(card).name;
       const item = selectionTemplate.content.firstElementChild.cloneNode(true);
       item.dataset.selectedId = id;
+      const photo = card.querySelector('.card-background');
+      if (photo) {
+        const image = photo.cloneNode(false);
+        image.className = 'selection-image';
+        image.alt = '';
+        item.prepend(image);
+      }
       item.querySelector('span').textContent = `${index + 1}. ${name}${index === 0 ? ' · 시작' : ''}`;
       item.querySelector('input').value = id;
       item.querySelectorAll('button').forEach(button => {

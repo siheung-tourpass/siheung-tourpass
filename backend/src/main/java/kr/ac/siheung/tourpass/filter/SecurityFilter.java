@@ -23,9 +23,9 @@ public final class SecurityFilter implements Filter {
     public void doFilter(ServletRequest req,ServletResponse res,FilterChain chain) throws IOException,ServletException {
         var r=(HttpServletRequest)req;var out=(HttpServletResponse)res;r.setCharacterEncoding("UTF-8");out.setCharacterEncoding("UTF-8");out.setHeader("X-Content-Type-Options","nosniff");out.setHeader("Referrer-Policy","no-referrer");out.setHeader("Cache-Control","no-store");out.setHeader("Content-Security-Policy","default-src 'self'; frame-ancestors 'none'; base-uri 'none'");
         try{
-            if(r.getServletPath().startsWith("/assets/")){chain.doFilter(req,res);return;}
-            if(isApiPath(r.getServletPath())){chain.doFilter(req,res);return;}
-            var session=r.getSession();if(session.getAttribute("csrf")==null)session.setAttribute("csrf",AuthService.token());
+            if(!r.getServletPath().startsWith("/assets/")&&!isApiPath(r.getServletPath())){
+                var session=r.getSession();if(session.getAttribute("csrf")==null)session.setAttribute("csrf",AuthService.token());
+            }
             chain.doFilter(req,res);
         }catch(Problem e){if(isApiPath(r.getServletPath()))ApiHandler.error(out,e);else WebHandler.error(r,out,e);}
     }

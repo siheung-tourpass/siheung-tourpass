@@ -10,17 +10,10 @@
 
 ### 주요 화면
 
-로컬 시연 환경에서 촬영했다. 관광·행사 자료의 운영 조건은 검토 대상이며, 화면의 혜택은 시연용이다. 이미지를 누르면 원본 크기로 볼 수 있다.
-
-| 서비스 소개 | 여행 덱 구성 |
-| --- | --- |
-| [![관광지와 행사 카드를 보여주는 서비스 소개](docs/assets/landing.png)](docs/assets/landing.png) | [![시작 관광지 주변의 후보를 비교하고 여행 카드 선택](docs/assets/journey-builder.png)](docs/assets/journey-builder.png) |
-| 관광지·행사 카드를 둘러보고 여행 만들기를 시작한다. | 담은 장소 주변의 후보를 비교하고 여행에 추가한다. |
-
-| 카드 상세 안내 | 여행 확인 |
-| --- | --- |
-| [![카드의 소개와 공식 안내 확인](docs/assets/card-details.png)](docs/assets/card-details.png) | [![여행 순서와 이름을 확인하는 저장 전 화면](docs/assets/journey-review.png)](docs/assets/journey-review.png) |
-| 카드의 소개·이용 조건과 공식 출처를 확인한다. | 카드 순서·여행 이름·날짜를 정하고 임시 저장하거나 제작을 확정한다. |
+| 서비스 소개 | 여행 덱 구성 | 카드 상세 안내 | 여행 확인 |
+| --- | --- | --- | --- |
+| [![관광지와 행사 카드를 보여주는 서비스 소개](docs/assets/landing.png)](docs/assets/landing.png) | [![시작 관광지 주변의 후보를 비교하고 여행 카드 선택](docs/assets/journey-builder.png)](docs/assets/journey-builder.png) | [![카드의 소개와 공식 안내 확인](docs/assets/card-details.png)](docs/assets/card-details.png) | [![여행 순서와 이름을 확인하는 저장 전 화면](docs/assets/journey-review.png)](docs/assets/journey-review.png) |
+| 관광지·행사 카드를 둘러보고 여행 만들기를 시작한다. | 담은 장소 주변의 후보를 비교하고 여행에 추가한다. | 카드의 소개·이용 조건과 공식 출처를 확인한다. | 카드 순서·여행 이름·날짜를 정하고 임시 저장하거나 제작을 확정한다. |
 
 ## 기술 스택
 
@@ -45,7 +38,6 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
    ```
 
    기존 DB는 초기화 SQL 대신 백업 후 [마이그레이션 디렉터리](backend/sql/migrations)의 SQL 중 아직 적용하지 않은 파일만 번호 순서대로 한 번씩 적용한다. 각 파일의 적용 명령은 `psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < 파일경로`다. 신규 스키마에는 이미 포함되어 있다. 새 테이블이 추가되면 2단계의 앱 계정 권한 부여도 다시 실행한다.
-
 2. DB에서 앱 전용 계정을 만들고 테이블의 SELECT·INSERT·UPDATE·DELETE와 identity 시퀀스의 USAGE 권한을 부여한다.
 
    ```sql
@@ -102,7 +94,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 
 초기 자료의 담기 조건은 [여행 구성](docs/specs/visitor.md#담기와-보존), 추천 승인 절차는 [데이터 적재](docs/data-collection/tourism-data.md#적재)를 따른다.
 
-포토카드는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [포토카드 정책](docs/specs/admin.md#관리자-작업과-카드-출력)을 따른다.
+포토카드는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [포토카드 정책](docs/specs/admin.md#카드-출력)을 따른다.
 
 ### API
 
@@ -118,23 +110,37 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 
 ## 관련 문서
 
-| 문서 | 내용 |
+문서 관리 원칙은 [작업 지침](AGENTS.md)을 따른다. 아래에서 변경할 내용의 담당 문서를 찾는다.
+
+### 요구사항·구조·화면
+
+| 문서 | 담당 내용 |
 | --- | --- |
-| [공통 요구사항](spec.md) | 범위·공통 인증·이용권 정책·완료 기준 |
-| [방문객 요구사항](docs/specs/visitor.md) | 여행·추천·피드백·방문 기록 |
+| [공통 요구사항](spec.md) | 범위·공통 인증·이용권 정책·API 계약·완료 기준 |
+| [방문객 요구사항](docs/specs/visitor.md) | 탐색·여행·추천·피드백·사진·방문 기록 |
 | [가맹점 담당자 요구사항](docs/specs/merchant.md) | 혜택 확인·사용 권한 |
-| [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·포토카드 출력 |
-| [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·명령어·초기 자료 |
-| [API 사용 안내](docs/api-usage.md) | API 인증·요청·Bruno 사용 |
-| [구현 계획](plan.md) | 현재 구조·구현 방향·검증 전략·남은 작업 |
-| [디자인 기준](docs/design.md) | 화면 배치·상태·접근성 |
-| [추천 모델](docs/tourism-semantics.md) | 추천 점수·정렬·추론 경계 |
-| [지역 문제와 사용자 검증](docs/project-validation.md) | 지역 문제 제안·기능 연결·사용자 검증 과제 |
-| [최종 발표 준비 기준](docs/final-presentation.md) | 최종 발표 심사기준·자료 구성·근거 준비·제출 점검 |
-| [데이터 수집 공통 기준](docs/data-collection/common.md) | 공통 출처·좌표·이미지 기준 |
-| [관광 데이터](docs/data-collection/tourism-data.md) | 관광 적재·검토·사진 배포 |
-| [행사 데이터](docs/data-collection/events-data.md) | 행사 일정·연결·이미지 예외 |
-| [음식점 데이터](docs/data-collection/dining-data.md) | 공식 지정 업소·공개·이미지 예외 |
-| [음식점 이미지 조사](docs/data-collection/dining-images.md) | 사진 후보 근거·미확보 사유 |
+| [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·카드 출력 |
+| [구현 계획](plan.md) | 소스 구조·구현 경계·검증 전략·남은 작업 |
+| [디자인 기준](docs/design.md) | 역할별 메뉴·화면 배치·조작·상태·접근성 |
+| [추천 모델](docs/tourism-semantics.md) | 개념 계층·추천 점수·정렬·추론 경계 |
+
+### 실행·검증·협업
+
+| 문서 | 담당 내용 |
+| --- | --- |
+| [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·변경 반영·초기 자료 |
+| [API 사용 안내](docs/api-usage.md) | 요청별 인증·헤더·Bruno 사용 |
+| [지역 문제와 사용자 검증](docs/project-validation.md) | 지역 문제 가설·기능 연결·사용자 검증 과제 |
+| [최종 발표 준비 기준](docs/final-presentation.md) | 심사기준·자료 구성·근거 준비·제출 점검 |
 | [작업 지침](AGENTS.md) | 문서와 코드 변경 원칙 |
 | [이슈·PR 작성 규칙](docs/collaboration.md) | 이슈·PR 제목과 본문 작성 방법 |
+
+### 데이터 수집·검토
+
+| 문서 | 담당 내용 |
+| --- | --- |
+| [데이터 수집 공통 기준](docs/data-collection/common.md) | 공통 출처·좌표·이미지 기준 |
+| [관광 데이터](docs/data-collection/tourism-data.md) | 관광 적재·승인·운영 조건 검토·사진 배포 |
+| [행사 데이터](docs/data-collection/events-data.md) | 행사 일정·장소 연결·이미지·배포 조건 |
+| [음식점 데이터](docs/data-collection/dining-data.md) | 공식 지정 업소의 공개·분류·이미지·배포 조건 |
+| [음식점 이미지 조사](docs/data-collection/dining-images.md) | 미등록 사진 후보 근거·미확보 사유·재개 조건 |
