@@ -98,7 +98,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 
 ### API
 
-`GET /api/v1/`의 링크에서 시작한다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
+`GET /api/v1/`의 링크에서 시작한다. 전체 명세는 서버 실행 후 `http://localhost:8080/siheung-tourpass/api-docs`의 Swagger UI에서 보고 실행할 수 있다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
 
 ## 테스트
 
@@ -129,7 +129,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 문서 | 담당 내용 |
 | --- | --- |
 | [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·변경 반영·초기 자료 |
-| [API 사용 안내](docs/api-usage.md) | 요청별 인증·헤더·Bruno 사용 |
+| [API 사용 안내](docs/api-usage.md) | 요청별 인증·헤더·Swagger UI·Bruno 사용 |
 | [지역 문제와 사용자 검증](docs/project-validation.md) | 지역 문제 가설·기능 연결·사용자 검증 과제 |
 | [최종 발표 준비 기준](docs/final-presentation.md) | 심사기준·자료 구성·근거 준비·제출 점검 |
 | [작업 지침](AGENTS.md) | 문서와 코드 변경 원칙 |

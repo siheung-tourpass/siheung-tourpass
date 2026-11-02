@@ -75,6 +75,7 @@ jobs:
           python3 backend/tests/journey_check.py "$API_URL"
           python3 backend/tests/journey_cards_check.py "$API_URL"
           python3 backend/tests/place_feedback_check.py "$API_URL"
+          python3 backend/tests/openapi_check.py "$API_URL"
       - name: Restart database and application
         if: matrix.suite == 'api'
         run: |
