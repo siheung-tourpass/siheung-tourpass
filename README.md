@@ -106,7 +106,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 
 ### API
 
-`GET /api/v1/`의 링크에서 시작한다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
+`GET /api/v1/`의 링크에서 시작한다. 전체 명세는 서버 실행 후 `http://localhost:8080/siheung-tourpass/api-docs`의 Swagger UI에서 보고 실행할 수 있다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
 
 ## 테스트
 
@@ -125,7 +125,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | [가맹점 담당자 요구사항](docs/specs/merchant.md) | 혜택 확인·사용 권한 |
 | [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·포토카드 출력 |
 | [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·명령어·초기 자료 |
-| [API 사용 안내](docs/api-usage.md) | API 인증·요청·Bruno 사용 |
+| [API 사용 안내](docs/api-usage.md) | API 인증·요청·Swagger UI·Bruno 사용 |
 | [구현 계획](plan.md) | 현재 구조·구현 방향·검증 전략·남은 작업 |
 | [디자인 기준](docs/design.md) | 화면 배치·상태·접근성 |
 | [추천 모델](docs/tourism-semantics.md) | 추천 점수·정렬·추론 경계 |

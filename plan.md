@@ -37,7 +37,7 @@
 
 카카오 인증은 KakaoLoginService가 외부 인가 코드·회원번호 확인을, AuthService·AuthDao가 방문객 계정 조회·생성을 담당한다. WebHandler는 state·세션·콜백을 처리하며 외부 호출 후 DB 트랜잭션을 연다.
 
-화면은 세션·CSRF를, API는 요청별 Basic 인증·CSRF 헤더를 사용한다. 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API 혜택 확인 자원은 DB에서 조회·소비한다. 요청 방법은 [API 사용 안내](docs/api-usage.md), 계약은 [RESTful API](spec.md#restful-api)를 따른다.
+화면은 세션·CSRF를, API는 요청별 Basic 인증·CSRF 헤더를 사용한다. 화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API 혜택 확인 자원은 DB에서 조회·소비한다. 요청 방법은 [API 사용 안내](docs/api-usage.md), 계약은 [RESTful API](spec.md#restful-api)를 따른다. [OpenAPI 명세](frontend/assets/api-docs/openapi.yaml)는 현재 구현을 기술하며 `/api-docs`에서 Swagger UI로 제공한다.
 
 ## 실행 범위
 
