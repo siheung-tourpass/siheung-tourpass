@@ -41,7 +41,7 @@
 
 ## 실행 범위
 
-로컬 PostgreSQL 16 시연을 기본으로 하며 CI만 PostgreSQL 16 컨테이너를 사용한다. 기존 DB 갱신은 [README](README.md#시작하기)의 마이그레이션 절차를 따른다. JPA·운영 Docker·RDS·로드밸런서·오토스케일링·S3·CloudFront·자동 배포는 범위에 포함하지 않는다.
+로컬 PostgreSQL 16 시연을 기본으로 하며 [로컬 Docker 실행](docs/docker.md)과 CI는 PostgreSQL 16 컨테이너를 사용한다. 기존 DB 갱신은 [README](README.md#시작하기)의 마이그레이션 절차를 따른다. JPA·운영 Docker·RDS·로드밸런서·오토스케일링·S3·CloudFront·자동 배포는 범위에 포함하지 않는다.
 
 ## 검증 전략
 
