@@ -10,11 +10,14 @@
 <c:when test="${view eq 'journey-photocards'}"><c:set var="headerBackPath" value="/journeys/detail?id=${data.id}"/></c:when>
 <c:when test="${view eq 'journey'}"><c:set var="headerBackPath" value="/journeys?status=${data.status}"/></c:when>
 <c:when test="${view eq 'journey-builder'}"><c:set var="headerBackPath" value="/journeys"/></c:when>
-<c:when test="${view eq 'product' or view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
+<c:when test="${view eq 'product'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
+<c:when test="${view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants?tab=facilities"/></c:when>
 <c:when test="${view eq 'place'}"><c:set var="headerBackPath" value="/explore"/></c:when>
+<c:when test="${(view eq 'history' or view eq 'feedback') and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
 <c:when test="${view eq 'pass'}"><c:set var="headerBackPath" value="${user.role eq 'ADMIN' ? '/admin/passes' : '/passes'}"/></c:when>
 </c:choose>
-<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div></header>
+<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div>
+<c:if test="${(empty user or user.role eq 'VISITOR') and view ne 'landing' and view ne 'login'}"><c:set var="topTab" value="${view eq 'catalog' ? guideTab : view eq 'product' ? 'products' : view eq 'merchant' ? 'facilities' : ''}"/><nav class="top-tabs" aria-label="투어패스 안내"><a href="${root}/merchants" ${topTab eq 'products' ? 'aria-current=page' : ''}>전체 상품</a><a href="${root}/merchants?tab=facilities" ${topTab eq 'facilities' ? 'aria-current=page' : ''}>이용 가능 시설</a><a href="${root}/merchants?tab=usage" ${topTab eq 'usage' ? 'aria-current=page' : ''}>이용 방법</a><a href="${root}/merchants?tab=notes" ${topTab eq 'notes' ? 'aria-current=page' : ''}>유의사항</a></nav></c:if></header>
 <main id="main" tabindex="-1">
 <c:choose>
 <c:when test="${view eq 'landing'}"><%@ include file="landing.jspf" %></c:when>
@@ -31,8 +34,6 @@
 <a class="home-card home-passes" href="${root}/journeys?status=CONFIRMED"><div><h2>내 패스</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>방문 날짜와 메모를 남겨 보세요.</p></div><span class="home-card-action">패스 보기 <span aria-hidden="true">→</span></span></a>
 </c:if>
 </div>
-<p class="home-benefits"><a href="${root}/merchants">여행 혜택 살펴보기 →</a> · <a href="${root}/passes">내 혜택 이용권</a></p>
-<details class="home-help"><summary>이용 방법</summary><ol><li>관심 있는 관광지와 함께 갈 행사·음식점·카페를 골라 여행에 담으세요.</li><li>상세에서 이용 조건을 비교하고 순서와 이름을 정해 저장하세요.</li><li>확정한 여행은 내 패스에서 확인하고 기억에 남는 경험을 기록하세요.</li></ol><p>여행 패스는 만료되지 않아요. 사용 완료한 여행은 여행 기록에서 다시 꺼내 볼 수 있어요.</p></details>
 </div>
 </c:when>
 <c:when test="${view eq 'place-feedback-statistics'}"><%@ include file="place-feedback-statistics.jspf" %></c:when>
@@ -50,9 +51,9 @@
 <c:when test="${view eq 'admin' or view eq 'editor' or view eq 'relations' or view eq 'goods'}"><%@ include file="admin.jspf" %></c:when>
 </c:choose></main><c:if test="${view ne 'landing'}"><footer class="site-footer">수업용 시연 서비스 · 화면 시각은 한국 시간 · 실제 관광 자료의 영업·예약·이동 가능성은 미확인</footer></c:if><c:if test="${view ne 'landing' and view ne 'login'}"><nav class="bottom-nav" aria-label="주 메뉴"><div class="bottom-nav-inner">
 <a href="${root}/" ${view eq 'home' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z"/></svg><span>홈</span></a>
-<c:if test="${empty user or user.role eq 'VISITOR'}"><a href="${root}/journeys" ${journeyStatus eq 'PLANNING' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6V4h8v2M5 6h14v15H5V6Zm4 4v7m6-7v7"/></svg><span>여행 만들기</span></a>
-<a href="${root}/journeys?status=CONFIRMED" ${journeyStatus eq 'CONFIRMED' or view eq 'passes' or view eq 'pass' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Zm12 2v2m0 2v2m0 2v1"/></svg><span>내 패스</span></a>
-<a href="${root}/journeys?status=ARCHIVED" ${journeyStatus eq 'ARCHIVED' or view eq 'history' or view eq 'feedback' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v16H4V5Zm4-2v4m8-4v4M8 11h8m-8 4h5"/></svg><span>여행 기록</span></a>
+<c:if test="${empty user or user.role eq 'VISITOR'}"><a href="${root}/passes" ${view eq 'passes' or view eq 'pass' or view eq 'history' or view eq 'feedback' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Zm12 2v2m0 2v2m0 2v1"/></svg><span>내 투어패스</span></a>
+<a href="${root}/journeys" ${journeyStatus eq 'PLANNING' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6V4h8v2M5 6h14v15H5V6Zm4 4v7m6-7v7"/></svg><span>여행 만들기</span></a>
+<a href="${root}/journeys?status=CONFIRMED" ${journeyStatus eq 'CONFIRMED' or journeyStatus eq 'ARCHIVED' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v16H4V5Zm4-2v4m8-4v4M8 11h8m-8 4h5"/></svg><span>내 여행</span></a>
 </c:if>
 <c:if test="${user.role eq 'STAFF'}"><a href="${root}/merchant/redeem" ${view eq 'redeem' or view eq 'confirm' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>혜택 사용</span></a>
 <a href="${root}/merchant/history" ${view eq 'history' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v16H4V5Zm4-2v4m8-4v4M8 11h8m-8 4h5"/></svg><span>가맹점 이력</span></a></c:if>
