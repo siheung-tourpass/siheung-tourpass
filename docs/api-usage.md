@@ -14,6 +14,14 @@ curl --user 'visitor:DemoPass!2026' http://localhost:8080/siheung-tourpass/api/v
 
 혜택 확인 생성 응답은 `201`이며 `Location`에서 쿠키 없이 재조회할 수 있다. 순서 상대 이동은 `POST .../move`다.
 
+## Swagger UI
+
+서버 실행 후 `/api-docs`에 접속하면 전체 경로의 요청·응답·상태 코드·오류 코드를 보고 실행할 수 있다. 명세 원본은 [openapi.yaml](../frontend/assets/api-docs/openapi.yaml)이며, API 경로·메서드를 바꾸면 함께 수정한다. CI가 [명세 검사](../backend/tests/openapi_check.py)로 실제 API와 비교한다.
+
+명세는 구현된 API만 담는다. API를 바꿀 때는 [공통 요구사항](../spec.md#restful-api)과 [역할별 요구사항](../spec.md#역할별-요구사항)을 비교해 함께 반영한다. 로그인·프로필, 카드 탐색 목록, 행사·음식점 조회, 여행 사진, 포토카드, 카드 출력, 관리자 홈은 화면에서만 제공한다.
+
+인증이 필요한 요청은 **Authorize**에 시연 계정을 입력한 뒤 실행한다. 변경 요청의 `X-CSRF-Token`은 `api`가 미리 선택되어 있다. **Execute**는 연결된 DB를 실제로 변경하므로 테스트 DB를 사용한다. 인증 없이 실행해 401을 받으면 브라우저가 자체 로그인 창을 띄울 수 있으며, 취소한 뒤 **Authorize**를 사용한다. 계정을 바꾸기 전에 그 창에 입력한 인증 정보가 남아 있으면 브라우저를 닫아 지운다.
+
 ## Bruno
 
 Bruno에서 **Open Collection**으로 [backend/bruno](../backend/bruno)를 열고 `Local` 환경을 선택한다. 서버 주소가 다르면 환경의 `baseUrl`을 변경한다. `Auth / Index` → 원하는 `Select` 요청으로 클라이언트의 인증 계정을 선택한다. 컬렉션 스크립트가 요청마다 인증·CSRF 헤더를 전달한다. [Bruno 변수 사용법](https://blog.usebruno.com/manage-variables)을 참고한다.

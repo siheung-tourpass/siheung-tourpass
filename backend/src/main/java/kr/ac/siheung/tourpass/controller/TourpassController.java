@@ -219,7 +219,12 @@ public class TourpassController {
         web.handle(request, response, web::relations);
     }
 
-    @RequestMapping({"/assets", "/{path:^(?!assets$).*}/**"})
+    @RequestMapping({"/api-docs"})
+    public void apiDocs(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.sendRedirect(request.getContextPath() + "/assets/api-docs/index.html");
+    }
+
+    @RequestMapping({"/assets", "/{path:^(?!assets$|webjars$).*}/**"})
     public void missing(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         web.missing(request, response);
     }

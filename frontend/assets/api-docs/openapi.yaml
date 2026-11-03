@@ -1,0 +1,2284 @@
+openapi: 3.1.0
+info:
+  title: 시흥 투어패스 API
+  version: v1
+  description: |
+    현재 구현된 `/api/v1` API만 기능별로 묶어 보여 준다.
+
+    **인증**: 쿠키 없이 요청마다 Basic 인증을 사용한다. 오른쪽 **Authorize**에 시연 계정을 입력한다. 경로 접두사로 역할이 정해진다.
+    `/me/`는 VISITOR, `/merchant/`는 STAFF, `/admin/`은 ADMIN이며 그 외는 공개다. 잘못된 인증 정보는 공개 경로에서도 401이다.
+    401 응답에는 `WWW-Authenticate: Basic`이 포함되므로 브라우저가 자체 로그인 창을 띄울 수 있다.
+
+    **변경 요청**: GET·HEAD·OPTIONS 외에는 `X-CSRF-Token: api` 헤더가 필요하다. 없으면 인증 후 403 `CSRF_INVALID`다.
+
+    **본문**: `application/json`만 받으며(그 외 415 `UNSUPPORTED_MEDIA_TYPE`) 최대 64KB다. 모르는 필드·중복 키·잘못된 JSON은 400 `INVALID_INPUT`이다.
+
+    **공통 동작**: 모든 경로는 끝에 `/`를 붙여도 같다. GET 경로는 HEAD, 모든 경로는 OPTIONS(204와 `Allow` 헤더)도 받는다. 메서드가 다르면 405 `METHOD_NOT_ALLOWED`이며 인증을 먼저 검사한다. 없는 경로는 404 `NOT_FOUND`다.
+    같은 쿼리 파라미터를 반복하면 400이다(`themeId` 제외). 모든 응답은 `Cache-Control: no-store`다. JSON 응답에는 역할·상태에 따라 달라지는 `_links`가 있으며 ID는 문자열이다.
+
+    **오류**: 모든 오류는 `Error` 형식이다. `fieldErrors`는 항상 빈 배열이다. 각 응답 설명은 해당 요청의 업무 오류 코드를 나열한다. 어느 요청에서나 500 `INTERNAL_ERROR`, 503 `RETRY_LATER`가 발생할 수 있다.
+
+    ## 구현 현황
+
+    전체 **47개 경로, 73개 요청**이 구현되어 있다. 아래 그룹은 이 페이지의 묶음 이름과 같으며, 위 검색창에 그룹 이름을 입력해 좁힐 수 있다.
+
+    | 역할 | 경로 | 요청 | 기능 |
+    | --- | --- | --- | --- |
+    | 공개 | 8 | 8 | 상품·가맹점·장소 조회, 추천 |
+    | 방문객 | 12 | 21 | 여행 구성·기록, 이용권 발급·조회, 혜택 이력, 혜택·관광지 평가 |
+    | 담당자 | 5 | 6 | 담당 가맹점, 이용권 코드 확인, 혜택 사용 처리·이력 |
+    | 관리자 | 22 | 38 | 이용권 조회·취소, 평가 통계, 상품·가맹점·혜택 관리, 온톨로지 관리·검토 |
+servers:
+  - url: ../../api/v1
+    description: 현재 서버
+security:
+  - basicAuth: []
+tags:
+  - {name: 공개 · 시작점, description: "API 진입점. 로그인 없이 사용한다."}
+  - {name: 공개 · 상품, description: "판매 중인 투어패스 상품을 조회한다."}
+  - {name: 공개 · 가맹점, description: "혜택을 제공하는 가맹점을 조회한다."}
+  - {name: 공개 · 장소·추천, description: "장소 정보를 보고 조건에 맞는 장소를 추천받는다."}
+  - {name: 방문객 · 여행, description: "내 여행을 만들고 수정·확정·보관·삭제한다."}
+  - {name: 방문객 · 여행 카드, description: "여행에 카드를 담고 빼고 순서를 바꾸며 방문 기록을 남긴다."}
+  - {name: 방문객 · 이용권, description: "이용권을 발급받고 내 이용권과 혜택 잔여를 확인한다."}
+  - {name: 방문객 · 혜택 사용 이력, description: "내가 혜택을 사용한 내역을 확인한다."}
+  - {name: 방문객 · 혜택 평가, description: "사용한 혜택을 평가한다. 추천 점수에 반영된다."}
+  - {name: 방문객 · 관광지 평가, description: "장소 만족도를 평가한다. 혜택 평가·추천 점수와 별도로 집계한다."}
+  - {name: 담당자 · 담당 가맹점, description: "내가 담당하는 가맹점을 확인한다."}
+  - {name: 담당자 · 이용권 확인, description: "방문객의 이용권 코드를 확인해 사용 가능한 혜택을 조회한다."}
+  - {name: 담당자 · 혜택 사용 처리, description: "혜택을 사용 처리하고 가맹점 사용 이력을 조회한다."}
+  - {name: 관리자 · 이용권, description: "발급된 전체 이용권을 조회하고 취소한다."}
+  - {name: 관리자 · 평가 통계, description: "관광지 평가를 장소별로 집계해 본다."}
+  - {name: 관리자 · 상품, description: "투어패스 상품을 등록·수정한다."}
+  - {name: 관리자 · 가맹점, description: "가맹점을 등록·수정한다."}
+  - {name: 관리자 · 혜택, description: "상품과 가맹점을 잇는 혜택을 등록·수정한다."}
+  - {name: 관리자 · 온톨로지 장소, description: "추천에 쓰는 장소를 등록·수정·검토한다."}
+  - {name: 관리자 · 온톨로지 분류, description: "지역·테마·동반 유형 분류를 관리한다."}
+  - {name: 관리자 · 온톨로지 관계, description: "장소-테마, 장소-동반 유형, 테마 상하 관계를 등록·수정·검토한다."}
+paths:
+  /:
+    get:
+      tags: [공개 · 시작점]
+      summary: "현재 인증 상태와 이어서 호출할 수 있는 API 링크를 알려 준다."
+      description: "현재 인증 상태와 이어서 호출할 수 있는 API 링크를 알려 준다.\n\n인증하면 `user`에 계정 정보를, 아니면 null을 반환한다. `_links`는 역할별로 다르다."
+      security: [{}, {basicAuth: []}]
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Index'}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /products:
+    get:
+      tags: [공개 · 상품]
+      summary: "활성 투어패스 상품 목록을 페이지로 조회한다."
+      description: "활성 투어패스 상품 목록을 페이지로 조회한다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/ProductPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /products/{id}:
+    get:
+      tags: [공개 · 상품]
+      summary: "상품 정보와 포함된 혜택을 함께 조회한다."
+      description: "상품 정보와 포함된 혜택을 함께 조회한다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Product'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchants:
+    get:
+      tags: [공개 · 가맹점]
+      summary: "가맹점 목록을 조회한다. 지역으로 좁힐 수 있다."
+      description: "가맹점 목록을 조회한다. 지역으로 좁힐 수 있다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {name: regionId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/MerchantPage'}}}
+        '400': {description: "INVALID_INPUT, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchants/{id}:
+    get:
+      tags: [공개 · 가맹점]
+      summary: "가맹점 정보와 제공 혜택을 함께 조회한다."
+      description: "가맹점 정보와 제공 혜택을 함께 조회한다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Merchant'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /places/{id}:
+    get:
+      tags: [공개 · 장소·추천]
+      summary: "승인된 장소의 소개, 지역, 테마, 동반 유형, 출처를 조회한다."
+      description: "승인된 장소의 소개, 지역, 테마, 동반 유형, 출처를 조회한다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Place'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND (승인되지 않은 장소 포함)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /recommendation-options:
+    get:
+      tags: [공개 · 장소·추천]
+      summary: "추천 조건으로 고를 수 있는 테마·동반 유형·지역을 알려 준다."
+      description: "추천 조건으로 고를 수 있는 테마·동반 유형·지역을 알려 준다."
+      security: [{}, {basicAuth: []}]
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RecommendationOptions'}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /recommendations:
+    get:
+      tags: [공개 · 장소·추천]
+      summary: "장소 추천"
+      description: "지역·테마·동반 유형에 맞는 장소를 점수순으로 최대 3곳 추천하고 추천 이유와 관련 혜택을 함께 준다. 지역은 필터, 테마·동반 유형은 순위 기준이다.\n\n인증한 방문객에게는 개인화 점수와 `myPassAvailability`를 포함한다."
+      security: [{}, {basicAuth: []}]
+      parameters:
+        - {name: regionId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {name: themeId, in: query, description: "여러 번 지정할 수 있다.", schema: {type: array, items: {$ref: '#/components/schemas/Id'}}}
+        - {name: companionId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Recommendations'}}}
+        '400': {description: "INVALID_INPUT, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "INVALID_CREDENTIALS (잘못된 인증 정보를 보낸 경우)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys:
+    get:
+      tags: [방문객 · 여행]
+      summary: "내 여행 목록을 상태별로 조회한다."
+      description: "내 여행 목록을 상태별로 조회한다."
+      parameters:
+        - {name: status, in: query, schema: {type: string, enum: [PLANNING, CONFIRMED, ARCHIVED]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/JourneySummaryPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [방문객 · 여행]
+      summary: "이름과 여행 날짜로 새 여행을 제작 중(PLANNING) 상태로 만든다."
+      description: "이름과 여행 날짜로 새 여행을 제작 중(PLANNING) 상태로 만든다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JourneyCreate'}
+            example: {"name": "시흥 하루 여행", "travelDate": "2026-12-01"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys/{id}:
+    get:
+      tags: [방문객 · 여행]
+      summary: "내 여행의 카드 목록, 연결된 이용권, 연결 이력을 조회한다."
+      description: "내 여행의 카드 목록, 연결된 이용권, 연결 이력을 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [방문객 · 여행]
+      summary: "여행 수정·상태 전환·이용권 연결"
+      description: "이름·날짜를 바꾸거나, 확정·보관 상태로 전환하거나, 이용권을 연결·해제한다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JourneyUpdate'}
+            example: {"name": "수정한 여행"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT, JOURNEY_EMPTY", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "INVALID_JOURNEY_TRANSITION, JOURNEY_LOCKED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    delete:
+      tags: [방문객 · 여행]
+      summary: "제작 중인 여행을 삭제한다."
+      description: "제작 중인 여행을 삭제한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      responses:
+        '204': {description: 성공(본문 없음)}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "JOURNEY_LOCKED (제작 중이 아닌 여행)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys/{id}/places:
+    post:
+      tags: [방문객 · 여행 카드]
+      summary: "제작 중인 여행에 장소·가맹점·행사·음식점 카드를 담는다."
+      description: "제작 중인 여행에 장소·가맹점·행사·음식점 카드를 담는다.\n\n현재 동작: 생성 요청이지만 200과 여행 전체를 반환하며 `Location`이 없다. 이미 담긴 카드는 다시 추가하지 않는다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JourneyCardAdd'}
+            example: {"placeId": "1"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "JOURNEY_LOCKED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys/{id}/places/{item}:
+    delete:
+      tags: [방문객 · 여행 카드]
+      summary: "제작 중인 여행에서 카드를 뺀다."
+      description: "제작 중인 여행에서 카드를 뺀다.\n\n현재 동작: 204가 아니라 200과 여행 전체를 반환한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/Item'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "JOURNEY_LOCKED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys/{id}/places/{item}/record:
+    put:
+      tags: [방문객 · 여행 카드]
+      summary: "카드에 방문일·메모·별점을 기록한다. 방문 인증은 아니다."
+      description: "카드에 방문일·메모·별점을 기록한다. 방문 인증은 아니다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/Item'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JourneyRecord'}
+            example: {"visitedOn": "2026-10-01", "note": "좋았던 곳", "rating": 5}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/journeys/{id}/places/{item}/move:
+    post:
+      tags: [방문객 · 여행 카드]
+      summary: "카드를 위나 아래로 한 칸 옮긴다."
+      description: "카드를 위나 아래로 한 칸 옮긴다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/Item'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JourneyMove'}
+            example: {"direction": "UP"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Journey'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "JOURNEY_LOCKED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/passes:
+    get:
+      tags: [방문객 · 이용권]
+      summary: "내 이용권 목록을 상태별로 조회한다."
+      description: "내 이용권 목록을 상태별로 조회한다."
+      parameters:
+        - {name: status, in: query, schema: {type: string, enum: [ACTIVE, EXPIRED, CANCELLED, NOT_STARTED]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassSummaryPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [방문객 · 이용권]
+      summary: "상품으로 24시간 이용권을 발급한다. 사용 중인 이용권이 있으면 거절한다."
+      description: "상품으로 24시간 이용권을 발급한다. 사용 중인 이용권이 있으면 거절한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PassIssue'}
+            example: {"productId": "1"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassDetail'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "ACTIVE_PASS_EXISTS, PRODUCT_INACTIVE, NO_ISSUABLE_BENEFITS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/passes/{id}:
+    get:
+      tags: [방문객 · 이용권]
+      summary: "이용권 코드와 혜택별 사용 가능 여부·잔여 횟수를 조회한다."
+      description: "이용권 코드와 혜택별 사용 가능 여부·잔여 횟수를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassDetail'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/redemptions:
+    get:
+      tags: [방문객 · 혜택 사용 이력]
+      summary: "내 혜택 사용 내역을 조회한다. 이용권으로 좁힐 수 있다."
+      description: "내 혜택 사용 내역을 조회한다. 이용권으로 좁힐 수 있다."
+      parameters:
+        - {name: passId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RedemptionPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/redemptions/{id}:
+    get:
+      tags: [방문객 · 혜택 사용 이력]
+      summary: "혜택 사용 한 건의 내용과 평가 작성 여부를 조회한다."
+      description: "혜택 사용 한 건의 내용과 평가 작성 여부를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Redemption'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/redemptions/{id}/feedback:
+    get:
+      tags: [방문객 · 혜택 평가]
+      summary: "내가 작성한 혜택 평가를 조회한다."
+      description: "내가 작성한 혜택 평가를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RedemptionFeedback'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [방문객 · 혜택 평가]
+      summary: "사용한 혜택에 별점·이유·의견을 처음 작성한다."
+      description: "사용한 혜택에 별점·이유·의견을 처음 작성한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RedemptionFeedbackSave'}
+            example: {"rating": 5, "reasons": ["INTEREST"], "comment": "만족"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/RedemptionFeedback'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_FEEDBACK", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    put:
+      tags: [방문객 · 혜택 평가]
+      summary: "작성한 혜택 평가를 전체 교체한다."
+      description: "작성한 혜택 평가를 전체 교체한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RedemptionFeedbackSave'}
+            example: {"rating": 5, "reasons": ["INTEREST"], "comment": "만족"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RedemptionFeedback'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    delete:
+      tags: [방문객 · 혜택 평가]
+      summary: "작성한 혜택 평가를 삭제한다."
+      description: "작성한 혜택 평가를 삭제한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      responses:
+        '204': {description: 성공(본문 없음)}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/places/{id}/feedback:
+    get:
+      tags: [방문객 · 관광지 평가]
+      summary: "장소에 남긴 내 평가를 조회한다."
+      description: "장소에 남긴 내 평가를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PlaceFeedback'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    put:
+      tags: [방문객 · 관광지 평가]
+      summary: "장소에 별점·의견을 작성하거나 수정한다."
+      description: "장소에 별점·의견을 작성하거나 수정한다.\n\n처음 저장하면 201과 `Location`, 이후에는 200을 반환한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlaceFeedbackSave'}
+            example: {"rating": 5, "comment": "다시 가고 싶어요"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PlaceFeedback'}}}
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/PlaceFeedback'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    delete:
+      tags: [방문객 · 관광지 평가]
+      summary: "장소에 남긴 내 평가를 삭제한다."
+      description: "장소에 남긴 내 평가를 삭제한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      responses:
+        '204': {description: 성공(본문 없음)}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchant/assignments:
+    get:
+      tags: [담당자 · 담당 가맹점]
+      summary: "로그인한 담당자에게 배정된 가맹점을 조회한다."
+      description: "로그인한 담당자에게 배정된 가맹점을 조회한다."
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Assignments'}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchant/pass-lookups:
+    post:
+      tags: [담당자 · 이용권 확인]
+      summary: "이용권 코드 조회"
+      description: "이용권 코드로 이 가맹점의 혜택을 조회하고 사용 확정에 쓸 5분짜리 확인 토큰을 만든다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PassLookupCreate'}
+            example: {"merchantId": "1", "code": "이용권 코드"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassLookup'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), 담당하지 않는 가맹점도 FORBIDDEN, CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "PASS_CODE_NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchant/pass-lookups/{token}:
+    get:
+      tags: [담당자 · 이용권 확인]
+      summary: "만들어 둔 확인 토큰과 혜택 상태를 다시 조회한다."
+      description: "만들어 둔 확인 토큰과 혜택 상태를 다시 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/LookupToken'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassLookup'}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), 담당이 해제된 가맹점도 FORBIDDEN", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchant/redemptions:
+    get:
+      tags: [담당자 · 혜택 사용 처리]
+      summary: "담당 가맹점의 혜택 사용 이력을 조회한다."
+      description: "담당 가맹점의 혜택 사용 이력을 조회한다."
+      parameters:
+        - {name: merchantId, in: query, required: true, schema: {$ref: '#/components/schemas/Id'}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RedemptionPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), 담당하지 않는 가맹점도 FORBIDDEN", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [담당자 · 혜택 사용 처리]
+      summary: "혜택 사용 확정"
+      description: "확인 토큰으로 혜택을 사용 처리해 잔여 횟수를 차감한다. 토큰은 한 번만 쓸 수 있다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RedemptionCreate'}
+            example: {"confirmationToken": "조회 응답의 토큰", "issuedBenefitId": "1"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Redemption'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), 담당하지 않거나 다른 이용권의 혜택도 FORBIDDEN, CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "CONFIRMATION_INVALID, CONFIRMATION_USED, CONFIRMATION_EXPIRED, BENEFIT_ALREADY_USED, MERCHANT_INACTIVE, BENEFIT_INACTIVE, PASS_EXPIRED, PASS_CANCELLED, PASS_NOT_STARTED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /merchant/redemptions/{id}:
+    get:
+      tags: [담당자 · 혜택 사용 처리]
+      summary: "담당 가맹점의 혜택 사용 한 건을 조회한다."
+      description: "담당 가맹점의 혜택 사용 한 건을 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Redemption'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/passes:
+    get:
+      tags: [관리자 · 이용권]
+      summary: "전체 이용권을 소유자·상태로 조회한다."
+      description: "전체 이용권을 소유자·상태로 조회한다."
+      parameters:
+        - {name: ownerId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {name: status, in: query, schema: {type: string, enum: [ACTIVE, EXPIRED, CANCELLED, NOT_STARTED]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassSummaryPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/passes/{id}:
+    get:
+      tags: [관리자 · 이용권]
+      summary: "이용권의 혜택과 사용 이력을 조회한다. 이용권 코드는 보여 주지 않는다."
+      description: "이용권의 혜택과 사용 이력을 조회한다. 이용권 코드는 보여 주지 않는다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PassDetail'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/passes/{id}/cancellation:
+    put:
+      tags: [관리자 · 이용권]
+      summary: "사유를 남기고 이용권을 취소한다."
+      description: "사유를 남기고 이용권을 취소한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PassCancel'}
+            example: {"reason": "시연 취소"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Cancellation'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "PASS_EXPIRED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/place-feedback:
+    get:
+      tags: [관리자 · 평가 통계]
+      summary: "장소별 응답 수, 평균 별점(소수 첫째 자리), 별점 분포를 조회한다. 응답이 없는 장소는 제외한다."
+      description: "장소별 응답 수, 평균 별점, 별점 분포를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PlaceFeedbackStatisticPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/products:
+    get:
+      tags: [관리자 · 상품]
+      summary: "비활성을 포함한 상품 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 상품 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminProductPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 상품]
+      summary: "새 상품을(를) 등록한다."
+      description: "새 상품을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProductCreate'}
+            example: {"code": "P_SAMPLE", "name": "시연 상품", "description": "설명"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminProduct'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/products/{id}:
+    get:
+      tags: [관리자 · 상품]
+      summary: "상품 하나를 관리 정보까지 조회한다."
+      description: "상품 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminProduct'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 상품]
+      summary: "상품을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "상품을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProductUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminProduct'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/merchants:
+    get:
+      tags: [관리자 · 가맹점]
+      summary: "비활성을 포함한 가맹점 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 가맹점 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminMerchantPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 가맹점]
+      summary: "새 가맹점을(를) 등록한다."
+      description: "새 가맹점을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MerchantCreate'}
+            example: {"code": "M_SAMPLE", "placeId": "1", "name": "시연 가맹점", "locationDescription": "가상 위치"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminMerchant'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE, REVIEW_REQUIRED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/merchants/{id}:
+    get:
+      tags: [관리자 · 가맹점]
+      summary: "가맹점 하나를 관리 정보까지 조회한다."
+      description: "가맹점 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminMerchant'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 가맹점]
+      summary: "가맹점을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "가맹점을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MerchantUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminMerchant'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "REVIEW_REQUIRED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/benefits:
+    get:
+      tags: [관리자 · 혜택]
+      summary: "비활성을 포함한 혜택 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 혜택 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {name: productId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {name: merchantId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminBenefitPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 혜택]
+      summary: "새 혜택을(를) 등록한다."
+      description: "새 혜택을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/BenefitCreate'}
+            example: {"code": "B_SAMPLE", "productId": "1", "merchantId": "1", "name": "무료 이용", "description": "설명", "benefitType": "FREE_ONCE", "basePriceWon": null, "discountWon": null, "payableWon": 0, "reservationNote": "예약 불필요"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminBenefit'}}}
+        '400': {description: "INVALID_INPUT, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/benefits/{id}:
+    get:
+      tags: [관리자 · 혜택]
+      summary: "혜택 하나를 관리 정보까지 조회한다."
+      description: "혜택 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminBenefit'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 혜택]
+      summary: "혜택을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "혜택을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/BenefitUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/AdminBenefit'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/places:
+    get:
+      tags: [관리자 · 온톨로지 장소]
+      summary: "비활성을 포함한 장소 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 장소 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {name: regionId, in: query, schema: {$ref: '#/components/schemas/Id'}}
+        - {name: reviewStatus, in: query, schema: {type: string, enum: [DRAFT, APPROVED, REJECTED]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/PlacePage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 온톨로지 장소]
+      summary: "새 장소을(를) 등록한다."
+      description: "새 장소을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlaceCreate'}
+            example: {"code": "PLACE_SAMPLE", "name": "시연 장소", "regionId": "1", "description": "설명", "locationDescription": "가상 위치", "annotation": {"materialKind": "DEMO", "sourceUrl": null, "checkedOn": null, "evidenceNote": "시연 근거"}, "sources": []}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Place'}}}
+        '400': {description: "INVALID_INPUT, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/places/{id}:
+    get:
+      tags: [관리자 · 온톨로지 장소]
+      summary: "장소 하나를 관리 정보까지 조회한다."
+      description: "장소 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Place'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 온톨로지 장소]
+      summary: "장소을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "장소을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlaceUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Place'}}}
+        '400': {description: "INVALID_INPUT, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/places/{id}/review:
+    put:
+      tags: [관리자 · 온톨로지 장소]
+      summary: "장소를 승인·반려한다. 승인된 활성 장소만 공개·추천에 쓰인다."
+      description: "장소를 승인·반려한다. 승인된 활성 장소만 공개·추천에 쓰인다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReviewDecision'}
+            example: {"status": "APPROVED"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Place'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "REVIEW_REQUIRED (근거·출처 부족)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/regions:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "비활성을 포함한 지역 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 지역 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/ConceptPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "새 지역을(를) 등록한다."
+      description: "새 지역을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptCreate'}
+            example: {"code": "REGION_SAMPLE", "name": "시연 지역"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/regions/{id}:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "지역 하나를 관리 정보까지 조회한다."
+      description: "지역 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "지역을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "지역을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/themes:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "비활성을 포함한 테마 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 테마 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/ConceptPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "새 테마을(를) 등록한다."
+      description: "새 테마을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptCreate'}
+            example: {"code": "THEME_SAMPLE", "name": "시연 테마"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/themes/{id}:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "테마 하나를 관리 정보까지 조회한다."
+      description: "테마 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "테마을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "테마을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/companion-types:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "비활성을 포함한 동반 유형 전체를 검색·필터로 조회한다."
+      description: "비활성을 포함한 동반 유형 전체를 검색·필터로 조회한다."
+      parameters:
+        - {name: q, in: query, description: "이름·코드 부분 일치(최대 100자)", schema: {type: string}}
+        - {name: active, in: query, schema: {type: string, enum: [true, false]}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/ConceptPage'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "새 동반 유형을(를) 등록한다."
+      description: "새 동반 유형을(를) 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptCreate'}
+            example: {"code": "COMPANION_SAMPLE", "name": "시연 동반 유형"}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RESOURCE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/companion-types/{id}:
+    get:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "동반 유형 하나를 관리 정보까지 조회한다."
+      description: "동반 유형 하나를 관리 정보까지 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 온톨로지 분류]
+      summary: "동반 유형을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      description: "동반 유형을(를) 수정하거나 활성·비활성으로 바꾼다. 보내는 필드만 바뀐다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConceptUpdate'}
+            example: {"name": "수정한 이름"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Concept'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/relations:
+    get:
+      tags: [관리자 · 온톨로지 관계]
+      summary: "관계 유형별 목록을 조회한다."
+      description: "관계 유형별 목록을 조회한다."
+      parameters:
+        - {name: type, in: query, required: true, schema: {$ref: '#/components/schemas/RelationType'}}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Size'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/RelationPage'}}}
+        '400': {description: "INVALID_INPUT, INVALID_RELATION_TYPE (type 누락 포함)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    post:
+      tags: [관리자 · 온톨로지 관계]
+      summary: "장소-테마, 장소-동반 유형, 테마 상하 관계를 등록한다."
+      description: "장소-테마, 장소-동반 유형, 테마 상하 관계를 등록한다."
+      parameters:
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RelationCreate'}
+            example: {"type": "has-theme", "fromId": "1", "toId": "1", "annotation": {"materialKind": "DEMO", "sourceUrl": null, "checkedOn": null, "evidenceNote": "시연 근거"}}
+      responses:
+        '201':
+          description: 성공
+          headers: {Location: {$ref: '#/components/headers/Location'}}
+          content: {application/json: {schema: {$ref: '#/components/schemas/Relation'}}}
+        '400': {description: "INVALID_INPUT, INVALID_RELATION_TYPE, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "DUPLICATE_RELATION, THEME_CYCLE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/relations/{type}/{from}/{to}:
+    get:
+      tags: [관리자 · 온톨로지 관계]
+      summary: "관계 하나의 근거와 검토 상태를 조회한다."
+      description: "관계 하나의 근거와 검토 상태를 조회한다."
+      parameters:
+        - {$ref: '#/components/parameters/RelationType'}
+        - {$ref: '#/components/parameters/RelationFrom'}
+        - {$ref: '#/components/parameters/RelationTo'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Relation'}}}
+        '400': {description: "INVALID_INPUT, INVALID_RELATION_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    patch:
+      tags: [관리자 · 온톨로지 관계]
+      summary: "관계의 근거나 활성 여부를 수정한다."
+      description: "관계의 근거나 활성 여부를 수정한다."
+      parameters:
+        - {$ref: '#/components/parameters/RelationType'}
+        - {$ref: '#/components/parameters/RelationFrom'}
+        - {$ref: '#/components/parameters/RelationTo'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RelationUpdate'}
+            example: {"active": false}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Relation'}}}
+        '400': {description: "INVALID_INPUT, INVALID_RELATION_TYPE, INVALID_CONCEPT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "THEME_CYCLE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /admin/ontology/relations/{type}/{from}/{to}/review:
+    put:
+      tags: [관리자 · 온톨로지 관계]
+      summary: "관계를 승인·반려한다."
+      description: "관계를 승인·반려한다."
+      parameters:
+        - {$ref: '#/components/parameters/RelationType'}
+        - {$ref: '#/components/parameters/RelationFrom'}
+        - {$ref: '#/components/parameters/RelationTo'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReviewDecision'}
+            example: {"status": "APPROVED"}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Relation'}}}
+        '400': {description: "INVALID_INPUT, INVALID_RELATION_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "REVIEW_REQUIRED, THEME_CYCLE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+components:
+  securitySchemes:
+    basicAuth: {type: http, scheme: basic}
+  headers:
+    Location: {description: 생성된 자원의 경로, schema: {type: string}}
+  parameters:
+    Id: {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Id'}, example: '1'}
+    Item: {name: item, in: path, required: true, description: 여행 카드 ID, schema: {$ref: '#/components/schemas/Id'}, example: '1'}
+    LookupToken: {name: token, in: path, required: true, description: 조회 응답의 id, schema: {type: string, pattern: '^[A-Za-z0-9_-]{22}$'}}
+    RelationType: {name: type, in: path, required: true, schema: {$ref: '#/components/schemas/RelationType'}}
+    RelationFrom: {name: from, in: path, required: true, schema: {$ref: '#/components/schemas/Id'}, example: '1'}
+    RelationTo: {name: to, in: path, required: true, schema: {$ref: '#/components/schemas/Id'}, example: '1'}
+    Page: {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}}
+    Size: {name: size, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
+    CsrfToken: {name: X-CSRF-Token, in: header, required: true, description: 변경 요청 필수 헤더, schema: {type: string, enum: [api], default: api}}
+  schemas:
+    Id: {type: string, pattern: '^[1-9][0-9]{0,18}$', example: '1'}
+    Link:
+      type: object
+      required: [href, method]
+      properties:
+        href: {type: string}
+        method: {type: string}
+    Links:
+      type: object
+      description: 역할·상태에 따라 달라지는 다음 행동 링크
+      additionalProperties: {$ref: '#/components/schemas/Link'}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, fieldErrors]
+          properties:
+            code: {type: string}
+            message: {type: string}
+            fieldErrors: {type: array, maxItems: 0}
+    IndexUser:
+      type: [object, 'null']
+      required: [id, displayName, role]
+      properties:
+        id: {type: string}
+        displayName: {type: string}
+        role: {type: string, enum: [VISITOR, STAFF, ADMIN]}
+    PassStatus: {type: string, enum: [ACTIVE, EXPIRED, CANCELLED, NOT_STARTED]}
+    AvailabilityReason: {type: string, enum: [AVAILABLE, MERCHANT_INACTIVE, BENEFIT_INACTIVE, PASS_EXPIRED, PASS_CANCELLED, PASS_NOT_STARTED, BENEFIT_ALREADY_USED]}
+    FeedbackReason: {type: string, enum: [INTEREST, COMPANION_FIT, COST, GUIDANCE]}
+    RelationType: {type: string, enum: [has-theme, suitable-for, sub-theme-of]}
+    ThemePaths:
+      type: object
+      description: 거리별 상위 테마 코드 경로
+      additionalProperties: {type: array, items: {type: string}}
+    Index:
+      type: object
+      required: [user, _links]
+      properties:
+        user: {$ref: '#/components/schemas/IndexUser'}
+        _links: {$ref: '#/components/schemas/Links'}
+    Product:
+      type: object
+      required: [id, code, name, description, durationHours, demoOnly, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        name: {type: string}
+        description: {type: string}
+        durationHours: {type: integer}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        benefits: {type: array, items: {$ref: '#/components/schemas/Benefit'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    Benefit:
+      type: object
+      required: [id, code, productId, merchantId, name, description, benefitType, useLimit, basePriceWon, discountWon, payableWon, reservationRequired, reservationNote, demoOnly, active, createdAt, updatedAt]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        productId: {type: string}
+        merchantId: {type: string}
+        name: {type: string}
+        description: {type: string}
+        benefitType: {type: string, enum: [FREE_ONCE, DISCOUNT]}
+        useLimit: {type: integer}
+        basePriceWon: {type: [integer, 'null']}
+        discountWon: {type: [integer, 'null']}
+        payableWon: {type: integer}
+        reservationRequired: {type: boolean}
+        reservationNote: {type: [string, 'null']}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        merchantName: {type: string}
+        placeId: {type: string}
+        locationDescription: {type: string}
+        placeName: {type: string}
+        regionName: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    Merchant:
+      type: object
+      required: [id, code, placeId, name, locationDescription, demoOnly, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        placeId: {type: string}
+        name: {type: string}
+        locationDescription: {type: string}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        regionId: {type: string}
+        regionName: {type: string}
+        benefits: {type: array, items: {$ref: '#/components/schemas/Benefit'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    ConceptRef:
+      type: object
+      required: [id, code, name]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        name: {type: string}
+    Place:
+      type: object
+      required: [id, code, regionId, name, description, locationDescription, materialKind, sourceUrl, checkedOn, evidenceNote, reviewStatus, reviewedBy, reviewedAt, active, updatedAt, createdAt]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        regionId: {type: string}
+        name: {type: string}
+        description: {type: string}
+        locationDescription: {type: string}
+        materialKind: {type: string, enum: [REAL, DEMO]}
+        sourceUrl: {type: [string, 'null']}
+        checkedOn: {type: [string, 'null']}
+        evidenceNote: {type: string}
+        reviewStatus: {type: string, enum: [DRAFT, APPROVED, REJECTED]}
+        reviewedBy: {type: [string, 'null']}
+        reviewedAt: {type: [string, 'null']}
+        active: {type: boolean}
+        updatedAt: {type: string}
+        createdAt: {type: string}
+        notice: {type: string}
+        regionName: {type: string}
+        themes: {$ref: '#/components/schemas/ThemePaths'}
+        companions: {type: array, items: {$ref: '#/components/schemas/ConceptRef'}}
+        sources: {type: array, items: {$ref: '#/components/schemas/PlaceSource'}}
+        modelRevision: {type: string}
+        region: {$ref: '#/components/schemas/RegionRef'}
+        _links: {$ref: '#/components/schemas/Links'}
+    RegionRef:
+      type: object
+      required: [id, name]
+      properties:
+        id: {type: string}
+        name: {type: string}
+    PlaceSource:
+      type: object
+      required: [sourceUrl, checkedOn, evidenceNote]
+      properties:
+        id: {type: string}
+        placeId: {type: string}
+        sourceUrl: {type: string}
+        checkedOn: {type: string}
+        evidenceNote: {type: string}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+    RecommendationOptions:
+      type: object
+      required: [themes, companionTypes, regions, _links]
+      properties:
+        themes: {type: array, items: {$ref: '#/components/schemas/ConceptRef'}}
+        companionTypes: {type: array, items: {$ref: '#/components/schemas/ConceptRef'}}
+        regions: {type: array, items: {$ref: '#/components/schemas/ConceptRef'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    MatchedTheme:
+      type: object
+      required: [path, matchType, selectedThemeId]
+      properties:
+        path: {type: array, items: {type: string}}
+        matchType: {type: string}
+        selectedThemeId: {type: string}
+    RecommendationScore:
+      type: object
+      required: [personal, total, feedbackCount, base]
+      properties:
+        personal: {type: number}
+        total: {type: number}
+        feedbackCount: {type: integer}
+        base: {type: number}
+    PassBenefitRef:
+      type: object
+      required: [benefitId, demoOnly]
+      properties:
+        benefitId: {type: string}
+        demoOnly: {type: boolean}
+        notice: {type: string}
+    MyPassAvailability:
+      type: object
+      required: [checkedAt, usable, issuedBenefitId, passId, reason]
+      properties:
+        checkedAt: {type: string}
+        usable: {type: boolean}
+        issuedBenefitId: {type: string}
+        passId: {type: string}
+        reason: {$ref: '#/components/schemas/AvailabilityReason'}
+    RecommendationItem:
+      type: object
+      description: "myPassAvailability는 비로그인이면 null, 방문객이면 배열이다."
+      required: [place, matchedThemes, companionMatched, score, personalizationReason, explanation, passBenefits, myPassAvailability, _links]
+      properties:
+        place: {$ref: '#/components/schemas/Place'}
+        matchedThemes: {type: array, items: {$ref: '#/components/schemas/MatchedTheme'}}
+        companionMatched: {type: boolean}
+        score: {$ref: '#/components/schemas/RecommendationScore'}
+        personalizationReason: {type: string}
+        explanation: {type: string}
+        passBenefits: {type: array, items: {$ref: '#/components/schemas/PassBenefitRef'}}
+        myPassAvailability: {type: [array, 'null'], items: {$ref: '#/components/schemas/MyPassAvailability'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    Recommendations:
+      type: object
+      required: [modelRevision, items, emptyReason, notice, _links]
+      properties:
+        modelRevision: {type: string}
+        items: {type: array, maxItems: 3, items: {$ref: '#/components/schemas/RecommendationItem'}}
+        emptyReason: {type: [string, 'null'], enum: [NO_MATCHING_PLACE, null]}
+        message: {type: string}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    JourneySummary:
+      type: object
+      required: [id, ownerId, name, travelDate, status, issuedPassId, createdAt, updatedAt, placeCount, _links]
+      properties:
+        id: {type: string}
+        ownerId: {type: string}
+        name: {type: string}
+        travelDate: {type: [string, 'null']}
+        status: {type: string, enum: [PLANNING, CONFIRMED, ARCHIVED]}
+        issuedPassId: {type: [string, 'null']}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        placeCount: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    JourneyPlace:
+      type: object
+      required: [id, journeyId, placeId, cardKind, cardKey, position, placeName, regionName, locationDescription, materialKind, visitedOn, note, rating, hasPhoto, _links]
+      properties:
+        id: {type: string}
+        journeyId: {type: string}
+        placeId: {type: [string, 'null']}
+        cardKind: {type: string, enum: [PLACE, MERCHANT, EVENT, DINING]}
+        cardKey: {type: string}
+        position: {type: integer}
+        placeName: {type: string}
+        regionName: {type: string}
+        locationDescription: {type: string}
+        materialKind: {type: string}
+        visitedOn: {type: [string, 'null']}
+        note: {type: [string, 'null']}
+        rating: {type: [integer, 'null']}
+        hasPhoto: {type: boolean}
+        _links: {$ref: '#/components/schemas/Links'}
+    BenefitPassLink:
+      type: object
+      required: [id, journeyId, issuedPassId, linkedAt, disconnectedAt, productName, startsAt, expiresAt, cancelledAt, demoOnly, status]
+      properties:
+        id: {type: string}
+        journeyId: {type: string}
+        issuedPassId: {type: string}
+        linkedAt: {type: string}
+        disconnectedAt: {type: [string, 'null']}
+        productName: {type: string}
+        startsAt: {type: string}
+        expiresAt: {type: string}
+        cancelledAt: {type: [string, 'null']}
+        demoOnly: {type: boolean}
+        status: {$ref: '#/components/schemas/PassStatus'}
+        notice: {type: string}
+    Journey:
+      type: object
+      description: "benefitPass는 이용권이 연결된 경우에만 포함한다."
+      required: [id, ownerId, name, travelDate, status, issuedPassId, createdAt, updatedAt, places, benefitPassHistory, _links]
+      properties:
+        id: {type: string}
+        ownerId: {type: string}
+        name: {type: string}
+        travelDate: {type: [string, 'null']}
+        status: {type: string, enum: [PLANNING, CONFIRMED, ARCHIVED]}
+        issuedPassId: {type: [string, 'null']}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        places: {type: array, items: {$ref: '#/components/schemas/JourneyPlace'}}
+        benefitPass: {$ref: '#/components/schemas/PassDetail'}
+        benefitPassHistory: {type: array, items: {$ref: '#/components/schemas/BenefitPassLink'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    PassSummary:
+      type: object
+      required: [id, ownerId, productId, productName, startsAt, expiresAt, cancelledAt, demoOnly, status, _links]
+      properties:
+        id: {type: string}
+        ownerId: {type: string}
+        productId: {type: string}
+        productName: {type: string}
+        startsAt: {type: string}
+        expiresAt: {type: string}
+        cancelledAt: {type: [string, 'null']}
+        demoOnly: {type: boolean}
+        status: {$ref: '#/components/schemas/PassStatus'}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    IssuedBenefit:
+      type: object
+      required: [id, passId, benefitId, merchantId, placeId, merchantName, placeName, regionName, locationDescription, benefitName, description, benefitType, useLimit, basePriceWon, discountWon, payableWon, reservationRequired, reservationNote, demoOnly, remainingCount, createdAt, usedAt, usable, reason]
+      properties:
+        id: {type: string}
+        passId: {type: string}
+        benefitId: {type: string}
+        merchantId: {type: string}
+        placeId: {type: string}
+        merchantName: {type: string}
+        placeName: {type: string}
+        regionName: {type: string}
+        locationDescription: {type: string}
+        benefitName: {type: string}
+        description: {type: string}
+        benefitType: {type: string, enum: [FREE_ONCE, DISCOUNT]}
+        useLimit: {type: integer}
+        basePriceWon: {type: [integer, 'null']}
+        discountWon: {type: [integer, 'null']}
+        payableWon: {type: integer}
+        reservationRequired: {type: boolean}
+        reservationNote: {type: [string, 'null']}
+        demoOnly: {type: boolean}
+        remainingCount: {type: integer}
+        createdAt: {type: string}
+        usedAt: {type: [string, 'null']}
+        usable: {type: boolean}
+        reason: {$ref: '#/components/schemas/AvailabilityReason'}
+        notice: {type: string}
+    PassDetail:
+      type: object
+      description: "code는 방문객 본인 조회에만 포함하고, redemptions는 관리자 조회에만 포함한다."
+      required: [id, ownerId, productId, productName, durationHours, startsAt, expiresAt, demoOnly, cancelledAt, cancelledBy, cancelReason, createdAt, status, benefits, notice]
+      properties:
+        id: {type: string}
+        ownerId: {type: string}
+        productId: {type: string}
+        code: {type: string}
+        productName: {type: string}
+        durationHours: {type: integer}
+        startsAt: {type: string}
+        expiresAt: {type: string}
+        demoOnly: {type: boolean}
+        cancelledAt: {type: [string, 'null']}
+        cancelledBy: {type: [string, 'null']}
+        cancelReason: {type: [string, 'null']}
+        createdAt: {type: string}
+        status: {$ref: '#/components/schemas/PassStatus'}
+        benefits: {type: array, items: {$ref: '#/components/schemas/IssuedBenefit'}}
+        redemptions: {type: array, items: {$ref: '#/components/schemas/Redemption'}}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    Redemption:
+      type: object
+      description: "hasFeedback은 방문객 조회에만 포함한다."
+      required: [id, passId, issuedBenefitId, merchantId, merchantName, benefitName, usedAt]
+      properties:
+        id: {type: string}
+        passId: {type: string}
+        issuedBenefitId: {type: string}
+        merchantId: {type: string}
+        merchantName: {type: string}
+        benefitName: {type: string}
+        usedAt: {type: string}
+        hasFeedback: {type: boolean}
+        result: {type: string, enum: [SUCCESS]}
+        _links: {$ref: '#/components/schemas/Links'}
+    RedemptionFeedback:
+      type: object
+      required: [id, redemptionId, rating, comment, createdAt, updatedAt, reasons, preservedThemes, _links]
+      properties:
+        id: {type: string}
+        redemptionId: {type: string}
+        rating: {type: integer}
+        comment: {type: [string, 'null']}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        reasons: {type: array, items: {$ref: '#/components/schemas/FeedbackReason'}}
+        preservedThemes: {type: array, items: {$ref: '#/components/schemas/ConceptRef'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    PlaceFeedback:
+      type: object
+      required: [placeId, rating, comment, updatedAt, _links]
+      properties:
+        placeId: {type: string}
+        rating: {type: integer}
+        comment: {type: [string, 'null']}
+        updatedAt: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    Assignment:
+      type: object
+      required: [merchantId, name, active, _links]
+      properties:
+        merchantId: {type: string}
+        name: {type: string}
+        active: {type: boolean}
+        _links: {$ref: '#/components/schemas/Links'}
+    Assignments:
+      type: object
+      description: "페이지 정보 없이 담당 가맹점 전체를 반환한다."
+      required: [items, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Assignment'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    LookupBenefit:
+      type: object
+      required: [issuedBenefitId, benefitName, remainingCount, usable, reason]
+      properties:
+        issuedBenefitId: {type: string}
+        benefitName: {type: string}
+        remainingCount: {type: integer}
+        usable: {type: boolean}
+        reason: {$ref: '#/components/schemas/AvailabilityReason'}
+    PassLookup:
+      type: object
+      description: "id와 confirmationToken은 같은 값이며 5분간 유효하다."
+      required: [id, confirmationToken, confirmationExpiresAt, used, benefits, _links]
+      properties:
+        id: {type: string}
+        confirmationToken: {type: string}
+        confirmationExpiresAt: {type: string}
+        used: {type: boolean}
+        benefits: {type: array, items: {$ref: '#/components/schemas/LookupBenefit'}}
+        _links: {$ref: '#/components/schemas/Links'}
+    Cancellation:
+      type: object
+      required: [passId, cancelledBy, reason, cancelledAt, _links]
+      properties:
+        passId: {type: string}
+        cancelledBy: {type: string}
+        reason: {type: string}
+        cancelledAt: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminProduct:
+      type: object
+      required: [id, code, name, description, durationHours, demoOnly, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        name: {type: string}
+        description: {type: string}
+        durationHours: {type: integer}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminMerchant:
+      type: object
+      required: [id, code, placeId, name, locationDescription, demoOnly, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        placeId: {type: string}
+        name: {type: string}
+        locationDescription: {type: string}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminBenefit:
+      type: object
+      required: [id, code, productId, merchantId, name, description, benefitType, useLimit, basePriceWon, discountWon, payableWon, reservationRequired, reservationNote, demoOnly, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        productId: {type: string}
+        merchantId: {type: string}
+        name: {type: string}
+        description: {type: string}
+        benefitType: {type: string, enum: [FREE_ONCE, DISCOUNT]}
+        useLimit: {type: integer}
+        basePriceWon: {type: [integer, 'null']}
+        discountWon: {type: [integer, 'null']}
+        payableWon: {type: integer}
+        reservationRequired: {type: boolean}
+        reservationNote: {type: [string, 'null']}
+        demoOnly: {type: boolean}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        notice: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    Concept:
+      type: object
+      description: "지역·테마·동반 유형."
+      required: [id, code, name, active, createdAt, updatedAt, _links]
+      properties:
+        id: {type: string}
+        code: {type: string}
+        name: {type: string}
+        active: {type: boolean}
+        createdAt: {type: string}
+        updatedAt: {type: string}
+        modelRevision: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    Relation:
+      type: object
+      description: "관계 유형에 따라 키가 다르다. has-theme은 placeId·themeId, suitable-for는 placeId·companionTypeId, sub-theme-of는 childThemeId·parentThemeId다."
+      required: [materialKind, sourceUrl, checkedOn, evidenceNote, reviewStatus, reviewedBy, reviewedAt, active, updatedAt, _links]
+      properties:
+        placeId: {type: string}
+        themeId: {type: string}
+        companionTypeId: {type: string}
+        childThemeId: {type: string}
+        parentThemeId: {type: string}
+        materialKind: {type: string, enum: [REAL, DEMO]}
+        sourceUrl: {type: [string, 'null']}
+        checkedOn: {type: [string, 'null']}
+        evidenceNote: {type: string}
+        reviewStatus: {type: string, enum: [DRAFT, APPROVED, REJECTED]}
+        reviewedBy: {type: [string, 'null']}
+        reviewedAt: {type: [string, 'null']}
+        active: {type: boolean}
+        updatedAt: {type: string}
+        modelRevision: {type: string}
+        _links: {$ref: '#/components/schemas/Links'}
+    PlaceFeedbackStatistic:
+      type: object
+      required: [placeId, placeName, regionName, responseCount, averageRating, rating1, rating2, rating3, rating4, rating5]
+      properties:
+        placeId: {type: string}
+        placeName: {type: string}
+        regionName: {type: string}
+        responseCount: {type: integer}
+        averageRating: {type: number}
+        rating1: {type: integer}
+        rating2: {type: integer}
+        rating3: {type: integer}
+        rating4: {type: integer}
+        rating5: {type: integer}
+    ProductPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Product'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    MerchantPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Merchant'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    JourneySummaryPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/JourneySummary'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    PassSummaryPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/PassSummary'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    RedemptionPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Redemption'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminProductPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/AdminProduct'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminMerchantPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/AdminMerchant'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    AdminBenefitPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/AdminBenefit'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    PlacePage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Place'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    ConceptPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Concept'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    RelationPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Relation'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    PlaceFeedbackStatisticPage:
+      type: object
+      required: [items, page, size, total, _links]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/PlaceFeedbackStatistic'}}
+        page: {type: integer}
+        size: {type: integer}
+        total: {type: integer}
+        _links: {$ref: '#/components/schemas/Links'}
+    JourneyCreate:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: {type: string, maxLength: 100}
+        travelDate: {type: [string, 'null'], format: date}
+    JourneyUpdate:
+      type: object
+      description: "PLANNING↔CONFIRMED↔ARCHIVED 순서로만 전환한다. 장소가 없으면 CONFIRMED로 바꿀 수 없다."
+      additionalProperties: false
+      properties:
+        name: {type: string, maxLength: 100}
+        travelDate: {type: [string, 'null'], format: date}
+        status: {type: string, enum: [PLANNING, CONFIRMED, ARCHIVED]}
+        issuedPassId: {type: [string, 'null'], pattern: '^[1-9][0-9]{0,18}$'}
+    JourneyCardAdd:
+      type: object
+      description: "placeId와 cardKey 중 하나만 보낸다. cardKey는 `place:1`, `merchant:1`, `event:키`, `dining:키` 형식이다."
+      additionalProperties: false
+      properties:
+        placeId: {$ref: '#/components/schemas/Id'}
+        cardKey: {type: string, maxLength: 150}
+    JourneyRecord:
+      type: object
+      description: "세 필드 모두 필수이며 null을 보낼 수 있다. visitedOn은 오늘 이후일 수 없고 rating(1~5)은 visitedOn이 있어야 한다."
+      additionalProperties: false
+      required: [visitedOn, note, rating]
+      properties:
+        visitedOn: {type: [string, 'null'], format: date}
+        note: {type: [string, 'null'], maxLength: 500}
+        rating: {type: [integer, 'null'], minimum: 1, maximum: 5}
+    JourneyMove:
+      type: object
+      additionalProperties: false
+      required: [direction]
+      properties:
+        direction: {type: string, enum: [UP, DOWN]}
+    PassIssue:
+      type: object
+      additionalProperties: false
+      required: [productId]
+      properties:
+        productId: {$ref: '#/components/schemas/Id'}
+    RedemptionFeedbackSave:
+      type: object
+      description: "세 필드 모두 필수다. rating은 1~5, comment는 최대 500자다."
+      additionalProperties: false
+      required: [rating, reasons, comment]
+      properties:
+        rating: {type: integer, minimum: 1, maximum: 5}
+        reasons: {type: array, items: {$ref: '#/components/schemas/FeedbackReason'}}
+        comment: {type: [string, 'null'], maxLength: 500}
+    PlaceFeedbackSave:
+      type: object
+      description: "rating은 1~5, comment는 최대 500자다."
+      additionalProperties: false
+      required: [rating]
+      properties:
+        rating: {type: integer, minimum: 1, maximum: 5}
+        comment: {type: [string, 'null'], maxLength: 500}
+    PassLookupCreate:
+      type: object
+      additionalProperties: false
+      required: [merchantId, code]
+      properties:
+        merchantId: {$ref: '#/components/schemas/Id'}
+        code: {type: string, maxLength: 32}
+    RedemptionCreate:
+      type: object
+      additionalProperties: false
+      required: [confirmationToken, issuedBenefitId]
+      properties:
+        confirmationToken: {type: string, maxLength: 32}
+        issuedBenefitId: {$ref: '#/components/schemas/Id'}
+    PassCancel:
+      type: object
+      description: "최대 500자."
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason: {type: string, maxLength: 500}
+    ProductCreate:
+      type: object
+      additionalProperties: false
+      required: [code, name, description]
+      properties:
+        code: {type: string, maxLength: 64}
+        name: {type: string, maxLength: 100}
+        description: {type: string, maxLength: 1000}
+    ProductUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        name: {type: string, maxLength: 100}
+        description: {type: string, maxLength: 1000}
+        active: {type: boolean}
+    MerchantCreate:
+      type: object
+      description: "placeId는 승인된 시연 장소여야 하고 locationDescription에는 `가상`이 포함되어야 한다."
+      additionalProperties: false
+      required: [code, placeId, name, locationDescription]
+      properties:
+        code: {type: string, maxLength: 64}
+        placeId: {$ref: '#/components/schemas/Id'}
+        name: {type: string, maxLength: 100}
+        locationDescription: {type: string, maxLength: 500}
+    MerchantUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        placeId: {$ref: '#/components/schemas/Id'}
+        name: {type: string, maxLength: 100}
+        locationDescription: {type: string, maxLength: 500}
+        active: {type: boolean}
+    BenefitCreate:
+      type: object
+      description: "FREE_ONCE는 basePriceWon·discountWon이 null, payableWon이 0이다. DISCOUNT는 payableWon이 basePriceWon - discountWon이어야 한다."
+      additionalProperties: false
+      required: [code, productId, merchantId, name, description, benefitType, basePriceWon, discountWon, payableWon, reservationNote]
+      properties:
+        code: {type: string, maxLength: 64}
+        productId: {$ref: '#/components/schemas/Id'}
+        merchantId: {$ref: '#/components/schemas/Id'}
+        name: {type: string, maxLength: 100}
+        description: {type: string, maxLength: 1000}
+        benefitType: {type: string, enum: [FREE_ONCE, DISCOUNT]}
+        basePriceWon: {type: [integer, 'null']}
+        discountWon: {type: [integer, 'null']}
+        payableWon: {type: integer}
+        reservationNote: {type: string, maxLength: 500}
+    BenefitUpdate:
+      type: object
+      description: "가격 규칙은 BenefitCreate와 같다."
+      additionalProperties: false
+      properties:
+        name: {type: string, maxLength: 100}
+        description: {type: string, maxLength: 1000}
+        benefitType: {type: string, enum: [FREE_ONCE, DISCOUNT]}
+        basePriceWon: {type: [integer, 'null']}
+        discountWon: {type: [integer, 'null']}
+        payableWon: {type: integer}
+        reservationNote: {type: string, maxLength: 500}
+        active: {type: boolean}
+    Annotation:
+      type: object
+      description: "DEMO는 sourceUrl·checkedOn이 null이어야 한다. REAL은 승인 전에 둘 다 필요하다."
+      additionalProperties: false
+      required: [materialKind, sourceUrl, checkedOn, evidenceNote]
+      properties:
+        materialKind: {type: string, enum: [REAL, DEMO]}
+        sourceUrl: {type: [string, 'null'], format: uri, maxLength: 2048}
+        checkedOn: {type: [string, 'null'], format: date}
+        evidenceNote: {type: string, maxLength: 1000}
+    SourceInput:
+      type: object
+      additionalProperties: false
+      required: [sourceUrl, checkedOn, evidenceNote]
+      properties:
+        sourceUrl: {type: string, format: uri, maxLength: 2048}
+        checkedOn: {type: string, format: date}
+        evidenceNote: {type: string, maxLength: 1000}
+    PlaceCreate:
+      type: object
+      additionalProperties: false
+      required: [code, name, regionId, description, locationDescription, annotation, sources]
+      properties:
+        code: {type: string, maxLength: 64}
+        name: {type: string, maxLength: 100}
+        regionId: {$ref: '#/components/schemas/Id'}
+        description: {type: string, maxLength: 2000}
+        locationDescription: {type: string, maxLength: 500}
+        annotation: {$ref: '#/components/schemas/Annotation'}
+        sources: {type: array, items: {$ref: '#/components/schemas/SourceInput'}}
+    PlaceUpdate:
+      type: object
+      description: "active 외 필드를 바꾸면 검토 상태가 DRAFT로 돌아간다. materialKind는 바꿀 수 없다."
+      additionalProperties: false
+      properties:
+        name: {type: string, maxLength: 100}
+        regionId: {$ref: '#/components/schemas/Id'}
+        description: {type: string, maxLength: 2000}
+        locationDescription: {type: string, maxLength: 500}
+        annotation: {$ref: '#/components/schemas/Annotation'}
+        sources: {type: array, items: {$ref: '#/components/schemas/SourceInput'}}
+        active: {type: boolean}
+    ConceptCreate:
+      type: object
+      additionalProperties: false
+      required: [code, name]
+      properties:
+        code: {type: string, maxLength: 64}
+        name: {type: string, maxLength: 100}
+    ConceptUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        name: {type: string, maxLength: 100}
+        active: {type: boolean}
+    ReviewDecision:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: {type: string, enum: [APPROVED, REJECTED]}
+    RelationCreate:
+      type: object
+      additionalProperties: false
+      required: [type, fromId, toId, annotation]
+      properties:
+        type: {$ref: '#/components/schemas/RelationType'}
+        fromId: {$ref: '#/components/schemas/Id'}
+        toId: {$ref: '#/components/schemas/Id'}
+        annotation: {$ref: '#/components/schemas/Annotation'}
+    RelationUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        annotation: {$ref: '#/components/schemas/Annotation'}
+        active: {type: boolean}
