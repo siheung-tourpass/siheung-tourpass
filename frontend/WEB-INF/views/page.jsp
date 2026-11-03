@@ -3,7 +3,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="root" value="${pageContext.request.contextPath}"/>
 <c:set var="adminArea" value="${view eq 'place-feedback-statistics' ? 'statistics' : view eq 'passes' or view eq 'pass' or (view eq 'editor' and not semantic) ? 'benefits' : view eq 'admin' or view eq 'relations' or view eq 'editor' or view eq 'goods' ? 'tourism' : ''}"/>
-<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>시흥 투어패스</title><link rel="icon" type="image/png" href="${root}/assets/tourpass-icon.png"><link rel="apple-touch-icon" href="${root}/assets/tourpass-icon.png"><link rel="stylesheet" href="${root}/assets/style.css"><link rel="stylesheet" href="${root}/assets/admin.css"><script src="${root}/assets/site.js" defer></script><script src="${root}/assets/admin.js" defer></script></head><body class="page-${fn:escapeXml(view)}"><a class="skip-link" href="#main">본문으로 건너뛰기</a>
+<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>시흥 투어패스</title><link rel="icon" type="image/png" href="${root}/assets/images/tourpass-icon.png"><link rel="apple-touch-icon" href="${root}/assets/images/tourpass-icon.png"><link rel="stylesheet" href="${root}/assets/css/style.css"><link rel="stylesheet" href="${root}/assets/css/admin.css"><script src="${root}/assets/js/site.js" defer></script><script src="${root}/assets/js/admin.js" defer></script></head><body class="page-${fn:escapeXml(view)}"><a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <c:set var="headerBackPath" value=""/>
 <c:choose>
 <c:when test="${view eq 'goods'}"><c:set var="headerBackPath" value="/admin"/></c:when>
@@ -16,18 +16,18 @@
 <c:when test="${(view eq 'history' or view eq 'feedback') and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
 <c:when test="${view eq 'pass'}"><c:set var="headerBackPath" value="${user.role eq 'ADMIN' ? '/admin/passes' : '/passes'}"/></c:when>
 </c:choose>
-<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div>
+<header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/images/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div>
 <c:if test="${(empty user or user.role eq 'VISITOR') and view ne 'landing' and view ne 'login'}"><c:set var="topTab" value="${view eq 'catalog' ? guideTab : view eq 'product' ? 'products' : view eq 'merchant' ? 'facilities' : ''}"/><nav class="top-tabs" aria-label="투어패스 안내"><a href="${root}/merchants" ${topTab eq 'products' ? 'aria-current=page' : ''}>전체 상품</a><a href="${root}/merchants?tab=facilities" ${topTab eq 'facilities' ? 'aria-current=page' : ''}>이용 가능 시설</a><a href="${root}/merchants?tab=usage" ${topTab eq 'usage' ? 'aria-current=page' : ''}>이용 방법</a><a href="${root}/merchants?tab=notes" ${topTab eq 'notes' ? 'aria-current=page' : ''}>유의사항</a></nav></c:if></header>
 <main id="main" tabindex="-1">
 <c:choose>
-<c:when test="${view eq 'landing'}"><%@ include file="landing.jspf" %></c:when>
-<c:when test="${view eq 'home' and user.role eq 'ADMIN'}"><%@ include file="admin-home.jspf" %></c:when>
+<c:when test="${view eq 'landing'}"><%@ include file="/WEB-INF/views/site/landing.jspf" %></c:when>
+<c:when test="${view eq 'home' and user.role eq 'ADMIN'}"><%@ include file="/WEB-INF/views/admin/admin-home.jspf" %></c:when>
 <c:when test="${view eq 'home'}">
 <div class="home-layout home-dashboard">
-<header class="home-heading home-welcome"><img class="welcome-character" src="${root}/assets/siheung_character.png" width="640" height="640" alt=""><div><h1>나만의 시흥 여행을 담다</h1><p>새로운 여행을 찾고, 준비하던 여행을 이어가세요.</p></div></header>
-<%@ include file="home-background.jspf" %>
+<header class="home-heading home-welcome"><img class="welcome-character" src="${root}/assets/images/siheung_character.png" width="640" height="640" alt=""><div><h1>나만의 시흥 여행을 담다</h1><p>새로운 여행을 찾고, 준비하던 여행을 이어가세요.</p></div></header>
+<%@ include file="/WEB-INF/views/site/home-background.jspf" %>
 <div class="home-card-grid">
-<c:if test="${user.role eq 'VISITOR'}"><%@ include file="journey-start-picker.jspf" %></c:if>
+<c:if test="${user.role eq 'VISITOR'}"><%@ include file="/WEB-INF/views/journey/journey-start-picker.jspf" %></c:if>
 <a class="home-card home-start" href="${root}${user.role eq 'VISITOR' ? '/journeys' : '/explore'}" ${user.role eq 'VISITOR' ? 'data-popover-open="journey-start-picker" aria-haspopup="dialog"' : ''}><div><span class="home-card-label">장소 · 행사 · 음식점</span><h2>새 여행 만들기</h2><p>마음에 드는 카드를 골라<br>나만의 여행을 시작하세요.</p></div><span class="home-card-action">카드 둘러보기 <span aria-hidden="true">↗</span></span></a>
 <c:if test="${user.role eq 'VISITOR'}">
 <a class="home-card home-drafts" href="${root}/journeys"><div><h2>만들던 여행</h2><strong class="home-card-count">${homeDraftCount}<span>개 제작 중</span></strong><p class="home-draft-name"><c:out value="${empty homeLatestDraft ? '아직 제작 중인 여행이 없어요.' : homeLatestDraft.name}"/></p></div><span class="home-card-action">${empty homeLatestDraft ? '제작 중 목록' : '이어 만들기'} <span aria-hidden="true">→</span></span></a>
@@ -36,19 +36,19 @@
 </div>
 </div>
 </c:when>
-<c:when test="${view eq 'place-feedback-statistics'}"><%@ include file="place-feedback-statistics.jspf" %></c:when>
-<c:when test="${view eq 'public-card'}"><%@ include file="public-card.jspf" %></c:when>
-<c:when test="${view eq 'profile'}"><%@ include file="profile.jspf" %></c:when>
-<c:when test="${view eq 'journey-builder'}"><%@ include file="journey-builder.jspf" %></c:when>
-<c:when test="${view eq 'journey-photocards'}"><%@ include file="journey-photocards.jspf" %></c:when>
-<c:when test="${view eq 'journeys' or view eq 'journey'}"><%@ include file="journeys.jspf" %></c:when>
+<c:when test="${view eq 'place-feedback-statistics'}"><%@ include file="/WEB-INF/views/admin/place-feedback-statistics.jspf" %></c:when>
+<c:when test="${view eq 'public-card'}"><%@ include file="/WEB-INF/views/catalog/public-card.jspf" %></c:when>
+<c:when test="${view eq 'profile'}"><%@ include file="/WEB-INF/views/site/profile.jspf" %></c:when>
+<c:when test="${view eq 'journey-builder'}"><%@ include file="/WEB-INF/views/journey/journey-builder.jspf" %></c:when>
+<c:when test="${view eq 'journey-photocards'}"><%@ include file="/WEB-INF/views/journey/journey-photocards.jspf" %></c:when>
+<c:when test="${view eq 'journeys' or view eq 'journey'}"><%@ include file="/WEB-INF/views/journey/journeys.jspf" %></c:when>
 <c:when test="${view eq 'error'}"><h1>요청 확인</h1><p class="error" role="alert"><c:out value="${message}"/></p><p>오류 코드: <c:out value="${errorCode}"/></p><a href="${root}/">처음으로</a></c:when>
-<c:when test="${view eq 'login'}"><%@ include file="login.jspf" %></c:when>
-<c:when test="${view eq 'catalog' or view eq 'product' or view eq 'merchant' or view eq 'place'}"><%@ include file="catalog.jspf" %></c:when>
-<c:when test="${view eq 'recommendations'}"><%@ include file="recommendations.jspf" %></c:when>
-<c:when test="${view eq 'passes' or view eq 'pass'}"><%@ include file="passes.jspf" %></c:when>
-<c:when test="${view eq 'redeem' or view eq 'confirm' or view eq 'history' or view eq 'feedback'}"><%@ include file="usage.jspf" %></c:when>
-<c:when test="${view eq 'admin' or view eq 'editor' or view eq 'relations' or view eq 'goods'}"><%@ include file="admin.jspf" %></c:when>
+<c:when test="${view eq 'login'}"><%@ include file="/WEB-INF/views/site/login.jspf" %></c:when>
+<c:when test="${view eq 'catalog' or view eq 'product' or view eq 'merchant' or view eq 'place'}"><%@ include file="/WEB-INF/views/catalog/catalog.jspf" %></c:when>
+<c:when test="${view eq 'recommendations'}"><%@ include file="/WEB-INF/views/catalog/recommendations.jspf" %></c:when>
+<c:when test="${view eq 'passes' or view eq 'pass'}"><%@ include file="/WEB-INF/views/pass/passes.jspf" %></c:when>
+<c:when test="${view eq 'redeem' or view eq 'confirm' or view eq 'history' or view eq 'feedback'}"><%@ include file="/WEB-INF/views/pass/usage.jspf" %></c:when>
+<c:when test="${view eq 'admin' or view eq 'editor' or view eq 'relations' or view eq 'goods'}"><%@ include file="/WEB-INF/views/admin/admin.jspf" %></c:when>
 </c:choose></main><c:if test="${view ne 'landing'}"><footer class="site-footer">수업용 시연 서비스 · 화면 시각은 한국 시간 · 실제 관광 자료의 영업·예약·이동 가능성은 미확인</footer></c:if><c:if test="${view ne 'landing' and view ne 'login'}"><nav class="bottom-nav" aria-label="주 메뉴"><div class="bottom-nav-inner">
 <a href="${root}/" ${view eq 'home' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z"/></svg><span>홈</span></a>
 <c:if test="${empty user or user.role eq 'VISITOR'}"><a href="${root}/passes" ${view eq 'passes' or view eq 'pass' or view eq 'history' or view eq 'feedback' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Zm12 2v2m0 2v2m0 2v1"/></svg><span>내 투어패스</span></a>

@@ -171,7 +171,7 @@ public final class WebHandler {
     public Page home(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
         if("ADMIN".equals(role(user)))return page("home",adminOverview(c));
-        var available=new ArrayList<>(catalog.cards(c));
+        var available=catalog.cards(c);
         Collections.shuffle(available);
         var background=new ArrayList<Map<String,Object>>();
         for(String kind:List.of("place","event"))
@@ -194,24 +194,21 @@ public final class WebHandler {
     public Page catalog(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         var q=query(r);
         method(r,"GET");
-        var products=new ArrayList<Map<String,Object>>();
-        for(var p:catalog.list(c,"products",null))products.add(catalog.product(c,String.valueOf(p.get("id"))));
-        var merchants=new ArrayList<Map<String,Object>>();
-        for(var m:catalog.list(c,"merchants",Input.param(q.get("regionId"))))merchants.add(catalog.merchant(c,String.valueOf(m.get("id"))));
+        var products=catalog.withBenefits(c,"products",null);
+        var merchants=catalog.withBenefits(c,"merchants",Input.param(q.get("regionId")));
         String tab=param(r,"tab");r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities","usage","notes"));
-        if("VISITOR".equals(role(user))){
-            var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
-            if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
-        }
+        activeBenefitPass(c,r,user);
         return page("catalog",Map.of("products",products,"merchants",merchants));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
-        if("VISITOR".equals(role(user))){
-            var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
-            if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
-        }
+        activeBenefitPass(c,r,user);
         return page("product",catalog.product(c,id(r)));
+    }
+    private void activeBenefitPass(Connection c,HttpServletRequest r,Map<String,Object> user) throws java.sql.SQLException {
+        if(!"VISITOR".equals(role(user)))return;
+        var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
+        if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
     }
     public Page merchant(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");return page("merchant",catalog.merchant(c,id(r)));

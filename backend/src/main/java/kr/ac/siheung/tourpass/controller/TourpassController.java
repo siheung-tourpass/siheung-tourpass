@@ -219,7 +219,7 @@ public class TourpassController {
         web.handle(request, response, web::relations);
     }
 
-    @RequestMapping({"/api-docs"})
+    @RequestMapping({"/docs", "/api-docs"})
     public void apiDocs(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.sendRedirect(request.getContextPath() + "/assets/api-docs/index.html");
     }

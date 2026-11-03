@@ -33,6 +33,14 @@ public final class CatalogService {
         else {concept(c,"region",region);all=CatalogDao.merchants(c,region);}
         all.forEach(CatalogService::demo);return all;
     }
+    public List<Map<String,Object>> withBenefits(Connection c,String collection,String region) throws SQLException {
+        var items=list(c,collection,region);
+        for(var item:items){
+            var benefits=collection.equals("products")?CatalogDao.productBenefits(c,item.get("id")):CatalogDao.merchantBenefits(c,item.get("id"));
+            benefits.forEach(CatalogService::demo);item.put("benefits",benefits);
+        }
+        return items;
+    }
     public Map<String,Object> product(Connection c,String id) throws SQLException {
         var p=CatalogDao.product(c,id);require(p!=null,404,"NOT_FOUND");
         var bs=CatalogDao.productBenefits(c,id);bs.forEach(CatalogService::demo);p.put("benefits",bs);return demo(p);
@@ -45,7 +53,7 @@ public final class CatalogService {
         int page=number(query,"page",1,1,Integer.MAX_VALUE),size=number(query,"size",20,1,100);long start=(long)(page-1)*size;
         List<Map<String,Object>> items=start>=all.size()?List.of():all.subList((int)start,(int)Math.min(start+size,all.size()));return Map.of("items",items,"page",page,"size",size,"total",all.size());
     }
-    private static int number(Map<String,List<String>> q,String key,int fallback,int min,int max){String v=Input.param(q.get(key));if(v==null)return fallback;int n=Input.parseInteger(v);require(n>=min&&n<=max,400,"INVALID_INPUT");return n;}
+    private static int number(Map<String,List<String>> q,String key,int fallback,int min,int max){String v=Input.param(q.get(key));return v==null?fallback:Input.integer(Input.parseInteger(v),min,max);}
     public static void concept(Connection c,String table,String id) throws SQLException {if(id!=null)require(CatalogDao.activeConcept(c,table,Input.id(id))!=null,400,"INVALID_CONCEPT");}
     public List<Map<String,Object>> diningCards(Connection c) throws SQLException {
         var regions=new HashMap<Object,Object>();
