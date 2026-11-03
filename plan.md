@@ -20,8 +20,10 @@
 | [frontend](frontend/WEB-INF/views) | JSP·EL/JSTL·이스케이프; SQL·업무 판정·스크립틀릿 금지 |
 | [설정](backend/src/main/resources/application.properties) · [web.xml](frontend/WEB-INF/web.xml) | 내장/외부 실행·세션·JNDI |
 
-- 업무 계층은 표현 계층에, 영속 계층은 업무·표현 계층에 의존하지 않는다. URL별 접근 정책은 SecurityFilter가 소유하고 AuthService는 계정·역할을 검증한다. Database는 공통 트랜잭션 기반이며 요청 단위 트랜잭션 안에서 인증과 업무 처리를 함께 실행한다. 계층 경계는 [아키텍처 검사](backend/tests/architecture_check.py)로 확인한다.
+- 업무 계층은 표현 계층에, 영속 계층은 업무·표현 계층에 의존하지 않는다. URL별 접근 정책은 SecurityFilter가 소유하고 AuthService는 계정·역할을 검증한다. Database는 공통 트랜잭션 기반이며 요청 단위 트랜잭션 안에서 인증과 업무 처리를 함께 실행한다. 계층 경계는 [아키텍처 검사](backend/tests/python/architecture_check.py)로 확인한다.
 - 서버·SQL·데이터·스크립트·검사는 `backend/`, JSP·정적 자산은 `frontend/`, 세부 문서는 `docs/`에 둔다. 로컬 `.runtime/` 경로를 유지한다.
+- JSP는 `views/page.jsp`를 진입점으로 두고 `site`·`admin`·`catalog`·`journey`·`pass`·`shared`로 나눈다. 정적 자산은 `assets/css`·`assets/js`·`assets/images`에 두며 관광 사진·API 문서의 기존 전용 폴더는 유지한다.
+- 검사는 `backend/tests/java`·`python`·`javascript`·`browser`로 나눈다. Python 검사와 공통 HTTP 도구는 같은 폴더에 두어 직접 실행과 모듈 가져오기를 유지한다.
 
 ## 기능별 구현 경계
 
@@ -30,16 +32,16 @@
 | 영역 | 구현 진입점·경계 |
 | --- | --- |
 | 여행 | [JourneyService](backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyService.java)가 구성·스냅샷·방문 기록·이용권 연결을 관리한다. 여행 행 잠금으로 변경을 직렬화한다. |
-| 탐색·선택 | [공통 보드](frontend/WEB-INF/views/journey-builder.jspf)와 [선택 상태](frontend/assets/journey-builder.js)를 공개 탐색·생성·편집에서 공유한다. [카드 이동](frontend/assets/card-scroll.js)은 여행 기록에서도 사용한다. |
+| 탐색·선택 | [공통 보드](frontend/WEB-INF/views/journey/journey-builder.jspf)와 [선택 상태](frontend/assets/js/journey-builder.js)를 공개 탐색·생성·편집에서 공유한다. [카드 이동](frontend/assets/js/card-scroll.js)은 여행 기록에서도 사용한다. |
 | 관계·추론 | [OntologyService](backend/src/main/java/kr/ac/siheung/tourpass/service/OntologyService.java)가 타입·순환·승인 경로·추론·검토를 담당한다. |
 | 추천 | [RecommendationService](backend/src/main/java/kr/ac/siheung/tourpass/service/RecommendationService.java)가 후보 제외·분수 정렬·이유·이용권 사용 가능 판정을 담당한다. 계산 기준은 [추천 모델](docs/tourism-semantics.md)을 따른다. |
 | 평가 | [FeedbackService](backend/src/main/java/kr/ac/siheung/tourpass/service/FeedbackService.java)가 성공 이력 소유권·최초 테마 보존·혜택 평가 변경을, [PlaceFeedbackService](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceFeedbackService.java)가 관광지 평가 저장·집계를 담당한다. |
-| 안내 자료 | [CatalogService](backend/src/main/java/kr/ac/siheung/tourpass/service/CatalogService.java)가 여행·관리자·출력에 공통 카드 자료를 제공한다. [좌표](backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)·[관광 사진](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java)은 코드로 연결한다. |
-| 포토카드 | [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java)가 관리자 출력 대상 검증·QR을 담당하고 JSP·CSS가 인쇄 배치를 담당한다. 방문객 조회는 JourneyService가 소유권·상태를 검사한다. JourneyPhotoService·JourneyPhotoDao는 본인 사진 검증·비공개 DB 저장을 담당하며 공통 포토카드 뷰로 출력한다. |
+| 안내 자료 | [CatalogService](backend/src/main/java/kr/ac/siheung/tourpass/service/CatalogService.java)가 공통 카드 자료와 상품·가맹점의 혜택 목록을 제공한다. API 목록은 기본 자료, 화면 목록은 혜택을 덧붙인 자료를 사용한다. 목록·상세의 발급 조작은 [공통 뷰](frontend/WEB-INF/views/pass/issue-pass.jspf)를 공유한다. [좌표](backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)·[관광 사진](backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceImages.java)은 코드로 연결한다. |
+| 포토카드 | [GoodsService](backend/src/main/java/kr/ac/siheung/tourpass/service/GoodsService.java)가 관리자 출력 대상 검증·QR을 담당하고 JSP·CSS가 인쇄 배치를 담당한다. 방문객 조회는 JourneyService가 소유권·상태를 검사한다. [JourneyPhotoService](backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyPhotoService.java)·[JourneyPhotoDao](backend/src/main/java/kr/ac/siheung/tourpass/dao/JourneyPhotoDao.java)는 본인 사진 검증·비공개 DB 저장을 담당하며 [공통 포토카드 뷰](frontend/WEB-INF/views/shared/photocard.jspf)로 출력한다. |
 
 카카오 인증은 KakaoLoginService가 외부 인가 코드·회원번호 확인을, AuthService·AuthDao가 방문객 계정 조회·생성을 담당한다. WebHandler는 state·세션·콜백을 처리하며 외부 호출 후 DB 트랜잭션을 연다.
 
-화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용한다. API 혜택 확인 자원은 DB에서 조회·소비한다. 인증·요청 방법은 [API 사용 안내](docs/api-usage.md), 화면과 API의 인증 경계·HTTP 계약은 [RESTful API](spec.md#restful-api)를 따른다. [OpenAPI 명세](frontend/assets/api-docs/openapi.yaml)는 현재 구현을 기술하며 `/api-docs`에서 Swagger UI로 제공한다.
+화면의 비동기 추천은 `/recommendations`의 JSON 표현을 사용하고 API의 혜택 확인 자원은 DB에서 조회·소비한다. 인증 경계·HTTP 계약은 [공통 요구사항](spec.md#restful-api), 요청·명세 확인은 [README의 API 안내](README.md#api)를 따른다.
 
 ## 실행 범위
 
@@ -49,7 +51,7 @@
 
 테스트는 정책 경계·권한·저장 결과·사용자 조작을 검증하며, 단순 문구·장식 스타일·데이터의 고정 개수는 고정하지 않는다.
 
-자동 검사의 환경·명령·DB 분리는 [README 테스트](README.md#테스트)를 따른다. 자동 검사 통과와 자료 최신성 검토·사용자 검증은 별도로 확인하며, 최종 판정은 [완료 기준](spec.md#완료-기준)을 따른다.
+자동 검사의 실행 환경·명령은 [README 테스트](README.md#테스트)를 따른다. 자료 최신성 검토와 사용자 검증은 자동 검사 통과 여부와 별도로 확인한다.
 
 ## 남은 작업
 
@@ -58,5 +60,5 @@
 | 미확보 음식점·카페 사진 | [이미지 조사](docs/data-collection/dining-images.md)의 미확보 업소는 촬영 대상 또는 재사용 조건 미확인 | 대상 일치·이용 조건 확인 후 등록 |
 | 행사 자료 | 수집 내용 관리자 검토 대기 | [행사 데이터](docs/data-collection/events-data.md)의 공식 안내를 재확인하고 검토 |
 | 관광 운영 조건 | 최신 운영기관 자료 미확보 | [검토 기준](docs/data-collection/tourism-data.md#검토)에 따라 운영·예약·접근 조건을 확인 후 보완 |
-| 사용자 검증 | 참여자 미확보 | [검증 절차](docs/project-validation.md#검증-절차)의 참여자 확보 후 과제 수행 |
+| 사용자 검증 | 참여자 미확보 | [검증 절차](docs/presentation/project-validation.md#검증-절차)의 참여자 확보 후 과제 수행 |
 | AWS 배포 | 공식 배포 요구 미확인 | 요구 확인 후 범위·설계 결정 |

@@ -1,0 +1,6 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="pass-card-action"><c:choose>
+<c:when test="${not empty activeBenefitPass}"><button disabled>지금 발급 · 24시간</button><span>사용 중인 이용권이 있어 발급할 수 없어요</span></c:when>
+<c:when test="${user.role eq 'VISITOR'}"><form method="post" action="${root}/passes/issue"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="productId" value="${issueProduct.id}"><button ${view eq 'product' ? 'aria-label="시연 혜택 이용권 발급"' : ''}>지금 발급 · 24시간${view eq 'product' ? ' 시작' : ''}</button></form></c:when>
+<c:when test="${empty user}"><a ${view eq 'catalog' ? 'class="button secondary"' : ''} href="${root}/login">로그인 후 발급</a></c:when>
+</c:choose></div>

@@ -5,7 +5,7 @@ info:
   description: |
     현재 구현된 `/api/v1` API만 기능별로 묶어 보여 준다.
 
-    **인증**: 쿠키 없이 요청마다 Basic 인증을 사용한다. 오른쪽 **Authorize**에 시연 계정을 입력한다. 경로 접두사로 역할이 정해진다.
+    **인증**: 쿠키 없이 요청마다 Basic 인증을 사용한다. Scalar의 인증 설정에 시연 계정을 입력한다. 경로 접두사로 역할이 정해진다.
     `/me/`는 VISITOR, `/merchant/`는 STAFF, `/admin/`은 ADMIN이며 그 외는 공개다. 잘못된 인증 정보는 공개 경로에서도 401이다.
     401 응답에는 `WWW-Authenticate: Basic`이 포함되므로 브라우저가 자체 로그인 창을 띄울 수 있다.
 

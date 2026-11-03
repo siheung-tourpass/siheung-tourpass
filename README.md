@@ -4,7 +4,7 @@
 
 시흥시 관광 장소를 추천하고 혜택 이용 후 피드백을 다음 추천에 반영하는 수업용 웹서비스. 추천 장소를 개인 여행 패스에 담고 방문 기록을 보관한다. 혜택 이용권은 시연용·실제 사용 불가다.
 
-관광지·행사·음식점을 함께 발견하고 여행 후에도 기록을 다시 찾는 흐름을 제공한다. 기획 근거와 효과를 확인할 과제는 [지역 문제와 사용자 검증](docs/project-validation.md)을 참고한다.
+관광지·행사·음식점을 함께 발견하고 여행 후에도 기록을 다시 찾는 흐름을 제공한다. 기획 근거와 효과를 확인할 과제는 [지역 문제와 사용자 검증](docs/presentation/project-validation.md)을 참고한다.
 
 ![시흥 투어패스 핵심 기능](docs/assets/key-features.svg)
 
@@ -85,7 +85,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 여행 구성 | 여행 만들기 → 빈 구성·템플릿 선택 → 시작 카드·덱 구성 → 여행 확인 → 이름·날짜 입력 → 임시 저장 또는 제작 확정 |
 | 공개 탐색 | 여행 카드 둘러보기 → 검색·종류·지역·행사 날짜로 탐색 → 카드 상세·공식 안내 확인. 저장 시 방문객 로그인 |
 | 여행 기록 | 내 여행 → 내 패스 → 방문 기록 → 사용 완료 → 여행 기록에서 사진 업로드·교체·삭제 → 사용 완료 여행의 포토카드 인쇄 |
-| 혜택 이용 | 상단 탭(전체 상품·이용 가능 시설·이용 방법·유의사항) 확인 → 전체 상품에서 이용권 발급 → 내 투어패스의 코드를 담당자에게 제시 → 내 투어패스의 사용 이력에서 피드백. 여행 설정의 이용권 연결은 선택 |
+| 혜택 이용 | 전체 상품에서 조건 확인·발급 → 내 투어패스의 코드를 담당자에게 제시 → 사용 이력에서 피드백. 여행 설정의 이용권 연결은 선택 |
 | 관광지 평가 | 관광지 상세 → 만족도·선택 의견 저장·수정·삭제 |
 | 가맹점 담당자 | 코드 입력 → 배정 혜택·잔여 확인 → 사용 확인 → 결과·이력 조회 |
 | 관리자 | 관광·혜택 자료 관리·검토, 통계 조회, 사유 입력 후 이용권 취소. 관광 관리 → 카드 상세 → 카드 출력 → 설정 → 미리보기·인쇄 |
@@ -98,15 +98,21 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 
 ### API
 
-`GET /api/v1/`의 링크에서 시작한다. 전체 명세는 서버 실행 후 `http://localhost:8080/siheung-tourpass/api-docs`의 Swagger UI에서 보고 실행할 수 있다. 요청별 인증·변경 요청 헤더·Bruno 실행 순서는 [API 사용 안내](docs/api-usage.md)를 따른다.
+서버 실행 후 [Scalar](http://localhost:8080/siheung-tourpass/api-docs)에서 요청·응답을 확인한다. API 탐색은 `GET /api/v1/`의 응답 링크에서 시작한다. 보호된 요청은 Scalar 인증 설정에 시연 계정을 입력하고, 변경 요청에는 `X-CSRF-Token: api`를 전달한다. 로컬 시연 외에는 Basic 인증을 HTTPS로 전송한다.
+
+Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다. `Auth / Index`와 역할별 `Select` 요청을 실행하면 인증·CSRF 헤더가 자동 적용된다. 변경 요청은 [별도 테스트 DB](#테스트)에서 개별 실행한다. 역할 전환 순서는 컬렉션의 Docs에 있다. API 변경 시 [명세 원본](frontend/assets/api-docs/openapi.yaml)을 갱신하고 [명세 검사](backend/tests/python/openapi_check.py)로 서버와 비교한다.
 
 ## 테스트
 
-[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 검사 명령과 결과는 워크플로·Actions에서 확인한다. 공통 검사는 한 작업에서 실행하고, 상태를 변경하는 API·화면·관광 통합 검사는 별도 DB에서 실행한다. 검증 범위와 판정 기준은 [구현 계획](plan.md#검증-전략)을 따른다.
+[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 자동 검사 명령·초기화 순서는 워크플로를 원본으로 사용한다. `api`·`web`·`tourism` 작업의 초기 자료가 다르며, DB를 변경하므로 시연·보관용 DB와 분리한다. 검증 범위는 [구현 계획](plan.md#검증-전략), 최종 판정은 [완료 기준](spec.md#완료-기준)을 따른다.
 
-통합 검사는 DB를 변경하므로 시연·보관용 DB와 분리한다. CI의 `api`·`web`·`tourism` 작업마다 초기 자료가 다르므로 해당 작업의 초기화 순서를 따른다.
+브라우저 검사는 Node.js·Playwright·Chrome과 별도 테스트 서버의 시연 계정이 필요하다. 외부 경로의 Playwright는 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 아래 URL은 테스트 서버에 맞게 바꾼다.
 
-카드 브라우저 검사는 Playwright와 Chrome이 있는 환경에서 `node backend/tests/cards_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다. Playwright가 외부 경로에 설치되어 있으면 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 검사에는 방문객 시연 계정이 필요하며 생성한 임시 여행은 삭제한다. 사진 업로드·교체·삭제·소유권 검사는 같은 환경에서 `node backend/tests/journey_photos_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다. 관리자·포토카드 브라우저 검사는 같은 환경에서 `node backend/tests/admin_browser_check.cjs http://localhost:8080/siheung-tourpass`로 실행한다.
+| 검사 | 명령 |
+| --- | --- |
+| 카드 탐색·선택·저장 | `node backend/tests/browser/cards_browser_check.cjs http://localhost:8080/siheung-tourpass` |
+| 여행 사진 업로드·교체·삭제·소유권 | `node backend/tests/browser/journey_photos_check.cjs http://localhost:8080/siheung-tourpass` |
+| 관리자·포토카드 출력 | `node backend/tests/browser/admin_browser_check.cjs http://localhost:8080/siheung-tourpass` |
 
 ## 관련 문서
 
@@ -117,7 +123,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 문서 | 담당 내용 |
 | --- | --- |
 | [공통 요구사항](spec.md) | 범위·공통 인증·이용권 정책·API 계약·완료 기준 |
-| [방문객 요구사항](docs/specs/visitor.md) | 탐색·여행·추천·피드백·사진·방문 기록 |
+| [방문객 요구사항](docs/specs/visitor.md) | 공개 탐색·이용권 발급/조회·여행·추천·피드백·사진·방문 기록 |
 | [가맹점 담당자 요구사항](docs/specs/merchant.md) | 혜택 확인·사용 권한 |
 | [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·카드 출력 |
 | [구현 계획](plan.md) | 소스 구조·구현 경계·검증 전략·남은 작업 |
@@ -129,11 +135,16 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 문서 | 담당 내용 |
 | --- | --- |
 | [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·변경 반영·초기 자료 |
-| [API 사용 안내](docs/api-usage.md) | 요청별 인증·헤더·Swagger UI·Bruno 사용 |
-| [지역 문제와 사용자 검증](docs/project-validation.md) | 지역 문제 가설·기능 연결·사용자 검증 과제 |
-| [최종 발표 준비 기준](docs/final-presentation.md) | 심사기준·자료 구성·근거 준비·제출 점검 |
 | [작업 지침](AGENTS.md) | 문서와 코드 변경 원칙 |
 | [이슈·PR 작성 규칙](docs/collaboration.md) | 이슈·PR 제목과 본문 작성 방법 |
+
+### 발표·사용자 검증
+
+| 문서 | 담당 내용 |
+| --- | --- |
+| [최종 발표 준비 기준](docs/presentation/final-presentation.md) | 발표·제출 조건·심사기준·자료 구성·근거 준비·제출 점검 |
+| [지역 문제와 사용자 검증](docs/presentation/project-validation.md) | 지역 문제 가설·기능 연결·역할별 검증 과제·기록 방법 |
+| [거북섬 투어패스 검토 과제](docs/presentation/시흥%20거북섬%20투어패스%20도입을%20위한%20검토%20과제.pdf) | 투어패스 도입 검토 참고 자료 |
 
 ### 데이터 수집·검토
 

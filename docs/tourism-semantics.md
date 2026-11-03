@@ -14,7 +14,7 @@
 
 ## 계산
 
-추천 입력·후보 조건은 [방문객 기능 4](specs/visitor.md#기능), 피드백 적용 대상은 [방문객 기능 6](specs/visitor.md#기능)을 따른다. 이 문서는 점수 계산과 정렬의 원본이다.
+추천 입력은 [방문객 기능 4](specs/visitor.md#추천피드백), 후보 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재), 피드백 적용 대상은 [방문객 기능 6](specs/visitor.md#추천피드백)을 따른다.
 
 | 단계 | 계산·처리 |
 | --- | --- |

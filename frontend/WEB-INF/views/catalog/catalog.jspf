@@ -1,0 +1,41 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:choose><c:when test="${view eq 'catalog'}"><div class="guide">
+<c:if test="${guideTab eq 'products'}"><section class="guide-section" aria-labelledby="guide-products-title"><h1 id="guide-products-title">전체 상품</h1><p>발급부터 24시간 동안 상품에 포함된 가맹점 혜택을 1회씩 받을 수 있어요. 결제는 없습니다.</p>
+<c:forEach var="item" items="${data.products}"><article class="pass-card"><div class="pass-card-main"><h2><a href="${root}/products/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${fn:replace(item.description, '시연용·실제 사용 불가. ', '')}"/></p>
+<c:if test="${not empty item.benefits}"><ul class="guide-benefit-list"><c:forEach var="benefit" items="${item.benefits}"><li><strong><c:out value="${benefit.merchantName}"/></strong> <c:out value="${benefit.name}"/></li></c:forEach></ul></c:if></div>
+<c:set var="issueProduct" value="${item}"/><%@ include file="/WEB-INF/views/pass/issue-pass.jspf" %></article></c:forEach>
+<c:if test="${empty data.products}"><p>판매 중인 상품이 없습니다.</p></c:if></section></c:if>
+<c:if test="${guideTab eq 'facilities'}"><section class="guide-section" aria-labelledby="guide-facilities-title"><h1 id="guide-facilities-title">이용 가능 시설</h1><p>이용권 혜택은 아래 가맹점에서만 받을 수 있어요. 여행 카드의 관광지·행사·음식점·카페는 안내 자료이며 이용권 혜택이 포함되지 않습니다.</p>
+<div class="destination-grid"><c:forEach var="item" items="${data.merchants}"><article class="destination-card guide-facility"><h2><a href="${root}/merchants/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${item.regionName}"/> · <c:out value="${item.locationDescription}"/></p>
+<ul class="guide-benefit-list"><c:forEach var="benefit" items="${item.benefits}"><li><strong><c:choose><c:when test="${benefit.benefitType eq 'FREE_ONCE'}">1회 무료</c:when><c:otherwise><c:out value="${benefit.discountWon}"/>원 할인</c:otherwise></c:choose></strong> <c:out value="${benefit.name}"/></li></c:forEach></ul></article></c:forEach></div>
+<c:if test="${empty data.merchants}"><p>등록된 가맹점이 없습니다.</p></c:if></section></c:if>
+<c:if test="${guideTab eq 'usage'}"><section class="guide-section" aria-labelledby="guide-usage-title"><h1 id="guide-usage-title">이용 방법</h1>
+<h2>혜택 이용권</h2><ol class="benefit-steps guide-steps"><li><strong>상품 확인·발급</strong><span>혜택과 조건을 확인하고 이용할 때 발급해요.</span></li><li><strong>코드 제시</strong><span>내 투어패스의 코드를 가맹점 담당자에게 보여 주세요.</span></li><li><strong>담당자 확인</strong><span>담당자가 혜택을 확인하고 사용 처리하면 1회 차감돼요.</span></li><li><strong>피드백</strong><span>사용 후 남긴 평가는 다음 장소 추천에 반영돼요.</span></li></ol>
+<h2>여행 패스</h2><ol class="benefit-steps guide-steps"><li><strong>카드 고르기</strong><span>관광지와 함께 갈 행사·음식점·카페를 골라 담아요.</span></li><li><strong>순서·이름 정하기</strong><span>상세에서 조건을 비교하고 순서와 이름을 정해 저장해요.</span></li><li><strong>여행 기록</strong><span>확정한 여행에 방문 날짜·메모·사진을 남겨요.</span></li><li><strong>포토카드</strong><span>사용 완료한 여행은 여행 기록에 보관하고 포토카드로 볼 수 있어요.</span></li></ol></section></c:if>
+<c:if test="${guideTab eq 'notes'}"><section class="guide-section" aria-labelledby="guide-notes-title"><h1 id="guide-notes-title">유의사항</h1><ul class="guide-notes">
+<li>이용권은 발급 즉시 24시간 동안 사용할 수 있으며 만료 시각 정각부터 사용할 수 없어요.</li>
+<li>유효한 이용권은 한 번에 하나만 가질 수 있어요.</li>
+<li>각 혜택은 이용권당 1회 사용할 수 있어요.</li>
+<li>담당자의 코드 조회만으로는 차감되지 않으며, 사용 처리를 해야 1회 차감돼요.</li>
+<li>이용권 기간은 여행 날짜와 관계없이 발급 시점부터 시작돼요. 여행에 이용권을 연결하는 것은 선택 사항이에요.</li>
+<li>결제와 예약 없이 이용하며, 취소된 이용권은 사용할 수 없어요.</li>
+<li>여행 패스는 만료되지 않으며, 직접 남긴 방문 기록은 방문 인증이 아니에요.</li>
+<li>관광지·행사·음식점 안내는 영업·예약·이동 가능성을 보장하지 않으니 방문 전 공식 안내를 확인하세요.</li>
+</ul></section></c:if></div>
+</c:when><c:when test="${view eq 'product'}">
+<article class="pass-card"><div class="pass-card-main"><%@ include file="/WEB-INF/views/catalog/catalog-heading.jspf" %>
+<p>발급부터 24시간 · 시작 시각 포함, 만료 시각 제외 · 각 혜택 패스당 1회 · 결제 없음</p></div>
+<c:set var="issueProduct" value="${data}"/><%@ include file="/WEB-INF/views/pass/issue-pass.jspf" %></article>
+<p>유효한 이용권은 한 번에 하나만 가질 수 있어요. 여행 날짜와 관계없이 발급 즉시 시작됩니다. 발급한 이용권은 여행 설정에서 연결하세요.</p><c:set var="benefits" value="${data.benefits}"/><%@ include file="/WEB-INF/views/pass/benefits.jspf" %>
+</c:when><c:otherwise>
+<article class="destination-card destination-detail"><div class="destination-content"><c:if test="${view eq 'place'}"><c:set var="imagePlace" value="${data}"/><%@ include file="/WEB-INF/views/catalog/place-image.jspf" %></c:if>
+<%@ include file="/WEB-INF/views/catalog/catalog-heading.jspf" %><p><c:out value="${data.regionName}"/> · <c:out value="${data.locationDescription}"/></p>
+<c:if test="${view eq 'place'}"><p><c:out value="${data.materialKind eq 'REAL' ? '실제 관광 소개' : '시연 자료'}"/> · 검토 상태: <c:out value="${data.reviewStatusLabel}"/></p><p>근거: <c:out value="${data.evidenceNote}"/></p>
+<c:if test="${not empty data.sourceUrl}"><p><a href="${fn:escapeXml(data.sourceUrl)}" rel="noopener noreferrer">소개 출처</a> · 확인일 <c:out value="${data.checkedOn}"/></p></c:if>
+<c:forEach var="source" items="${data.sources}"><p><a href="${fn:escapeXml(source.sourceUrl)}" rel="noopener noreferrer">추가 출처</a> · <c:out value="${source.checkedOn}"/> · <c:out value="${source.evidenceNote}"/></p></c:forEach>
+<c:set var="addPlaceId" value="${data.id}"/><%@ include file="/WEB-INF/views/journey/add-journey.jspf" %>
+<p>영업·예약·이동 가능성: 미확인. 추천과 소개는 이용 가능성을 보장하지 않습니다.</p><c:if test="${data.materialKind eq 'REAL'}"><%@ include file="/WEB-INF/views/catalog/visit-info.jspf" %></c:if></c:if>
+</div></article><c:set var="benefits" value="${data.benefits}"/><%@ include file="/WEB-INF/views/pass/benefits.jspf" %>
+</c:otherwise></c:choose>
+
+<c:if test="${view eq 'place'}"><%@ include file="/WEB-INF/views/catalog/place-feedback.jspf" %></c:if>
