@@ -126,8 +126,9 @@ assert re.findall(r'name="themeId" value="([0-9]+)" checked', text) == ['2']
 assert '시연 자료' in public.get('/places/detail?id=1')
 public.get('/merchants/detail?id=1')
 visitor.get('/products/detail?id=1'); visitor.submit('/passes/issue')
-pid = urllib.parse.parse_qs(urllib.parse.urlsplit(visitor.location).query)['id'][0]
-text = visitor.get(visitor.location)
+assert visitor.location == '/passes'
+pid = re.search(r'/passes/detail\?id=([0-9]+)', visitor.get('/passes')).group(1)
+text = visitor.get('/passes/detail?id='+pid)
 assert '사용 가능' in text and 'ê' not in text
 with visitor.api('/api/v1/me/passes/'+pid) as response:
     issued = json.load(response)
@@ -136,7 +137,8 @@ for key in ('startsAt','expiresAt'):
     assert kst in text, (key, kst)
 code = html.unescape(re.search(r'class="code">(.*?)</p>', text).group(1))
 other.get('/passes/detail?id='+pid, 404)
-text=visitor.get('/products/detail?id=1'); assert '발급한 이용권 보기' in text
+assert all('<button disabled>지금 발급 · 24시간</button>' in visitor.get(path) for path in ('/products/detail?id=1','/merchants'))
+text=visitor.get('/passes'); assert 'class="code">'+html.escape(code)+'</p>' in text and '남은 시간' in text
 csrf=re.search(r'name="csrf" value="([^"]+)"',visitor.get('/profile')).group(1)
 visitor.request('/passes/issue', {'csrf':csrf,'productId':'1'},409)
 staff.get('/merchant/redeem'); text=staff.submit('/merchant/redeem/lookup', {'merchantId':'1','code':code}, 200)
@@ -165,10 +167,19 @@ public.get('/journeys/new',303)
 staff.get('/journeys/new',403)
 text=visitor.get('/journeys/new')
 visitor.submit('/journeys/create', {'name':'장소 없음','intent':'confirm'},400)
-# Five-stage navigation, profile-only account controls, editable/deletable drafts.
+# Visitor navigation, tour pass guide, profile-only account controls, editable/deletable drafts.
 text=visitor.get('/profile')
 nav=text.split('aria-label="주 메뉴"')[1]
-assert all('<span>'+label+'</span>' in nav for label in ('홈','여행 만들기','내 패스','여행 기록','프로필'))
+assert all('<span>'+label+'</span>' in nav for label in ('홈','내 투어패스','여행 만들기','내 여행','프로필'))
+assert all(label in text for label in ('aria-label="투어패스 안내"','/merchants?tab=facilities','/merchants?tab=usage','/merchants?tab=notes'))
+for tab,title in (('products','전체 상품'),('facilities','이용 가능 시설'),('usage','이용 방법'),('notes','유의사항')):
+    guide=public.get('/merchants?tab='+tab)
+    assert 'id="guide-'+tab+'-title">'+title+'</h1>' in guide and guide.count('<h1')==1
+public.get('/merchants?tab=unknown',400)
+assert '/merchants?tab=' not in staff.get('/merchant/redeem')
+assert '혜택 사용 이력' in visitor.get('/passes')
+text=visitor.get('/journeys?status=ARCHIVED')
+assert 'aria-label="내 여행 구분"' in text and '/journeys?status=CONFIRMED' in text
 visitor.get('/journeys/new');visitor.submit('/journeys/create', {'name':'임시 패스','placeId':['2','1']})
 draft_url=visitor.location
 assert draft_url.startswith('/journeys/edit?id=')

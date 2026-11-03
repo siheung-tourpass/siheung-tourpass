@@ -193,7 +193,17 @@ public final class WebHandler {
     }
     public Page catalog(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         var q=query(r);
-        method(r,"GET");return page("catalog",Map.of("products",catalog.list(c,"products",null),"merchants",catalog.list(c,"merchants",Input.param(q.get("regionId")))));
+        method(r,"GET");
+        var products=new ArrayList<Map<String,Object>>();
+        for(var p:catalog.list(c,"products",null))products.add(catalog.product(c,String.valueOf(p.get("id"))));
+        var merchants=new ArrayList<Map<String,Object>>();
+        for(var m:catalog.list(c,"merchants",Input.param(q.get("regionId"))))merchants.add(catalog.merchant(c,String.valueOf(m.get("id"))));
+        String tab=param(r,"tab");r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities","usage","notes"));
+        if("VISITOR".equals(role(user))){
+            var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
+            if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
+        }
+        return page("catalog",Map.of("products",products,"merchants",merchants));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
@@ -276,7 +286,15 @@ public final class WebHandler {
     public Page passes(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
         var q=query(r);
-        method(r,"GET");return page("passes",passes.list(c,uid,q));
+        method(r,"GET");var list=passes.list(c,uid,q);
+        var active=list.stream().filter(p->"ACTIVE".equals(p.get("status"))).findFirst();
+        if(active.isPresent()){
+            r.setAttribute("activeBenefitPass",display(passes.detail(c,uid,String.valueOf(active.get().get("id")),false)));
+            long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
+            r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");
+        }
+        r.setAttribute("benefitHistory",display(redemption.history(c,uid,false,null)));
+        return page("passes",list);
     }
     public Page passDetail(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -284,7 +302,7 @@ public final class WebHandler {
     }
     public Page issuePass(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"POST");return redirect("/passes/detail?id="+passes.issue(c,uid,form(r,"productId")).get("id"));
+        method(r,"POST");passes.issue(c,uid,form(r,"productId"));return redirect("/passes");
     }
     public Page history(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -501,8 +519,8 @@ public final class WebHandler {
     }
     private static Map<String,String> journeyText(String status){
         return switch(status){
-            case "CONFIRMED"->Map.of("title","내 패스","intro","제작을 확정한 패스입니다. 여행을 마치면 사용 완료로 보관하세요.","section","제작 확정","empty","제작을 확정한 패스가 없습니다","emptyHint","여행 만들기에서 카드를 골라 임시 저장하거나 제작을 확정해 보세요.");
-            case "ARCHIVED"->Map.of("title","여행 기록","intro","사용을 마친 패스와 여행 기록을 아카이브에 보관합니다.","section","아카이브","empty","사용 완료한 패스가 없습니다","emptyHint","확정한 패스에서 사용 완료를 누르면 여기에 보관됩니다.");
+            case "CONFIRMED"->Map.of("title","내 여행","intro","제작을 확정한 패스입니다. 여행을 마치면 사용 완료로 보관하세요.","section","제작 확정","empty","제작을 확정한 패스가 없습니다","emptyHint","여행 만들기에서 카드를 골라 임시 저장하거나 제작을 확정해 보세요.");
+            case "ARCHIVED"->Map.of("title","내 여행","intro","사용을 마친 패스와 여행 기록을 아카이브에 보관합니다.","section","아카이브","empty","사용 완료한 패스가 없습니다","emptyHint","확정한 패스에서 사용 완료를 누르면 여기에 보관됩니다.");
             default->Map.of("title","여행 만들기","intro","카드를 탐색해 새 패스를 제작하거나 임시 저장한 패스를 이어 만드세요.","section","제작 중","empty","제작 중인 패스가 없습니다","emptyHint","여행 만들기에서 카드를 골라 임시 저장하거나 제작을 확정해 보세요.");
         };
     }
