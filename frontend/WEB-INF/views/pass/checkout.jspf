@@ -1,0 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="checkout"><h1>투어패스 구매</h1>
+<section class="panel" aria-labelledby="checkout-product"><p class="trip-pass-label"><c:out value="${empty checkoutJourney ? '선택한 상품' : checkoutJourney.name}"/></p><h2 id="checkout-product"><c:out value="${data.name}"/></h2><p><c:out value="${data.description}"/></p>
+<dl class="checkout-summary"><dt>이용 일정</dt><dd><c:out value="${checkoutStart}"/></dd><dt>포함 혜택</dt><dd>아래 ${fn:length(data.benefits)}곳 · 각 1회</dd></dl>
+<ul class="guide-benefit-list"><c:forEach var="benefit" items="${data.benefits}"><li><strong><c:out value="${benefit.placeName}"/></strong> <c:out value="${benefit.name}"/></li></c:forEach></ul></section>
+<section class="panel checkout-pay" aria-label="결제"><p class="checkout-total"><span>결제 금액</span><strong><fmt:formatNumber value="${data.priceWon}"/>원</strong></p>
+<c:choose><c:when test="${checkoutConflict}"><button disabled>결제하기</button><p class="form-hint">같은 날 쓰는 투어패스가 이미 있어요. 내 투어패스를 확인해 주세요.</p></c:when>
+<c:otherwise><form method="post" action="${root}/passes/issue"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="productId" value="${data.id}"><c:if test="${not empty checkoutJourney}"><input type="hidden" name="journeyId" value="${checkoutJourney.id}"></c:if><button><fmt:formatNumber value="${data.priceWon}"/>원 결제하기</button></form><p class="form-hint">시연 결제로 실제 금액은 청구되지 않아요.</p></c:otherwise></c:choose></section></div>

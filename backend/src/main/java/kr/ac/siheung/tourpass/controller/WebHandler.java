@@ -19,7 +19,7 @@ public final class WebHandler {
         Map.entry("code","고유 코드"),
         Map.entry("name","이름"),
         Map.entry("description","소개·내용"),
-        Map.entry("locationDescription","위치 설명 · 가맹점에는 ‘가상’ 포함"),
+        Map.entry("locationDescription","위치 설명"),
         Map.entry("reservationNote","예약 조건"),
         Map.entry("benefitType","혜택 유형"),
         Map.entry("basePriceWon","기준 금액 · 무료 혜택이면 비움"),
@@ -109,11 +109,12 @@ public final class WebHandler {
         case "FORBIDDEN"->"이 작업을 수행할 권한이 없습니다.";
         case "CSRF_INVALID"->"폼이 만료되었습니다. 화면을 다시 열고 제출해 주세요.";
         case "NOT_FOUND","PASS_CODE_NOT_FOUND"->"조회할 수 있는 자료가 없습니다.";
-        case "ACTIVE_PASS_EXISTS"->"이미 유효한 패스가 있습니다. 내 패스를 확인해 주세요.";
+        case "ACTIVE_PASS_EXISTS"->"이미 사용 예정이거나 사용 중인 투어패스가 있습니다. 내 투어패스를 확인해 주세요.";
         case "BENEFIT_ALREADY_USED"->"이미 사용한 혜택입니다.";
         case "PASS_EXPIRED","EXPIRED"->"만료된 패스입니다.";
         case "PASS_CANCELLED","CANCELLED"->"취소된 패스입니다.";
-        case "PASS_NOT_STARTED","NOT_STARTED"->"사용 기간이 시작되지 않았습니다.";
+        case "PASS_NOT_STARTED"->"사용 기간이 시작되지 않았습니다.";
+        case "NOT_STARTED"->"사용 예정";
         case "MERCHANT_INACTIVE"->"비활성 가맹점입니다.";
         case "BENEFIT_INACTIVE"->"비활성 혜택입니다.";
         case "PRODUCT_INACTIVE","NO_ISSUABLE_BENEFITS"->"현재 발급할 수 없는 상품입니다.";
@@ -197,18 +198,11 @@ public final class WebHandler {
         var products=catalog.withBenefits(c,"products",null);
         var merchants=catalog.withBenefits(c,"merchants",Input.param(q.get("regionId")));
         String tab=param(r,"tab");r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities","usage","notes"));
-        activeBenefitPass(c,r,user);
         return page("catalog",Map.of("products",products,"merchants",merchants));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
-        activeBenefitPass(c,r,user);
         return page("product",catalog.product(c,id(r)));
-    }
-    private void activeBenefitPass(Connection c,HttpServletRequest r,Map<String,Object> user) throws java.sql.SQLException {
-        if(!"VISITOR".equals(role(user)))return;
-        var active=passes.list(c,userId(user),Map.of("status",List.of("ACTIVE")));
-        if(!active.isEmpty())r.setAttribute("activeBenefitPass",display(active.get(0)));
     }
     public Page merchant(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");return page("merchant",catalog.merchant(c,id(r)));
@@ -243,18 +237,37 @@ public final class WebHandler {
         String uid=userId(user);
         method(r,"GET");String journeyId=id(r);var journey=new JourneyService().detail(c,uid,journeyId);
         if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journeyId);
-        journeyCovers(c,List.of(journey));
+        journeyCovers(c,List.of(journey));tourpassBenefits(c,r,journey);
         r.setAttribute("journeyStatus",journey.get("status"));r.setAttribute("benefitPasses",passes.list(c,uid,Map.of()));return page("journey",journey);
+    }
+    /** Benefits per trip card: the linked pass's issued benefits, otherwise what each card offers and the best-fitting product. */
+    @SuppressWarnings("unchecked")
+    private void tourpassBenefits(Connection c,HttpServletRequest r,Map<String,Object> journey) throws java.sql.SQLException {
+        var places=(List<Map<String,Object>>)journey.get("places");
+        var pass=(Map<String,Object>)journey.get("benefitPass");
+        var byCard=new HashMap<String,List<Map<String,Object>>>();
+        if(pass!=null)for(var b:(List<Map<String,Object>>)pass.get("benefits"))byCard.computeIfAbsent(CatalogService.cardKey(b),k->new ArrayList<>()).add(b);
+        else byCard.putAll(catalog.benefitsByCard(c));
+        for(var place:places){var list=byCard.get(place.get("cardKey"));if(list!=null)place.put("tourpassBenefits",list);}
+        if(pass==null&&!"ARCHIVED".equals(journey.get("status"))){
+            var product=catalog.productFor(c,places.stream().map(p->(String)p.get("cardKey")).toList());
+            if(product!=null)r.setAttribute("recommendedProduct",display(product));
+        }
     }
     public Page saveDraft(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String path=r.getServletPath();
         String uid=userId(user);
         method(r,"POST");String intent=param(r,"intent");if(intent==null)intent="draft";
-        Input.choice(intent,"draft","confirm");String journeyId=path.endsWith("update")?id(r):null;
+        Input.choice(intent,"draft","confirm","purchase");String journeyId=path.endsWith("update")?id(r):null;
         var cards=values(r,"cardKey");
         var journey=new JourneyService().saveDraft(c,uid,journeyId,form(r,"name","travelDate"),
-            cards!=null?cards:values(r,"placeId"),intent.equals("confirm"));
-        return redirect("/journeys/"+(journey.get("status").equals("PLANNING")?"edit":"detail")+"?id="+journey.get("id"));
+            cards!=null?cards:values(r,"placeId"),!intent.equals("draft"));
+        if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journey.get("id"));
+        if(intent.equals("purchase")){
+            var product=catalog.productFor(c,((List<?>)journey.get("places")).stream().map(p->(String)Input.object(p).get("cardKey")).toList());
+            if(product!=null)return redirect("/passes/checkout?productId="+product.get("id")+"&journeyId="+journey.get("id"));
+        }
+        return redirect("/journeys/detail?id="+journey.get("id"));
     }
     public Page deleteJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -284,11 +297,12 @@ public final class WebHandler {
         String uid=userId(user);
         var q=query(r);
         method(r,"GET");var list=passes.list(c,uid,q);
-        var active=list.stream().filter(p->"ACTIVE".equals(p.get("status"))).findFirst();
+        var active=list.stream().filter(p->"ACTIVE".equals(p.get("status"))).findFirst()
+            .or(()->list.stream().filter(p->"NOT_STARTED".equals(p.get("status"))).min(Comparator.comparing(p->(String)p.get("startsAt"))));
         if(active.isPresent()){
             r.setAttribute("activeBenefitPass",display(passes.detail(c,uid,String.valueOf(active.get().get("id")),false)));
-            long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
-            r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");
+            if("ACTIVE".equals(active.get().get("status"))){long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
+            r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");}
         }
         r.setAttribute("benefitHistory",display(redemption.history(c,uid,false,null)));
         return page("passes",list);
@@ -299,7 +313,19 @@ public final class WebHandler {
     }
     public Page issuePass(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"POST");passes.issue(c,uid,form(r,"productId"));return redirect("/passes");
+        method(r,"POST");String journey=param(r,"journeyId");if(journey!=null)journey=Input.id(journey);
+        passes.issue(c,uid,Input.id(param(r,"productId")),journey);
+        return redirect(journey==null?"/passes":"/journeys/detail?id="+journey);
+    }
+    public Page checkout(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        method(r,"GET");String uid=userId(user);var product=catalog.product(c,Input.id(param(r,"productId")));
+        require(CatalogService.onSale(product),409,"PRODUCT_INACTIVE");
+        String journeyId=param(r,"journeyId");Map<String,Object> journey=null;
+        if(journeyId!=null){journey=new JourneyService().cards(c,uid,Input.id(journeyId));r.setAttribute("checkoutJourney",display(journey));}
+        Instant now=Instant.now(),start=PassService.start(journey,now);
+        r.setAttribute("checkoutStart",start.equals(now)?"결제 즉시 시작 · 24시간":journey.get("travelDate")+" 하루(0시~24시)");
+        r.setAttribute("checkoutConflict",passes.overlaps(c,uid,start,start.plus(Duration.ofHours(24))));
+        return page("checkout",product);
     }
     public Page history(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -471,9 +497,20 @@ public final class WebHandler {
         for(var item:relations){item.put("fromName",names.get(fromCollection).get(item.get(fields.get("fromKey"))));item.put("toName",names.get(toCollection).get(item.get(fields.get("toKey"))));}
         return page("relations",relations);
     }
+    /** Products with the card keys their benefits cover, for the review step's recommendation. */
+    @SuppressWarnings("unchecked")
+    private static List<Map<String,Object>> passOffers(Connection c) throws java.sql.SQLException {
+        var offers=new ArrayList<Map<String,Object>>();
+        for(var product:new CatalogService().withBenefits(c,"products",null)){
+            var keys=((List<Map<String,Object>>)product.get("benefits")).stream().map(CatalogService::cardKey).distinct().toList();
+            if(!keys.isEmpty()&&CatalogService.onSale(product))offers.add(Map.of("id",product.get("id"),"name",product.get("name"),"priceWon",product.get("priceWon"),"cards",String.join(" ",keys)));
+        }
+        return offers;
+    }
     private static Page builder(Connection c,HttpServletRequest r,String uid,String id) throws Exception {
         var ontology=new OntologyService();
         var cards=new CatalogService().cards(c);
+        r.setAttribute("passOffers",passOffers(c));
         var places=cards.stream().filter(card->"place".equals(card.get("kind"))).toList();
         var selectedOrder=new ArrayList<String>();
         var byKey=new LinkedHashMap<String,Map<String,Object>>();

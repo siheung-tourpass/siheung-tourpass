@@ -129,6 +129,11 @@ public class TourpassController {
         web.handle(request, response, web::passDetail);
     }
 
+    @RequestMapping({"/passes/checkout"})
+    public void checkout(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        web.handle(request, response, web::checkout);
+    }
+
     @RequestMapping({"/passes/issue"})
     public void issuePass(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         web.handle(request, response, web::issuePass);
