@@ -35,6 +35,8 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
    psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < backend/sql/seed.sql
    python3 backend/scripts/tourism-sql.py --replace-demo > /tmp/siheung-tourism.sql
    psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < /tmp/siheung-tourism.sql
+   python3 backend/scripts/tourpass-sql.py > /tmp/siheung-tourpass.sql
+   psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < /tmp/siheung-tourpass.sql
    ```
 
    기존 DB는 초기화 SQL 대신 백업 후 [마이그레이션 디렉터리](backend/sql/migrations)의 SQL 중 아직 적용하지 않은 파일만 번호 순서대로 한 번씩 적용한다. 각 파일의 적용 명령은 `psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < 파일경로`다. 신규 스키마에는 이미 포함되어 있다. 새 테이블이 추가되면 2단계의 앱 계정 권한 부여도 다시 실행한다.
@@ -85,7 +87,7 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 여행 구성 | 여행 만들기 → 빈 구성·템플릿 선택 → 시작 카드·덱 구성 → 여행 확인 → 이름·날짜 입력 → 임시 저장 또는 제작 확정 |
 | 공개 탐색 | 여행 카드 둘러보기 → 검색·종류·지역·행사 날짜로 탐색 → 카드 상세·공식 안내 확인. 저장 시 방문객 로그인 |
 | 여행 기록 | 내 여행 → 내 패스 → 방문 기록 → 사용 완료 → 여행 기록에서 사진 업로드·교체·삭제 → 사용 완료 여행의 포토카드 인쇄 |
-| 혜택 이용 | 전체 상품에서 조건 확인·발급 → 내 투어패스의 코드를 담당자에게 제시 → 사용 이력에서 피드백. 여행 설정의 이용권 연결은 선택 |
+| 투어패스 구매·이용 | 여행 만들기 → 여행 확인의 `확정하고 투어패스 구매`(또는 전체 상품에서 구매) → 시연 결제 → 여행 카드의 혜택 배지 확인 → 내 투어패스 코드를 담당자에게 제시 → 사용 이력에서 피드백 |
 | 관광지 평가 | 관광지 상세 → 만족도·선택 의견 저장·수정·삭제 |
 | 가맹점 담당자 | 코드 입력 → 배정 혜택·잔여 확인 → 사용 확인 → 결과·이력 조회 |
 | 관리자 | 관광·혜택 자료 관리·검토, 통계 조회, 사유 입력 후 이용권 취소. 관광 관리 → 카드 상세 → 카드 출력 → 설정 → 미리보기·인쇄 |
@@ -155,3 +157,4 @@ Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다.
 | [행사 데이터](docs/data-collection/events-data.md) | 행사 일정·장소 연결·이미지·배포 조건 |
 | [음식점 데이터](docs/data-collection/dining-data.md) | 공식 지정 업소의 공개·분류·이미지·배포 조건 |
 | [음식점 이미지 조사](docs/data-collection/dining-images.md) | 미등록 사진 후보 근거·미확보 사유·재개 조건 |
+| [투어패스 시연 자료](docs/data-collection/tourpass-data.md) | 가상 가맹점·상품·가격 자료의 성격과 적재 |

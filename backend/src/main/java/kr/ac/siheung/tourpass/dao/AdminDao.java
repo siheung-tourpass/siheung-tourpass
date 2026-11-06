@@ -13,8 +13,8 @@ public final class AdminDao {
     public static Map<String,Object> lock(Connection c, String table, Object id) throws SQLException {
         return one(c,"SELECT * FROM "+table+" WHERE id=? FOR UPDATE",id);
     }
-    public static Map<String,Object> approvedDemoPlace(Connection c, Object placeId) throws SQLException {
-        return one(c,"SELECT p.id FROM place p JOIN region r ON r.id=p.region_id WHERE p.id=? AND p.material_kind='DEMO' AND p.active=TRUE AND p.review_status='APPROVED' AND r.active=TRUE",placeId);
+    public static Map<String,Object> merchantPlace(Connection c, Object placeId) throws SQLException {
+        return one(c,"SELECT p.id,p.region_id FROM place p JOIN region r ON r.id=p.region_id WHERE p.id=? AND p.active=TRUE AND (p.material_kind='REAL' OR p.review_status='APPROVED') AND r.active=TRUE",placeId);
     }
     public static String create(Connection c, String table, Map<String,Object> values) throws SQLException {
         return insertValues(c,table,values);
