@@ -1,0 +1,13 @@
+BEGIN;
+ALTER TABLE merchant ALTER COLUMN place_id DROP NOT NULL;
+ALTER TABLE merchant ADD COLUMN dining_code VARCHAR(64);
+ALTER TABLE merchant ADD COLUMN region_id BIGINT REFERENCES region(id);
+UPDATE merchant m SET region_id=p.region_id FROM place p WHERE p.id=m.place_id;
+ALTER TABLE merchant ALTER COLUMN region_id SET NOT NULL;
+ALTER TABLE merchant ADD CHECK((place_id IS NULL)<>(dining_code IS NULL));
+ALTER TABLE product ADD COLUMN price_won INT NOT NULL DEFAULT 0 CHECK(price_won>=0);
+UPDATE product SET price_won=9900 WHERE code='DEMO_DAY';
+ALTER TABLE issued_pass ADD COLUMN price_won INT NOT NULL DEFAULT 0 CHECK(price_won>=0);
+ALTER TABLE issued_benefit ALTER COLUMN place_id DROP NOT NULL;
+ALTER TABLE issued_benefit ADD COLUMN dining_code VARCHAR(64);
+COMMIT;

@@ -21,7 +21,7 @@ public final class PassDao {
         return rows(c,RedemptionDao.HISTORY+" WHERE p.id=? ORDER BY r.used_at DESC,r.id DESC",id);
     }
     public static List<Map<String,Object>> list(Connection c, String owner) throws SQLException {
-        return rows(c,"SELECT id,owner_id,product_id,product_name,starts_at,expires_at,cancelled_at,demo_only FROM issued_pass"+(owner==null?"":" WHERE owner_id=?")+" ORDER BY starts_at DESC,id DESC",owner==null?new Object[]{}:new Object[]{owner});
+        return rows(c,"SELECT id,owner_id,product_id,product_name,price_won,starts_at,expires_at,cancelled_at,demo_only FROM issued_pass"+(owner==null?"":" WHERE owner_id=?")+" ORDER BY starts_at DESC,id DESC",owner==null?new Object[]{}:new Object[]{owner});
     }
     public static Map<String,Object> owned(Connection c, Object id, Object user) throws SQLException {
         return one(c,"SELECT id FROM issued_pass WHERE id=? AND owner_id=?",id,user);
@@ -30,17 +30,17 @@ public final class PassDao {
         return one(c,"SELECT * FROM product WHERE id=? FOR UPDATE",productId);
     }
     public static List<Map<String,Object>> issuableBenefits(Connection c, Object productId) throws SQLException {
-        return rows(c,CatalogDao.BENEFITS+" WHERE b.product_id=? AND b.active=TRUE AND m.active=TRUE AND p.active=TRUE AND p.review_status='APPROVED' AND p.material_kind='DEMO' AND r.active=TRUE ORDER BY b.id FOR UPDATE",productId);
+        return rows(c,CatalogDao.BENEFITS+" WHERE b.product_id=? AND b.active=TRUE AND m.active=TRUE AND (m.place_id IS NULL OR (p.active=TRUE AND (p.material_kind='REAL' OR p.review_status='APPROVED'))) AND r.active=TRUE ORDER BY b.id FOR UPDATE OF b,m",productId);
     }
-    public static Map<String,Object> activePass(Connection c, Object user, java.time.Instant now) throws SQLException {
-        return one(c,"SELECT id FROM issued_pass WHERE owner_id=? AND cancelled_at IS NULL AND starts_at<=? AND expires_at>? FOR UPDATE",user,now,now);
+    public static Map<String,Object> overlappingPass(Connection c, Object user, java.time.Instant startsAt, java.time.Instant expiresAt) throws SQLException {
+        return one(c,"SELECT id FROM issued_pass WHERE owner_id=? AND cancelled_at IS NULL AND starts_at<? AND expires_at>? LIMIT 1",user,expiresAt,startsAt);
     }
-    public static String create(Connection c, Object user, Object productId, Object code, Object name, java.time.Instant startsAt, java.time.Instant expiresAt) throws SQLException {
-        return insert(c,"INSERT INTO issued_pass(owner_id,product_id,code,product_name,starts_at,expires_at) VALUES(?,?,?,?,?,?) ON CONFLICT(code) DO NOTHING",user,productId,code,name,startsAt,expiresAt);
+    public static String create(Connection c, Object user, Object productId, Object code, Object name, Object priceWon, java.time.Instant startsAt, java.time.Instant expiresAt) throws SQLException {
+        return insert(c,"INSERT INTO issued_pass(owner_id,product_id,code,product_name,price_won,starts_at,expires_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(code) DO NOTHING",user,productId,code,name,priceWon,startsAt,expiresAt);
     }
     public static int snapshotBenefits(Connection c, String id, List<Map<String,Object>> benefits) throws SQLException {
-        String columns="pass_id,benefit_id,merchant_id,place_id,merchant_name,place_name,region_name,location_description,benefit_name,description,benefit_type,use_limit,base_price_won,discount_won,payable_won,reservation_required,reservation_note,demo_only";
-        return update(c,"INSERT INTO issued_benefit("+columns+") SELECT ?,b.id,b.merchant_id,m.place_id,m.name,p.name,r.name,m.location_description,b.name,b.description,b.benefit_type,b.use_limit,b.base_price_won,b.discount_won,b.payable_won,b.reservation_required,b.reservation_note,TRUE FROM benefit b JOIN merchant m ON m.id=b.merchant_id JOIN place p ON p.id=m.place_id JOIN region r ON r.id=p.region_id WHERE b.id IN ("+String.join(",",Collections.nCopies(benefits.size(),"?"))+") ORDER BY b.id",java.util.stream.Stream.concat(java.util.stream.Stream.of(id),benefits.stream().map(b->b.get("id"))).toArray());
+        String columns="pass_id,benefit_id,merchant_id,place_id,dining_code,merchant_name,place_name,region_name,location_description,benefit_name,description,benefit_type,use_limit,base_price_won,discount_won,payable_won,reservation_required,reservation_note,demo_only";
+        return update(c,"INSERT INTO issued_benefit("+columns+") SELECT ?,b.id,b.merchant_id,m.place_id,m.dining_code,m.name,COALESCE(p.name,m.name),r.name,m.location_description,b.name,b.description,b.benefit_type,b.use_limit,b.base_price_won,b.discount_won,b.payable_won,b.reservation_required,b.reservation_note,TRUE FROM benefit b JOIN merchant m ON m.id=b.merchant_id LEFT JOIN place p ON p.id=m.place_id JOIN region r ON r.id=m.region_id WHERE b.id IN ("+String.join(",",Collections.nCopies(benefits.size(),"?"))+") ORDER BY b.id",java.util.stream.Stream.concat(java.util.stream.Stream.of(id),benefits.stream().map(b->b.get("id"))).toArray());
     }
     public static Map<String,Object> lock(Connection c, Object id) throws SQLException {
         return one(c,"SELECT * FROM issued_pass WHERE id=? FOR UPDATE",id);

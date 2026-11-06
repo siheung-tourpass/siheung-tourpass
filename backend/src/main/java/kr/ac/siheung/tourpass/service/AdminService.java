@@ -41,7 +41,7 @@ public final class AdminService {
         }
         List<Map<String,Object>> validatedSources=List.of();
         var merged=new LinkedHashMap<String,Object>();if(old!=null)merged.putAll(old);merged.putAll(values);
-        if(t.equals("merchant")){if(create||body.containsKey("placeId")){var place=AdminDao.approvedDemoPlace(c,merged.get("placeId"));require(place!=null,409,"REVIEW_REQUIRED");}require(merged.get("locationDescription").toString().contains("가상"),400,"INVALID_INPUT");}
+        if(t.equals("merchant")&&(create||body.containsKey("placeId"))){var place=AdminDao.merchantPlace(c,merged.get("placeId"));require(place!=null,409,"REVIEW_REQUIRED");values.put("regionId",place.get("regionId"));}
         if(t.equals("benefit")){if(create){CatalogService.concept(c,"product",(String)merged.get("productId"));CatalogService.concept(c,"merchant",(String)merged.get("merchantId"));}price(merged);}
         if(t.equals("place")){
             if(create||body.containsKey("regionId"))CatalogService.concept(c,"region",(String)merged.get("regionId"));

@@ -1,7 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<c:set var="root" value="${pageContext.request.contextPath}"/>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<fmt:setLocale value="ko_KR"/><c:set var="root" value="${pageContext.request.contextPath}"/>
 <c:set var="adminArea" value="${view eq 'place-feedback-statistics' ? 'statistics' : view eq 'passes' or view eq 'pass' or (view eq 'editor' and not semantic) ? 'benefits' : view eq 'admin' or view eq 'relations' or view eq 'editor' or view eq 'goods' ? 'tourism' : ''}"/>
 <!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>시흥 투어패스</title><link rel="icon" type="image/png" href="${root}/assets/images/tourpass-icon.png"><link rel="apple-touch-icon" href="${root}/assets/images/tourpass-icon.png"><link rel="stylesheet" href="${root}/assets/css/style.css"><link rel="stylesheet" href="${root}/assets/css/admin.css"><script src="${root}/assets/js/site.js" defer></script><script src="${root}/assets/js/admin.js" defer></script></head><body class="page-${fn:escapeXml(view)}"><a class="skip-link" href="#main">본문으로 건너뛰기</a>
 <c:set var="headerBackPath" value=""/>
@@ -11,6 +12,7 @@
 <c:when test="${view eq 'journey'}"><c:set var="headerBackPath" value="/journeys?status=${data.status}"/></c:when>
 <c:when test="${view eq 'journey-builder'}"><c:set var="headerBackPath" value="/journeys"/></c:when>
 <c:when test="${view eq 'product'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
+<c:when test="${view eq 'checkout'}"><c:set var="headerBackPath" value="${empty checkoutJourney ? '/products/detail?id='.concat(data.id) : '/journeys/detail?id='.concat(checkoutJourney.id)}"/></c:when>
 <c:when test="${view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants?tab=facilities"/></c:when>
 <c:when test="${view eq 'place'}"><c:set var="headerBackPath" value="/explore"/></c:when>
 <c:when test="${(view eq 'history' or view eq 'feedback') and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
@@ -47,11 +49,12 @@
 <c:when test="${view eq 'catalog' or view eq 'product' or view eq 'merchant' or view eq 'place'}"><%@ include file="/WEB-INF/views/catalog/catalog.jspf" %></c:when>
 <c:when test="${view eq 'recommendations'}"><%@ include file="/WEB-INF/views/catalog/recommendations.jspf" %></c:when>
 <c:when test="${view eq 'passes' or view eq 'pass'}"><%@ include file="/WEB-INF/views/pass/passes.jspf" %></c:when>
+<c:when test="${view eq 'checkout'}"><%@ include file="/WEB-INF/views/pass/checkout.jspf" %></c:when>
 <c:when test="${view eq 'redeem' or view eq 'confirm' or view eq 'history' or view eq 'feedback'}"><%@ include file="/WEB-INF/views/pass/usage.jspf" %></c:when>
 <c:when test="${view eq 'admin' or view eq 'editor' or view eq 'relations' or view eq 'goods'}"><%@ include file="/WEB-INF/views/admin/admin.jspf" %></c:when>
 </c:choose></main><c:if test="${view ne 'landing'}"><footer class="site-footer">수업용 시연 서비스 · 화면 시각은 한국 시간 · 실제 관광 자료의 영업·예약·이동 가능성은 미확인</footer></c:if><c:if test="${view ne 'landing' and view ne 'login'}"><nav class="bottom-nav" aria-label="주 메뉴"><div class="bottom-nav-inner">
 <a href="${root}/" ${view eq 'home' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z"/></svg><span>홈</span></a>
-<c:if test="${empty user or user.role eq 'VISITOR'}"><a href="${root}/passes" ${view eq 'passes' or view eq 'pass' or view eq 'history' or view eq 'feedback' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Zm12 2v2m0 2v2m0 2v1"/></svg><span>내 투어패스</span></a>
+<c:if test="${empty user or user.role eq 'VISITOR'}"><a href="${root}/passes" ${view eq 'passes' or view eq 'pass' or view eq 'checkout' or view eq 'history' or view eq 'feedback' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6Zm12 2v2m0 2v2m0 2v1"/></svg><span>내 투어패스</span></a>
 <a href="${root}/journeys" ${journeyStatus eq 'PLANNING' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6V4h8v2M5 6h14v15H5V6Zm4 4v7m6-7v7"/></svg><span>여행 만들기</span></a>
 <a href="${root}/journeys?status=CONFIRMED" ${journeyStatus eq 'CONFIRMED' or journeyStatus eq 'ARCHIVED' ? 'aria-current=page' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v16H4V5Zm4-2v4m8-4v4M8 11h8m-8 4h5"/></svg><span>내 여행</span></a>
 </c:if>

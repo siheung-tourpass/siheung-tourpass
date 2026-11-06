@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "notice": "공모전 시연용 가상 가맹점·상품이다. 상품은 여행 날짜 하루 동안 포함 가맹점의 혜택을 각 1회 쓰는 이용권이다. 실제 관광지·시흥시 지정 음식점/카페 카드에 연결하지만 실제 제휴·가격·혜택이 아니다.",
+  "merchants": [
+    {
+      "code": "TP_OIDO_MUSEUM",
+      "place": "PLACE_REAL_003",
+      "benefit": {
+        "name": "전시 해설 투어 1회 무료",
+        "description": "상설 전시 해설 투어에 1회 무료로 참여합니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_OASIS",
+      "place": "PLACE_REAL_018",
+      "benefit": {
+        "name": "전망대 기념 엽서 증정",
+        "description": "함상전망대 방문 기념 엽서 세트를 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_OIDO_PREHISTORIC",
+      "place": "PLACE_REAL_002",
+      "benefit": {
+        "name": "선사 체험 키트 증정",
+        "description": "토기 만들기 체험 키트를 1회 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_GAETGOL",
+      "place": "PLACE_REAL_001",
+      "benefit": {
+        "name": "자전거 대여 1회 무료",
+        "description": "갯골생태공원 자전거를 1회 무료로 대여합니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_LOTUS",
+      "place": "PLACE_REAL_004",
+      "benefit": {
+        "name": "연잎차 체험 1회 무료",
+        "description": "연꽃테마파크 연잎차 시음 체험에 1회 무료로 참여합니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_ECOCENTER",
+      "place": "PLACE_REAL_015",
+      "benefit": {
+        "name": "생태 체험 프로그램 1회 무료",
+        "description": "에코센터 생태 체험 프로그램에 1회 무료로 참여합니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_WAVEPARK",
+      "place": "PLACE_REAL_006",
+      "benefit": {
+        "name": "서핑 체험 10,000원 할인",
+        "description": "서핑 체험 이용 시 10,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 60000,
+        "discount_won": 10000
+      }
+    },
+    {
+      "code": "TP_TTANGKKEUT",
+      "dining": "DINING_TTANGKKEUT",
+      "benefit": {
+        "name": "식사 5,000원 할인",
+        "description": "4만 원 이상 식사 시 5,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 40000,
+        "discount_won": 5000
+      }
+    },
+    {
+      "code": "TP_WINDMILL",
+      "dining": "DINING_WINDMILL",
+      "benefit": {
+        "name": "음료 1병 서비스",
+        "description": "식사 시 음료 1병을 무료로 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_BORIGULBI",
+      "dining": "DINING_BORIGULBI",
+      "benefit": {
+        "name": "정식 3,000원 할인",
+        "description": "보리굴비 정식 주문 시 3,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 25000,
+        "discount_won": 3000
+      }
+    },
+    {
+      "code": "TP_JINAEYEON",
+      "dining": "DINING_JINAEYEON",
+      "benefit": {
+        "name": "식사 3,000원 할인",
+        "description": "2만 원 이상 식사 시 3,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 20000,
+        "discount_won": 3000
+      }
+    },
+    {
+      "code": "TP_BEIJING",
+      "dining": "DINING_BEIJING",
+      "benefit": {
+        "name": "군만두 서비스",
+        "description": "식사 주문 시 군만두 1접시를 무료로 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_PAULBASSETT",
+      "dining": "DINING_PAULBASSETT",
+      "benefit": {
+        "name": "음료 1,000원 할인",
+        "description": "음료 1잔 주문 시 1,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 5500,
+        "discount_won": 1000
+      }
+    },
+    {
+      "code": "TP_STARBUCKS_DAEYA",
+      "dining": "DINING_STARBUCKS_DAEYA",
+      "benefit": {
+        "name": "음료 1,000원 할인",
+        "description": "음료 1잔 주문 시 1,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 5000,
+        "discount_won": 1000
+      }
+    }
+  ],
+  "products": [
+    {
+      "code": "TP_OIDO_SEA",
+      "name": "오이도 바다 패스",
+      "description": "오이도의 박물관·전망대·선사유적과 횟집을 함께 즐기는 패스",
+      "merchants": [
+        "TP_OIDO_MUSEUM",
+        "TP_OASIS",
+        "TP_OIDO_PREHISTORIC",
+        "TP_TTANGKKEUT",
+        "TP_WINDMILL"
+      ],
+      "price_won": 9900
+    },
+    {
+      "code": "TP_ECO",
+      "name": "갯골·연꽃 생태 패스",
+      "description": "갯골생태공원·연꽃테마파크·에코센터와 주변 맛집을 잇는 생태 여행 패스",
+      "merchants": [
+        "TP_GAETGOL",
+        "TP_LOTUS",
+        "TP_ECOCENTER",
+        "TP_BORIGULBI",
+        "TP_PAULBASSETT"
+      ],
+      "price_won": 6900
+    },
+    {
+      "code": "TP_ACTIVITY",
+      "name": "거북섬·월곶 액티비티 패스",
+      "description": "웨이브파크 서핑과 월곶·정왕 맛집을 묶은 액티비티 패스",
+      "merchants": [
+        "TP_WAVEPARK",
+        "TP_JINAEYEON",
+        "TP_BEIJING",
+        "TP_STARBUCKS_DAEYA"
+      ],
+      "price_won": 9900
+    },
+    {
+      "code": "TP_ALL",
+      "name": "시흥 올인원 패스",
+      "description": "시흥 투어패스의 모든 가맹점 혜택을 하루 동안 쓰는 패스",
+      "merchants": "ALL",
+      "price_won": 19900
+    }
+  ]
+}

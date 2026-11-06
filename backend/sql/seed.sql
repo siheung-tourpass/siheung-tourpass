@@ -45,16 +45,16 @@ INSERT INTO place_companion(place_id,companion_type_id,material_kind,evidence_no
 INSERT INTO theme_parent(child_theme_id,parent_theme_id,material_kind,evidence_note,review_status,reviewed_by,reviewed_at) VALUES
 (1,2,'DEMO','시연 설정: 관계 분류','APPROVED',4,'2026-10-03 00:00:00');
 
-INSERT INTO merchant(id,code,place_id,name,location_description) VALUES
-(1,'MERCHANT_A',1,'가맹점 A','거북섬 배경의 가상 위치입니다.'),
-(2,'MERCHANT_B',2,'가맹점 B','오이도 배경의 가상 위치입니다.');
+INSERT INTO merchant(id,code,place_id,region_id,name,location_description) VALUES
+(1,'MERCHANT_A',1,1,'가맹점 A','거북섬 배경의 가상 위치입니다.'),
+(2,'MERCHANT_B',2,2,'가맹점 B','오이도 배경의 가상 위치입니다.');
 
 INSERT INTO merchant_staff(user_id,merchant_id) VALUES
 (2,1),
 (3,2);
 
-INSERT INTO product(id,code,name,description) VALUES
-(1,'DEMO_DAY','시연용 1일 패스','시연용·실제 사용 불가. 발급부터 24시간');
+INSERT INTO product(id,code,name,description,price_won) VALUES
+  (1,'DEMO_DAY','시연용 1일 패스','시연용·실제 사용 불가. 발급부터 24시간',9900);
 
 INSERT INTO benefit(id,code,product_id,merchant_id,name,description,benefit_type,base_price_won,discount_won,payable_won,reservation_note) VALUES
 (1,'BENEFIT_A',1,1,'가상 체험 1회 무료','시연용 가상 체험','FREE_ONCE',NULL,NULL,0,'예약 불필요'),

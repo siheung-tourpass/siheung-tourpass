@@ -37,6 +37,7 @@ TOURPASS_PORT=8081 docker compose up --build
 | 바꾼 내용 | 명령어 |
 | --- | --- |
 | Java·JSP·CSS·JS, 행사·음식점 JSON | `docker compose up -d --build app` |
+| 투어패스 시연 자료 JSON | [초기화](#초기화) 후 다시 실행. 기존 DB 유지는 [적재](data-collection/tourpass-data.md#적재) 절차 |
 | 기존 DB의 스키마·관광 자료 | [마이그레이션](../README.md#시작하기)·[추가 적재](data-collection/tourism-data.md#추가-적재시연-자료-전환) 절차 적용 |
 | 보관할 데이터가 없는 DB를 초기 자료로 재생성 | [초기화](#초기화) 후 `docker compose up -d --build` |
 
@@ -53,7 +54,7 @@ TOURPASS_PORT=8081 docker compose up --build
 
 ## 초기 자료
 
-스키마·시연 자료·관광 자료를 자동으로 적재한다. [직접 설치 절차](../README.md#시작하기)와 달리 관광 자료를 `--replace-demo` 없이 적재해 혜택 흐름을 시연할 가상 장소를 유지한다. 옵션의 동작과 실제 자료의 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재)를 따른다.
+스키마·시연 계정·관광 자료·[투어패스 시연 자료](data-collection/tourpass-data.md)를 자동으로 적재한 뒤 [가상 자료 삭제 SQL](../backend/sql/remove-demo.sql)로 가상 장소·시연 빈 지역·시연 상품·가맹점 A/B를 지운다. 실제 관광지는 검토 대기로 적재되므로 시연 전에 관리자 화면에서 승인한다. 실제 자료의 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재)를 따른다.
 
 ## 카카오 로그인
 
