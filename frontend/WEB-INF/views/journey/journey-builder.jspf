@@ -47,7 +47,7 @@
 <article class="builder-card ${not empty place.image ? 'has-background' : ''}" data-card-kind="${card.kind}" data-latitude="${place.coordinates.latitude}" data-longitude="${place.coordinates.longitude}" data-card-key="${fn:escapeXml(card.key)}" data-region-id="${place.regionId}" data-saved-only="${place.savedOnly}">
 <div class="card-front"><c:if test="${not empty place.image}"><%@ include file="/WEB-INF/views/shared/card-background.jspf" %></c:if>
 <c:if test="${place.materialKind eq 'REAL' and empty place.image}"><p class="photo-pending">사진 준비 중 · <c:out value="${place.name}"/></p></c:if>
-<p class="card-kind"><%@ include file="/WEB-INF/views/shared/card-kind-icon.jspf" %>관광지</p><div class="card-overview"><h3><c:out value="${place.name}"/></h3>
+<p class="card-kind"><%@ include file="/WEB-INF/views/shared/card-kind-icon.jspf" %>관광지</p><div class="card-overview"><c:set var="badgeBenefits" value="${place.tourpassBenefits}"/><%@ include file="/WEB-INF/views/shared/benefit-badge.jspf" %><h3><c:out value="${place.name}"/></h3>
 <p class="builder-region" title="${fn:escapeXml(place.locationDescription)}"><c:out value="${place.regionName}"/> · <c:out value="${place.locationDescription}"/></p>
 <c:if test="${empty place.image}"><div class="deck-art" aria-hidden="true"><svg viewBox="0 0 320 90" fill="none" stroke="currentColor" stroke-width="2"><path d="M0 70 60 28l54 38 54-48 76 52 76-30M20 78h280"/><circle cx="256" cy="22" r="10"/><path d="M42 72c40-32 48 20 92-8s75 21 110-12" stroke-dasharray="5 6"/></svg></div></c:if>
 <p class="card-distance" hidden></p></div>
@@ -86,9 +86,10 @@
 <section id="journey-details"><c:choose><c:when test="${user.role eq 'VISITOR'}"><h3>이 여행에 이름을 붙여 주세요</h3>
 <label>패스 이름<input name="name" maxlength="100" required placeholder="나의 시흥 여행" autocomplete="off" value="${fn:escapeXml(empty draft ? builderName : draft.name)}"></label>
 <label>여행 날짜 · 선택<input type="date" name="travelDate" value="${fn:escapeXml(draft.travelDate)}"></label>
-<p class="form-hint">장소를 담아도 예약이나 혜택 발급은 되지 않아요. 혜택 이용권은 저장 후 연결할 수 있어요.</p>
+<div id="trip-offer-preview" class="panel trip-offer" hidden><p class="trip-pass-label">이 여행에 맞는 투어패스</p><h3 data-offer="name"></h3><p data-offer="summary"></p></div>
+<ul id="pass-offers" hidden><c:forEach var="offer" items="${passOffers}"><li data-product-id="${offer.id}" data-name="${fn:escapeXml(offer.name)}" data-price="${offer.priceWon}" data-cards="${fn:escapeXml(offer.cards)}"></li></c:forEach></ul>
 </c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
-</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button></div><p class="form-hint">확정한 패스는 내 패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
+</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 여행에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
 <div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span class="builder-selection-info"><small id="bar-label">담은 카드</small><span id="bar-count" role="status" aria-live="polite">0장 선택</span></span><button type="button" id="builder-next">이 카드로 시작</button></div>
 </form>
 <c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>

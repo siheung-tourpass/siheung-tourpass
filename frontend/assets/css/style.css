@@ -780,3 +780,18 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 @media (max-width: 600px) { .guide-steps { grid-template-columns: 1fr; } }
 .guide-notes { padding-left: var(--space-xl); }
 .guide-notes li + li { margin-top: var(--space-sm); }
+/* Tour pass on cards, trips and checkout */
+.benefit-badge { display: inline-flex; align-items: center; gap: var(--space-xs); max-width: 100%; margin: 0 0 var(--space-xs); padding: 2px var(--space-sm); border-radius: var(--radius-pill); background: var(--color-soft); color: var(--color-accent); font-size: var(--text-sm); font-weight: 700; line-height: 1.5; }
+.benefit-badge svg { flex-shrink: 0; width: 16px; height: 16px; }
+.benefit-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trip-pass { margin-block: var(--space-xl); }
+.trip-pass h2 { margin-top: 0; }
+.trip-pass-label { margin: 0 0 var(--space-xs); color: var(--color-accent); font-size: var(--text-sm); font-weight: 800; }
+.trip-offer { border: 2px solid var(--color-accent); }
+.trip-offer .button { width: 100%; margin-top: var(--space-lg); }
+.product-price { margin: 0; font-size: var(--text-section); font-weight: 800; color: var(--color-ink); }
+.checkout { max-width: 40rem; margin-inline: auto; }
+.checkout-summary { grid-template-columns: auto minmax(0, 1fr); gap: var(--space-xs) var(--space-lg); }
+.checkout-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 0; }
+.checkout-total strong { font-size: var(--text-title); color: var(--color-accent); }
+.checkout-pay button, .checkout-pay form { width: 100%; }
