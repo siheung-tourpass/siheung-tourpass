@@ -189,11 +189,19 @@ async function login(request, root) {
  assert.equal(await page.locator('.builder-card[aria-current=true]').count(),1);
  const session=await login(page.request,root);let r;
  await page.goto(root+'/journeys');
- const picker=page.locator('#journey-start-picker');assert.equal(await picker.isVisible(),false);
- await page.getByRole('button',{name:'새 여행 만들기',exact:true}).click();
- assert(await picker.locator('.journey-template').count()>0);
- await checkAccessiblePopup(page,picker);
- await picker.getByRole('link',{name:'빈 구성으로 시작',exact:true}).click();await page.waitForSelector('.is-deck-mode');await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
+ await page.getByRole('link',{name:'새 여행 만들기',exact:true}).click();
+ assert(await page.locator('#guide-products-title').isVisible());
+ assert.equal(await page.locator('.top-tabs').getByRole('link',{name:'전체 상품',exact:true}).count(),0);
+ assert(await page.locator('.journey-business-card').getByRole('link',{name:'직접 카드 고르기',exact:true}).isVisible());
+ const productStart=page.getByRole('link',{name:'이 상품으로 여행 시작',exact:true}).first();
+ if(await productStart.count()){
+  await productStart.click();await page.waitForSelector('#journey-builder[data-step="build"]');
+  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
+  assert(await page.locator('#selected-places li').count()>0);
+  assert(await page.locator('[name=name]').inputValue());
+  await page.goto(root+'/merchants');
+ }
+ await page.getByRole('link',{name:'직접 카드 고르기',exact:true}).click();await page.waitForSelector('.is-deck-mode');await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert(await page.locator('#start-preferences').isVisible());
  await page.locator('[name=startMode]').selectOption('direct');
  const keys=[];
@@ -304,13 +312,13 @@ async function login(request, root) {
   r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order.slice(1));
   const beforeStatus=saved.places;
   r=await page.request.patch(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':'api','Authorization':'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')},data:{status:'CONFIRMED'}});assert.equal(r.status(),200);
-  for(const [current,next,label] of [['CONFIRMED','ARCHIVED','사용 완료 · 아카이브'],['ARCHIVED','CONFIRMED','제작 확정 목록으로 복원'],['CONFIRMED','PLANNING','제작 중으로 보내기']]){
+  for(const [current,next,label] of [['CONFIRMED','ARCHIVED','사용 완료 · 아카이브'],['ARCHIVED','CONFIRMED','진행 중인 여행으로 복원'],['CONFIRMED','PLANNING','제작 중으로 보내기']]){
    await page.goto(root+'/journeys?status='+current);
    const statusCard=page.locator('.journey-card').filter({has:page.locator(`a[href$="detail?id=${id}"]`)});
    await statusCard.locator('.journey-ticket-action').click();
    await checkAccessiblePopup(page,statusCard.locator('section[id^=pass-status-]'));
    await statusCard.locator('section[id^=pass-status-]').getByRole('button',{name:label,exact:true}).click();
-   await page.waitForURL(root+'/journeys?status='+next);
+   await page.waitForURL(next==='CONFIRMED'?root+'/passes':root+'/journeys?status='+next);
    r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});const changed=await r.json();
    assert.equal(changed.status,next);assert.deepEqual(changed.places.map(({_links,...data})=>data),beforeStatus.map(({_links,...data})=>data));
   }

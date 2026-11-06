@@ -1,9 +1,12 @@
 <%@ page pageEncoding="UTF-8" %>
 <c:choose><c:when test="${view eq 'catalog'}"><div class="guide">
 <c:if test="${guideTab eq 'products'}"><section class="guide-section" aria-labelledby="guide-products-title"><h1 id="guide-products-title">전체 상품</h1><p>투어패스는 여행 날짜 하루 동안 포함된 관광지·음식점·카페의 혜택을 각 1회 받을 수 있는 이용권이에요.</p>
-<c:forEach var="item" items="${data.products}"><article class="pass-card"><div class="pass-card-main"><h2><a href="${root}/products/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${fn:replace(item.description, '시연용·실제 사용 불가. ', '')}"/></p>
-<c:if test="${not empty item.benefits}"><ul class="guide-benefit-list"><c:forEach var="benefit" items="${item.benefits}"><li><strong><c:out value="${benefit.merchantName}"/></strong> <c:out value="${benefit.name}"/></li></c:forEach></ul></c:if></div>
-<c:set var="issueProduct" value="${item}"/><%@ include file="/WEB-INF/views/pass/issue-pass.jspf" %></article></c:forEach>
+<p>상품의 혜택 장소를 담아 여행을 시작한 뒤 자유롭게 바꿔 보세요. 상품 선택만으로 저장·구매되지 않아요.</p>
+<div class="journey-pass-list product-pass-list">
+<article class="journey-card pass-card journey-business-card ${not empty directCover.coverImage ? 'has-cover' : ''}"><c:set var="cover" value="${directCover}"/><%@ include file="/WEB-INF/views/journey/journey-cover.jspf" %><div class="pass-card-main"><span class="journey-ticket-status">나만의 여행</span><h2><a class="journey-card-link" href="${root}${empty user ? '/explore' : '/journeys/new'}">직접 카드 고르기</a></h2><p class="journey-ticket-date">원하는 장소를 직접 담아 시작해요.</p><%@ include file="/WEB-INF/views/journey/journey-cover-credit.jspf" %></div></article>
+<c:forEach var="item" items="${data.products}"><article class="pass-card journey-business-card product-pass ${not empty item.coverImage ? 'has-cover' : ''}"><c:set var="cover" value="${item}"/><%@ include file="/WEB-INF/views/journey/journey-cover.jspf" %><div class="pass-card-main"><span class="journey-ticket-status">추천 여행 구성</span><h2><a href="${root}/products/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><details class="product-benefits"><summary>받을 수 있는 혜택 ${fn:length(item.benefits)}개</summary><ul class="guide-benefit-list"><c:forEach var="benefit" items="${item.benefits}"><li><strong><c:out value="${benefit.merchantName}"/></strong> <c:out value="${benefit.name}"/></li></c:forEach></ul><p class="form-hint">투어패스 구매 후 각 1회 이용할 수 있어요.</p></details>
+<c:set var="issueProduct" value="${item}"/><%@ include file="/WEB-INF/views/catalog/start-product.jspf" %><%@ include file="/WEB-INF/views/journey/journey-cover-credit.jspf" %></div></article></c:forEach>
+</div>
 <c:if test="${empty data.products}"><p>판매 중인 상품이 없습니다.</p></c:if></section></c:if>
 <c:if test="${guideTab eq 'facilities'}"><section class="guide-section" aria-labelledby="guide-facilities-title"><h1 id="guide-facilities-title">이용 가능 시설</h1><p>이용권 혜택은 아래 가맹점에서만 받을 수 있어요. 여행 카드의 관광지·행사·음식점·카페는 안내 자료이며 이용권 혜택이 포함되지 않습니다.</p>
 <div class="destination-grid"><c:forEach var="item" items="${data.merchants}"><article class="destination-card guide-facility"><h2><a href="${root}/merchants/detail?id=${item.id}"><c:out value="${item.name}"/></a></h2><p><c:out value="${item.regionName}"/> · <c:out value="${item.locationDescription}"/></p>
@@ -22,10 +25,10 @@
 <li>관광지·행사·음식점 안내는 영업·예약·이동 가능성을 보장하지 않으니 방문 전 공식 안내를 확인하세요.</li>
 </ul></section></c:if></div>
 </c:when><c:when test="${view eq 'product'}">
-<article class="pass-card"><div class="pass-card-main"><%@ include file="/WEB-INF/views/catalog/catalog-heading.jspf" %>
-<p>여행 날짜 하루 · 포함 혜택 각 1회</p></div>
-<c:set var="issueProduct" value="${data}"/><%@ include file="/WEB-INF/views/pass/issue-pass.jspf" %></article>
-<p>여행 상세에서 구매하면 그 여행에 연결되고 여행 날짜에 시작돼요.</p><c:set var="benefits" value="${data.benefits}"/><%@ include file="/WEB-INF/views/pass/benefits.jspf" %>
+<article class="pass-card journey-business-card product-pass ${not empty data.coverImage ? 'has-cover' : ''}"><c:set var="cover" value="${data}"/><%@ include file="/WEB-INF/views/journey/journey-cover.jspf" %><div class="pass-card-main"><%@ include file="/WEB-INF/views/catalog/catalog-heading.jspf" %>
+<p>여행 날짜 하루 · 포함 혜택 각 1회</p>
+<c:set var="issueProduct" value="${data}"/><%@ include file="/WEB-INF/views/catalog/start-product.jspf" %><%@ include file="/WEB-INF/views/journey/journey-cover-credit.jspf" %></div></article>
+<p>여행을 구성한 뒤 여행 확인이나 확정한 여행에서 투어패스를 구매할 수 있어요.</p><c:set var="benefits" value="${data.benefits}"/><%@ include file="/WEB-INF/views/pass/benefits.jspf" %>
 </c:when><c:otherwise>
 <article class="destination-card destination-detail"><div class="destination-content"><c:if test="${view eq 'place'}"><c:set var="imagePlace" value="${data}"/><%@ include file="/WEB-INF/views/catalog/place-image.jspf" %></c:if>
 <%@ include file="/WEB-INF/views/catalog/catalog-heading.jspf" %><p><c:out value="${data.regionName}"/> · <c:out value="${data.locationDescription}"/></p>

@@ -34,7 +34,7 @@ public class ApiController {
     public void catalog(@PathVariable String collection, @PathVariable(required = false) String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         api.handle(request, response, "GET", x -> {
             if (id == null) return ok(CatalogService.page(catalog.list(x.connection(), collection, Input.param(x.query().get("regionId"))), x.query()));
-            return ok(collection.equals("products") ? catalog.product(x.connection(), Input.id(id)) : catalog.merchant(x.connection(), Input.id(id)));
+            return ok(catalog.detail(x.connection(), collection, Input.id(id)));
         });
     }
 
