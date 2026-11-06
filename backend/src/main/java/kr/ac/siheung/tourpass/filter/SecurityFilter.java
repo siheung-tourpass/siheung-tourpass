@@ -29,7 +29,7 @@ public final class SecurityFilter implements Filter {
                 var session=r.getSession();if(session.getAttribute("csrf")==null)session.setAttribute("csrf",AuthService.token());
             }
             chain.doFilter(req,res);
-        }catch(Problem e){if(isApiPath(r.getServletPath()))ApiHandler.error(out,e);else WebHandler.error(r,out,e);}
+        }catch(Problem e){if(isApiPath(r.getServletPath()))ApiHandler.error(r,out,e);else WebHandler.error(r,out,e);}
     }
     public static Map<String,Object> authorize(java.sql.Connection c,HttpServletRequest r) throws java.sql.SQLException {
         if(isApiPath(r.getServletPath()))return authorizeApi(c,r);

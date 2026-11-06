@@ -313,6 +313,7 @@
         item.prepend(image);
       }
       item.querySelector('span').textContent = `${index + 1}. ${name}${index === 0 ? ' · 시작' : ''}`;
+      item.querySelector('span').title = name;
       item.querySelector('input').value = id;
       item.querySelectorAll('button').forEach(button => {
         const action = button.dataset.action;

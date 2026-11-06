@@ -1,6 +1,0 @@
-<%@ page pageEncoding="UTF-8" %>
-<div class="pass-card-action"><c:if test="${issueProduct.priceWon gt 0}"><p class="product-price"><fmt:formatNumber value="${issueProduct.priceWon}"/>원</p></c:if><c:choose>
-<c:when test="${issueProduct.priceWon le 0}"><button disabled>판매 준비 중</button></c:when>
-<c:when test="${user.role eq 'VISITOR'}"><a class="button" href="${root}/passes/checkout?productId=${issueProduct.id}">구매하기</a></c:when>
-<c:when test="${empty user}"><a class="button secondary" href="${root}/login">로그인 후 구매</a></c:when>
-</c:choose></div>

@@ -366,16 +366,10 @@ html[data-reduce-motion=true] .is-deck-mode .builder-card :is(.card-front, .card
   #selected-places li { grid-template-columns: minmax(0, 1fr); padding: var(--space-lg); }
   #selected-places .selection-controls { justify-content: flex-end; }
 }
-.journey-template-grid { display: grid; gap: var(--space-lg); }
-.journey-template { display: flex; flex-direction: column; padding: var(--space-xl); margin: 0; border: 1px solid var(--color-rule); }
-.journey-template h3 { margin: 0 0 var(--space-sm); font-size: var(--text-lg); }
-.journey-template p { margin-block: var(--space-sm); font-size: var(--text-sm); }
-.journey-template .button { text-align: center; }
-.journey-template .result-meta { padding-bottom: var(--space-md); }
 .journey-pass-list { display: grid; gap: var(--space-xl); margin-top: var(--space-xl); }
 .journey-ticket-status { display: inline-block; padding: var(--space-xs) var(--space-sm); color: var(--color-muted); background: var(--color-paper); font-size: var(--text-sm); font-weight: 600; }
 .journey-ticket-date { margin: 0; color: var(--color-muted); font-size: var(--text-sm); }
-.builder-template-note { margin-block: var(--space-sm); color: var(--color-muted); font-size: var(--text-sm); }
+.builder-product-note { margin-block: var(--space-sm); color: var(--color-muted); font-size: var(--text-sm); }
 .deck-summary-actions { flex-shrink: 0; padding-top: var(--space-md); border-top: 1px solid var(--color-rule); background: var(--color-surface); }
 .deck-summary-actions .actions { display: flex; gap: var(--space-sm); margin: 0; }
 .deck-summary-actions .actions button { flex: 1; width: auto; margin: 0; padding-inline: var(--space-md); }
@@ -407,7 +401,7 @@ button, .button, .card-types [aria-pressed=true] { color: var(--color-accent-ink
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front .card-overview :is(h3, p) { color: var(--color-card-ink); text-shadow: none; }
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front > .card-flip { border-radius: 0 0 var(--radius-control) var(--radius-control); background: var(--color-card-panel); box-shadow: none; }
 .is-deck-mode .builder-card .card-back > .card-flip { color: var(--color-accent); box-shadow: none; }
-.journey-template, .journey-record-card { box-shadow: var(--shadow-surface); }
+.journey-record-card { box-shadow: var(--shadow-surface); }
 .pass-card { display: grid; grid-template-columns: minmax(0, 1fr) var(--pass-stub-width); padding: 0; overflow: hidden; }
 .pass-card-main { min-width: 0; padding: var(--space-xl); }
 .pass-card-main > :first-child { margin-top: 0; }
@@ -418,7 +412,6 @@ button, .button, .card-types [aria-pressed=true] { color: var(--color-accent-ink
 .pass-card-action > span { font-size: var(--text-sm); color: var(--color-accent); }
 .pass-card-action .button, .pass-card-action button { width: 100%; padding-inline: var(--space-sm); font-size: var(--text-sm); }
 .pass-card-action form { margin: 0; }
-.journey-template .button { margin-top: 0; }
 .destination-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), var(--destination-card-width))); align-items: start; gap: var(--space-xl); margin-block: var(--space-xl); }
 .destination-card { display: flex; flex-direction: column; width: 100%; max-width: var(--destination-card-width); min-width: 0; aspect-ratio: var(--destination-card-ratio); margin: 0; padding: var(--space-xl); }
 .destination-card > :first-child { margin-top: 0; }
@@ -459,10 +452,6 @@ body:not(.is-deck-mode) .builder-card { aspect-ratio: var(--destination-card-rat
   .journey-business-card h1, .journey-business-card h2, .journey-business-card h3 { font-size: var(--text-lg); }
   .journey-business-card .button { padding-inline: var(--space-md); }
 }
-@media (max-width: 639px) {
-  .journey-template.journey-business-card h3 { font-size: var(--text-base); }
-}
-.journey-template-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); }
 .site-header { position: sticky; top: 0; z-index: 20; padding-top: env(safe-area-inset-top); background: var(--color-paper); border-bottom: 1px solid var(--color-rule); }
 .header-inner { min-height: var(--header-height); padding-block: 8px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; }
 .header-leading { width: 44px; }
@@ -523,9 +512,7 @@ input:not([type=checkbox]):not([type=hidden]), select, textarea { box-shadow: no
   .journey-business-card .pass-cover-credit { left: var(--space-lg); right: var(--space-lg); }
   .journey-business-card.has-cover .pass-cover-credit { right: calc(33% + var(--space-lg)); }
 }
-.journey-start-picker > .pass-cover-popover-heading h2 { margin: 0; font-size: var(--text-section); }
-.journey-start-picker .journey-template-grid { margin-top: var(--space-xl); }
-.journey-business-card, .journey-template { border-radius: var(--radius-panel); }
+.journey-business-card { border-radius: var(--radius-panel); }
 button, .button { box-shadow: var(--shadow-primary); }
 .secondary { box-shadow: var(--shadow-control); }
 input:not([type=checkbox]):not([type=hidden]), select, textarea { background: var(--color-surface-inset); }
@@ -655,6 +642,8 @@ body.page-landing, body.page-login { padding-bottom: 0; }
 #builder-step-hint { color: var(--color-muted); margin-block: var(--space-sm) var(--space-lg); }
 .is-deck-mode #deck-summary { max-width: none; margin: var(--space-xl) 0; padding: var(--space-lg); border: 1px solid var(--color-rule); border-radius: var(--radius-panel); }
 .is-deck-mode #deck-summary .builder-summary { padding-top: var(--space-sm); overflow: visible; }
+#journey-builder[data-step=build] #selected-places li { grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); min-height: 0; padding: var(--space-sm); }
+#journey-builder[data-step=build] #selected-places li > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--text-sm); }
 .is-deck-mode #journey-builder[data-step=review] #deck-summary { max-width: 640px; margin-inline: auto; }
 .is-deck-mode #journey-builder[data-step=review] .deck-summary-actions { margin-top: var(--space-xl); }
 .is-deck-mode .builder-selection-bar > span { font-size: var(--text-sm); }
@@ -697,7 +686,7 @@ body.page-landing, body.page-login { padding-bottom: 0; }
 .is-deck-mode #journey-builder[data-step=start] #builder-browse-title,
 .is-deck-mode #journey-builder[data-step=start] #builder-context,
 .is-deck-mode #journey-builder[data-step=start] #deck-feedback { display: none; }
-.is-deck-mode #journey-builder[data-step=start] .deck-stage { order: -1; --deck-card-width: min(320px, calc(100vw - 80px), max(200px, calc((100svh - 560px) * 2 / 3))); width: calc(var(--deck-card-width) + var(--space-xl) * 2); max-width: 100%; }
+.is-deck-mode #journey-builder[data-step=start] .deck-stage { order: -1; width: calc(var(--deck-card-width) + var(--space-xl) * 2); max-width: 100%; }
 .is-deck-mode #journey-builder[data-step=start] .builder-cards { gap: var(--space-3xl); scrollbar-width: none; }
 .is-deck-mode #journey-builder[data-step=start] .builder-card { transform: none; }
 .is-deck-mode #journey-builder[data-step=start] .builder-card:not(.is-current) { visibility: hidden; }
@@ -795,3 +784,9 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .checkout-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 0; }
 .checkout-total strong { font-size: var(--text-title); color: var(--color-accent); }
 .checkout-pay button, .checkout-pay form { width: 100%; }
+
+.product-pass-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); }
+.product-pass .pass-card-action { align-items: stretch; padding: 0; gap: var(--space-sm); }
+.product-pass .pass-card-action :is(button, .button) { margin-top: 0; }
+
+.product-benefits { margin-block: var(--space-md); padding: 0; background: transparent; font-size: var(--text-sm); }

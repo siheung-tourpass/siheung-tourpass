@@ -1,6 +1,6 @@
 <%@ page pageEncoding="UTF-8" %>
 <h1 id="builder-page-title" tabindex="-1">${empty draft ? '여행 만들기' : '여행 이어 만들기'}</h1><c:if test="${not empty draft}"><p><c:out value="${draft.name}"/> · 제작 중</p></c:if>
-<c:if test="${not empty builderTemplate}"><p class="builder-template-note"><c:out value="${builderTemplate}"/>에서 시작했어요. 카드와 순서를 바꾼 뒤 저장하세요.</p></c:if>
+<c:if test="${not empty builderProduct}"><p class="builder-product-note"><c:out value="${builderProduct}"/>의 혜택 장소를 담았어요. 카드와 순서를 바꾼 뒤 저장하세요. 투어패스 구매는 별도예요.</p></c:if>
 <nav id="builder-steps" aria-label="여행 만들기 단계" hidden><ol><li data-step="start">1. 시작 카드</li><li data-step="build">2. 덱 구성</li><li data-step="review">3. 여행 확인</li></ol></nav>
 <p id="builder-step-hint" hidden></p>
 <p class="builder-intro">관심 있는 관광지에서 시작해 행사·음식점·카페도 함께 골라 보세요. 담은 카드 주변의 후보를 비교하며 여행을 이어 갈 수 있어요.</p>
@@ -89,7 +89,7 @@
 <div id="trip-offer-preview" class="panel trip-offer" hidden><p class="trip-pass-label">이 여행에 맞는 투어패스</p><h3 data-offer="name"></h3><p data-offer="summary"></p></div>
 <ul id="pass-offers" hidden><c:forEach var="offer" items="${passOffers}"><li data-product-id="${offer.id}" data-name="${fn:escapeXml(offer.name)}" data-price="${offer.priceWon}" data-cards="${fn:escapeXml(offer.cards)}"></li></c:forEach></ul>
 </c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
-</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 여행에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
+</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 투어패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
 <div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span class="builder-selection-info"><small id="bar-label">담은 카드</small><span id="bar-count" role="status" aria-live="polite">0장 선택</span></span><button type="button" id="builder-next">이 카드로 시작</button></div>
 </form>
 <c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>

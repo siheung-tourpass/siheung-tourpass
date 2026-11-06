@@ -21,12 +21,26 @@ public final class CatalogService {
     }
     /** Journey card key of the tourism place or dining card a virtual merchant stands for. */
     public static String cardKey(Map<String,Object> benefit){return benefit.get("placeId")!=null?"place:"+benefit.get("placeId"):"dining:"+benefit.get("diningCode");}
+    /** Complete, distinct benefit locations in benefit order; empty when any card is unavailable. */
+    public static List<String> journeyCardKeys(Map<String,Object> product,List<Map<String,Object>> cards) {
+        var available=new HashSet<Object>();cards.forEach(card->available.add(card.get("key")));
+        var keys=new LinkedHashSet<String>();
+        for(Object value:(List<?>)product.get("benefits")){
+            String key=cardKey(Input.object(value));
+            if(!available.contains(key))return List.of();
+            keys.add(key);
+        }
+        return List.copyOf(keys);
+    }
     @SuppressWarnings("unchecked")
     public Map<String,List<Map<String,Object>>> benefitsByCard(Connection c) throws SQLException {
-        var byCard=new HashMap<String,List<Map<String,Object>>>();
+        var benefits=new ArrayList<Map<String,Object>>();
         for(var product:withBenefits(c,"products",null))
-            for(var benefit:(List<Map<String,Object>>)product.get("benefits")){benefit.put("productName",product.get("name"));byCard.computeIfAbsent(cardKey(benefit),k->new ArrayList<>()).add(benefit);}
-        return byCard;
+            for(var benefit:(List<Map<String,Object>>)product.get("benefits")){benefit.put("productName",product.get("name"));benefits.add(benefit);}
+        return groupBenefits(benefits);
+    }
+    public static Map<String,List<Map<String,Object>>> groupBenefits(List<Map<String,Object>> benefits) {
+        return benefits.stream().collect(java.util.stream.Collectors.groupingBy(CatalogService::cardKey));
     }
     /** The product whose benefits cover the most of the given cards, the cheaper one on ties; null when none covers any. */
     @SuppressWarnings("unchecked")
@@ -61,19 +75,18 @@ public final class CatalogService {
     }
     public List<Map<String,Object>> withBenefits(Connection c,String collection,String region) throws SQLException {
         var items=list(c,collection,region);
-        for(var item:items){
-            var benefits=collection.equals("products")?CatalogDao.productBenefits(c,item.get("id")):CatalogDao.merchantBenefits(c,item.get("id"));
-            benefits.forEach(CatalogService::demo);item.put("benefits",benefits);
-        }
+        for(var item:items)attachBenefits(c,collection,item);
         return items;
     }
-    public Map<String,Object> product(Connection c,String id) throws SQLException {
-        var p=CatalogDao.product(c,id);require(p!=null,404,"NOT_FOUND");
-        var bs=CatalogDao.productBenefits(c,id);bs.forEach(CatalogService::demo);p.put("benefits",bs);return demo(p);
+    public Map<String,Object> detail(Connection c,String collection,String id) throws SQLException {
+        var item=collection.equals("products")?CatalogDao.product(c,id):CatalogDao.merchant(c,id);
+        require(item!=null,404,"NOT_FOUND");
+        return attachBenefits(c,collection,item);
     }
-    public Map<String,Object> merchant(Connection c,String id) throws SQLException {
-        var m=CatalogDao.merchant(c,id);require(m!=null,404,"NOT_FOUND");
-        var bs=CatalogDao.merchantBenefits(c,id);bs.forEach(CatalogService::demo);m.put("benefits",bs);return demo(m);
+    private Map<String,Object> attachBenefits(Connection c,String collection,Map<String,Object> item) throws SQLException {
+        var benefits=collection.equals("products")?CatalogDao.productBenefits(c,item.get("id")):CatalogDao.merchantBenefits(c,item.get("id"));
+        benefits.forEach(CatalogService::demo);item.put("benefits",benefits);
+        return demo(item);
     }
     public static Map<String,Object> page(List<Map<String,Object>> all,Map<String,List<String>> query) {
         int page=number(query,"page",1,1,Integer.MAX_VALUE),size=number(query,"size",20,1,100);long start=(long)(page-1)*size;

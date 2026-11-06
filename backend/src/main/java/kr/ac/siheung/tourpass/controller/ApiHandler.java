@@ -42,7 +42,7 @@ public final class ApiHandler {
                 byte[] json=JSON.writeValueAsBytes(representation);out.setContentLength(json.length);
                 if(!method.equals("HEAD"))out.getOutputStream().write(json);
             }
-        }catch(Problem e){error(out,e);}catch(Exception e){error(out,new Problem(500,"INTERNAL_ERROR"));}
+        }catch(Problem e){error(r,out,e);}catch(Exception e){error(r,out,new Problem(500,"INTERNAL_ERROR"));}
     }
     private static Map<String,Object> body(HttpServletRequest r) throws IOException {
         if(r.getContentLengthLong()==0||r.getContentLengthLong()==-1&&r.getHeader("Transfer-Encoding")==null)return new LinkedHashMap<>();
@@ -51,5 +51,13 @@ public final class ApiHandler {
         try{return Input.object(JSON.readValue(raw,Object.class));}catch(com.fasterxml.jackson.core.JacksonException e){throw new Problem(400,"INVALID_INPUT");}
     }
     public static void json(HttpServletResponse out,Object body) throws IOException {out.setContentType("application/json;charset=UTF-8");JSON.writeValue(out.getWriter(),body);}
-    public static void error(HttpServletResponse out,Problem e) throws IOException {out.setStatus(e.status);if(e.status==401)out.setHeader("WWW-Authenticate","Basic realm=\"tourpass-api\", charset=\"UTF-8\"");out.setContentType("application/json;charset=UTF-8");String message=switch(e.code){case "BENEFIT_ALREADY_USED"->"이미 사용한 혜택입니다.";case "INVALID_INPUT"->"입력값을 확인해 주세요.";case "INTERNAL_ERROR"->"요청을 처리하지 못했습니다.";default->e.code;};JSON.writeValue(out.getWriter(),Map.of("error",Map.of("code",e.code,"message",message,"fieldErrors",List.of())));}
+    public static void error(HttpServletRequest request,HttpServletResponse out,Problem e) throws IOException {
+        out.setStatus(e.status);
+        if(e.status==401)out.setHeader("WWW-Authenticate","Basic realm=\"tourpass-api\", charset=\"UTF-8\"");
+        out.setContentType("application/json;charset=UTF-8");
+        String message=switch(e.code){case "BENEFIT_ALREADY_USED"->"이미 사용한 혜택입니다.";case "INVALID_INPUT"->"입력값을 확인해 주세요.";case "INTERNAL_ERROR"->"요청을 처리하지 못했습니다.";default->e.code;};
+        byte[] json=JSON.writeValueAsBytes(Map.of("error",Map.of("code",e.code,"message",message,"fieldErrors",List.of())));
+        out.setContentLength(json.length);
+        if(!request.getMethod().equals("HEAD"))out.getOutputStream().write(json);
+    }
 }

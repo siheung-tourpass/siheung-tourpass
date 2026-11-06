@@ -1,6 +1,7 @@
 <%@ page pageEncoding="UTF-8" %>
 <c:if test="${user.role eq 'ADMIN'}"><%@ include file="/WEB-INF/views/admin/admin-nav.jspf" %></c:if>
 <c:choose><c:when test="${view eq 'passes' and user.role eq 'VISITOR'}"><h1>내 투어패스</h1>
+<c:if test="${not empty activeJourneys}"><section aria-labelledby="active-journeys-title"><h2 id="active-journeys-title">진행 중인 여행</h2><p>여행을 열어 투어패스를 구매하거나 방문 기록을 남기고, 여행을 마치면 사용 완료로 보관하세요.</p><c:set var="journeyList" value="${activeJourneys}"/><%@ include file="/WEB-INF/views/journey/journey-list.jspf" %></section></c:if>
 <section class="panel mypass" aria-labelledby="mypass-active-title"><h2 id="mypass-active-title">현재 투어패스</h2>
 <c:choose><c:when test="${not empty activeBenefitPass}"><p class="mypass-name"><c:out value="${activeBenefitPass.productName}"/> <span class="journey-ticket-status"><c:out value="${activeBenefitPass.statusLabel}"/></span></p><c:choose><c:when test="${not empty activeBenefitPassRemaining}"><p class="mypass-remaining"><span>남은 시간</span><strong><c:out value="${activeBenefitPassRemaining}"/></strong></p></c:when><c:otherwise><p class="mypass-remaining"><span>시작</span><strong><c:out value="${activeBenefitPass.startsAtKst}"/></strong></p></c:otherwise></c:choose>
 <p class="mypass-code-label">가맹점에 제시할 코드</p><p class="code"><c:out value="${activeBenefitPass.code}"/></p><p>담당자가 혜택을 확인하고 사용 처리하면 1회 차감돼요. 만료 <c:out value="${activeBenefitPass.expiresAtKst}"/> · 만료 정각부터 사용 불가</p>

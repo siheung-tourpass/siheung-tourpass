@@ -142,7 +142,9 @@ for region in ('1', '2', '3'):
         ids = [item['id'] for item in json.load(response)['items']]
     guide = public.get('/merchants?tab=facilities&regionId='+region)
     assert re.findall(r'/merchants/detail\?id=([0-9]+)', guide) == ids
-assert '/passes/checkout?productId=1' in visitor.get('/products/detail?id=1')
+assert '/passes/checkout' not in visitor.get('/products/detail?id=1')
+assert 'product-price' not in visitor.text
+assert '/journeys/new?productId=1' in visitor.text
 checkout = visitor.get('/passes/checkout?productId=1'); assert '9,900원 결제하기' in checkout and '회권' not in checkout; visitor.submit('/passes/issue')
 assert visitor.location == '/passes'
 pid = re.search(r'/passes/detail\?id=([0-9]+)', visitor.get('/passes')).group(1)
@@ -179,8 +181,15 @@ assert '본인 평가 1건' not in visitor.get('/recommendations?themeId=2&compa
 public.get('/journeys',303)
 staff.get('/journeys',403)
 text=visitor.get('/journeys')
-visitor.get('/journeys/new?template=oido',409)
-visitor.get('/journeys/new?template=unknown',400)
+with visitor.api('/api/v1/me/journeys') as response:
+    before_product_start=json.load(response)
+text=visitor.get('/journeys/new?productId=1')
+assert 'data-selection-order="place:1,place:2"' in text
+assert 'value="시연용 1일 패스"' in text
+with visitor.api('/api/v1/me/journeys') as response:
+    assert json.load(response)==before_product_start
+visitor.get('/journeys/new?productId=999999999',404)
+visitor.get('/journeys/new?productId=unknown',400)
 public.get('/journeys/new',303)
 staff.get('/journeys/new',403)
 text=visitor.get('/journeys/new')
@@ -197,7 +206,8 @@ public.get('/merchants?tab=unknown',400)
 assert '/merchants?tab=' not in staff.get('/merchant/redeem')
 assert '혜택 사용 이력' in visitor.get('/passes')
 text=visitor.get('/journeys?status=ARCHIVED')
-assert 'aria-label="내 여행 구분"' in text and '/journeys?status=CONFIRMED' in text
+assert 'aria-label="내 여행 구분"' not in text and '/journeys?status=CONFIRMED' not in text
+visitor.get('/journeys?status=CONFIRMED',303); assert visitor.location == '/passes'
 visitor.get('/journeys/new');visitor.submit('/journeys/create', {'name':'임시 패스','placeId':['2','1']})
 draft_url=visitor.location
 assert draft_url.startswith('/journeys/edit?id=')
@@ -271,7 +281,7 @@ with visitor.api('/api/v1/me/journeys/'+jid) as response:
 assert history[0]['issuedPassId']==pid and history[0]['disconnectedAt'] is None
 assert '나의 여행' in visitor.get('/journeys?status=ARCHIVED')
 visitor.get(journey_url); visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'','status':'CONFIRMED','issuedPassId':''})
-assert visitor.location.endswith('/journeys?status=CONFIRMED')
+assert visitor.location.endswith('/passes')
 visitor.get(photo_url,409)
 assert '/journeys/photocards' not in visitor.get(journey_url)
 text=visitor.get(journey_url)

@@ -125,7 +125,7 @@ public final class WebHandler {
         case "REVIEW_REQUIRED"->"근거와 연결 자료의 승인을 확인해 주세요.";
         case "JOURNEY_NOT_COMPLETED"->"사용 완료한 여행에서만 포토카드를 확인할 수 있습니다.";
         case "JOURNEY_LOCKED"->"제작 중인 패스만 구성을 바꾸거나 삭제할 수 있습니다.";
-        case "TEMPLATE_UNAVAILABLE"->"이 템플릿의 장소 자료가 준비되지 않았습니다. 다른 템플릿이나 빈 여행으로 시작해 주세요.";
+        case "PRODUCT_JOURNEY_UNAVAILABLE"->"이 상품의 혜택 장소 자료가 준비되지 않았습니다. 다른 상품이나 직접 카드 고르기로 시작해 주세요.";
         case "JOURNEY_EMPTY"->"제작 확정 전에 카드를 한 장 이상 담아 주세요.";
         case "INVALID_JOURNEY_TRANSITION"->"제작 중 → 제작 확정 → 사용 완료 순서로 변경해 주세요.";
         case "PLANNING"->"제작 중";case "CONFIRMED"->"제작 확정";case "ARCHIVED"->"사용 완료";
@@ -151,6 +151,7 @@ public final class WebHandler {
     private static String userId(Map<String,Object> user){return user==null?null:(String)user.get("id");}
     private static String role(Map<String,Object> user){return user==null?null:(String)user.get("role");}
     private final CatalogService catalog=new CatalogService();
+    private final JourneyService journeyService=new JourneyService();
     private final PassService passes=new PassService();
     private final RedemptionService redemption=new RedemptionService();
     private final FeedbackService feedback=new FeedbackService();
@@ -180,11 +181,10 @@ public final class WebHandler {
         Collections.shuffle(background);
         r.setAttribute("homeCards",display(background));
         if("VISITOR".equals(role(user))) {
-            var journeys=new JourneyService().list(c,(String)user.get("id"),null);
+            var journeys=journeyService.list(c,(String)user.get("id"),null);
             var drafts=journeys.stream().filter(j->"PLANNING".equals(j.get("status"))).toList();
             r.setAttribute("homeDraftCount",drafts.size());
             if(!drafts.isEmpty())r.setAttribute("homeLatestDraft",drafts.get(0));
-            r.setAttribute("journeyTemplates",JourneyTemplates.list(available.stream().filter(card->"place".equals(card.get("kind"))).toList()));
             r.setAttribute("homePassCount",journeys.stream().filter(j->"CONFIRMED".equals(j.get("status"))).count());
         }
         return page(user==null?"landing":"home",null);
@@ -196,16 +196,22 @@ public final class WebHandler {
         var q=query(r);
         method(r,"GET");
         var products=catalog.withBenefits(c,"products",null);
+        var cards=catalog.cards(c);
+        for(var product:products)productCover(product,cards);
+        var directCover=new LinkedHashMap<String,Object>();directCover.put("code","direct");
+        cardCover(directCover,cards);r.setAttribute("directCover",directCover);
         var merchants=catalog.withBenefits(c,"merchants",Input.param(q.get("regionId")));
         String tab=param(r,"tab");r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities","usage","notes"));
         return page("catalog",Map.of("products",products,"merchants",merchants));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
-        return page("product",catalog.product(c,id(r)));
+        var product=catalog.detail(c,"products",id(r));
+        productCover(product,catalog.cards(c));
+        return page("product",product);
     }
     public Page merchant(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        method(r,"GET");return page("merchant",catalog.merchant(c,id(r)));
+        method(r,"GET");return page("merchant",catalog.detail(c,"merchants",id(r)));
     }
     public Page place(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -226,8 +232,8 @@ public final class WebHandler {
     public Page journeys(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
         method(r,"GET");String status=param(r,"status");if(status==null)status="PLANNING";
-        if(status.equals("PLANNING"))r.setAttribute("journeyTemplates",JourneyTemplates.list(ontology.browsePlaces(c)));
-        var journeys=new JourneyService().list(c,uid,status);journeyCovers(c,journeys);
+        if(status.equals("CONFIRMED"))return redirect("/passes");
+        var journeys=journeyService.list(c,uid,status);journeyCovers(c,journeys);
         r.setAttribute("journeyStatus",status);r.setAttribute("journeyText",journeyText(status));return page("journeys",journeys);
     }
     public Page journeyBuilder(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
@@ -235,7 +241,7 @@ public final class WebHandler {
     }
     public Page journey(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"GET");String journeyId=id(r);var journey=new JourneyService().detail(c,uid,journeyId);
+        method(r,"GET");String journeyId=id(r);var journey=journeyService.detail(c,uid,journeyId);
         if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journeyId);
         journeyCovers(c,List.of(journey));tourpassBenefits(c,r,journey);
         r.setAttribute("journeyStatus",journey.get("status"));r.setAttribute("benefitPasses",passes.list(c,uid,Map.of()));return page("journey",journey);
@@ -245,9 +251,7 @@ public final class WebHandler {
     private void tourpassBenefits(Connection c,HttpServletRequest r,Map<String,Object> journey) throws java.sql.SQLException {
         var places=(List<Map<String,Object>>)journey.get("places");
         var pass=(Map<String,Object>)journey.get("benefitPass");
-        var byCard=new HashMap<String,List<Map<String,Object>>>();
-        if(pass!=null)for(var b:(List<Map<String,Object>>)pass.get("benefits"))byCard.computeIfAbsent(CatalogService.cardKey(b),k->new ArrayList<>()).add(b);
-        else byCard.putAll(catalog.benefitsByCard(c));
+        var byCard=pass==null?catalog.benefitsByCard(c):CatalogService.groupBenefits((List<Map<String,Object>>)pass.get("benefits"));
         for(var place:places){var list=byCard.get(place.get("cardKey"));if(list!=null)place.put("tourpassBenefits",list);}
         if(pass==null&&!"ARCHIVED".equals(journey.get("status"))){
             var product=catalog.productFor(c,places.stream().map(p->(String)p.get("cardKey")).toList());
@@ -260,7 +264,7 @@ public final class WebHandler {
         method(r,"POST");String intent=param(r,"intent");if(intent==null)intent="draft";
         Input.choice(intent,"draft","confirm","purchase");String journeyId=path.endsWith("update")?id(r):null;
         var cards=values(r,"cardKey");
-        var journey=new JourneyService().saveDraft(c,uid,journeyId,form(r,"name","travelDate"),
+        var journey=journeyService.saveDraft(c,uid,journeyId,form(r,"name","travelDate"),
             cards!=null?cards:values(r,"placeId"),!intent.equals("draft"));
         if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journey.get("id"));
         if(intent.equals("purchase")){
@@ -271,17 +275,17 @@ public final class WebHandler {
     }
     public Page deleteJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"POST");new JourneyService().delete(c,uid,id(r));return redirect("/journeys");
+        method(r,"POST");journeyService.delete(c,uid,id(r));return redirect("/journeys");
     }
     public Page saveJourney(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
         method(r,"POST");var b=form(r,"name","travelDate","status","issuedPassId");b.keySet().removeIf(key->!r.getParameterMap().containsKey(key));if("".equals(b.get("issuedPassId")))b.put("issuedPassId",null);
         String journeyId=id(r);
-        var journey=new JourneyService().save(c,uid,journeyId,b);return redirect(b.containsKey("status")?"/journeys?status="+journey.get("status"):"/journeys/detail?id="+journeyId);
+        var journey=journeyService.save(c,uid,journeyId,b);return redirect(b.containsKey("status")?("CONFIRMED".equals(journey.get("status"))?"/passes":"/journeys?status="+journey.get("status")):"/journeys/detail?id="+journeyId);
     }
     public Page addPlace(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"POST");String journeyId=id(r);new JourneyService().add(c,uid,journeyId,form(r,"placeId"));return redirect("/journeys/detail?id="+journeyId);
+        method(r,"POST");String journeyId=id(r);journeyService.add(c,uid,journeyId,form(r,"placeId"));return redirect("/journeys/detail?id="+journeyId);
     }
     public Page journeyItem(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String path=r.getServletPath();
@@ -291,7 +295,7 @@ public final class WebHandler {
         else b=action.equals("move")?form(r,"direction"):Map.of();
         String journeyId=id(r);
         String itemId=Input.id(param(r,"itemId"));
-        new JourneyService().item(c,uid,journeyId,itemId,action,b);return redirect("/journeys/detail?id="+journeyId+(action.equals("record")?"#record-"+itemId:""));
+        journeyService.item(c,uid,journeyId,itemId,action,b);return redirect("/journeys/detail?id="+journeyId+(action.equals("record")?"#record-"+itemId:""));
     }
     public Page passes(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -304,6 +308,8 @@ public final class WebHandler {
             if("ACTIVE".equals(active.get().get("status"))){long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
             r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");}
         }
+        var activeJourneys=journeyService.list(c,uid,"CONFIRMED");journeyCovers(c,activeJourneys);
+        r.setAttribute("activeJourneys",display(activeJourneys));
         r.setAttribute("benefitHistory",display(redemption.history(c,uid,false,null)));
         return page("passes",list);
     }
@@ -318,10 +324,10 @@ public final class WebHandler {
         return redirect(journey==null?"/passes":"/journeys/detail?id="+journey);
     }
     public Page checkout(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
-        method(r,"GET");String uid=userId(user);var product=catalog.product(c,Input.id(param(r,"productId")));
+        method(r,"GET");String uid=userId(user);var product=catalog.detail(c,"products",Input.id(param(r,"productId")));
         require(CatalogService.onSale(product),409,"PRODUCT_INACTIVE");
         String journeyId=param(r,"journeyId");Map<String,Object> journey=null;
-        if(journeyId!=null){journey=new JourneyService().cards(c,uid,Input.id(journeyId));r.setAttribute("checkoutJourney",display(journey));}
+        if(journeyId!=null){journey=journeyService.cards(c,uid,Input.id(journeyId));r.setAttribute("checkoutJourney",display(journey));}
         Instant now=Instant.now(),start=PassService.start(journey,now);
         r.setAttribute("checkoutStart",start.equals(now)?"결제 즉시 시작 · 24시간":journey.get("travelDate")+" 하루(0시~24시)");
         r.setAttribute("checkoutConflict",passes.overlaps(c,uid,start,start.plus(Duration.ofHours(24))));
@@ -382,7 +388,7 @@ public final class WebHandler {
     }
     public Page journeyPhotocards(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         method(r,"GET");
-        var journey=new JourneyService().photocards(c,(String)user.get("id"),id(r));
+        var journey=journeyService.photocards(c,(String)user.get("id"),id(r));
         var photoCards=new ArrayList<Map<String,Object>>();
         for(var item:(List<Map<String,Object>>)journey.get("places")){
             if(!Boolean.TRUE.equals(item.get("hasPhoto")))continue;
@@ -499,24 +505,22 @@ public final class WebHandler {
     }
     /** Products with the card keys their benefits cover, for the review step's recommendation. */
     @SuppressWarnings("unchecked")
-    private static List<Map<String,Object>> passOffers(Connection c) throws java.sql.SQLException {
+    private List<Map<String,Object>> passOffers(Connection c) throws java.sql.SQLException {
         var offers=new ArrayList<Map<String,Object>>();
-        for(var product:new CatalogService().withBenefits(c,"products",null)){
+        for(var product:catalog.withBenefits(c,"products",null)){
             var keys=((List<Map<String,Object>>)product.get("benefits")).stream().map(CatalogService::cardKey).distinct().toList();
             if(!keys.isEmpty()&&CatalogService.onSale(product))offers.add(Map.of("id",product.get("id"),"name",product.get("name"),"priceWon",product.get("priceWon"),"cards",String.join(" ",keys)));
         }
         return offers;
     }
-    private static Page builder(Connection c,HttpServletRequest r,String uid,String id) throws Exception {
-        var ontology=new OntologyService();
-        var cards=new CatalogService().cards(c);
+    private Page builder(Connection c,HttpServletRequest r,String uid,String id) throws Exception {
+        var cards=catalog.cards(c);
         r.setAttribute("passOffers",passOffers(c));
-        var places=cards.stream().filter(card->"place".equals(card.get("kind"))).toList();
         var selectedOrder=new ArrayList<String>();
         var byKey=new LinkedHashMap<String,Map<String,Object>>();
         for(var card:cards)byKey.put((String)card.get("key"),card);
         if(id!=null){
-            var draft=new JourneyService().cards(c,uid,id);require(draft.get("status").equals("PLANNING"),409,"JOURNEY_LOCKED");r.setAttribute("draft",display(draft));
+            var draft=journeyService.cards(c,uid,id);require(draft.get("status").equals("PLANNING"),409,"JOURNEY_LOCKED");r.setAttribute("draft",display(draft));
             for(var saved:(List<?>)draft.get("places")){
                 var item=Input.object(saved);String key=(String)item.get("cardKey");selectedOrder.add(key);
                 String kind=(String)item.get("cardKind"),source=JourneyService.CardKey.parse(key).source();
@@ -534,15 +538,13 @@ public final class WebHandler {
                 card.put("locationDescription",item.get("locationDescription"));card.put("materialKind",item.get("materialKind"));
             }
         }
-        String templateCode=param(r,"template");
-        if(id==null&&templateCode!=null){
-            var template=JourneyTemplates.find(templateCode,places);
-            r.setAttribute("builderName",template.get("name"));r.setAttribute("builderTemplate",template.get("name"));
-            var byCode=JourneyTemplates.index(places);
-            for(Object code:(List<?>)template.get("placeCodes")){
-                var card=byCode.get(code);card.put("selected",true);
-                selectedOrder.add((String)card.get("key"));
-            }
+        String productId=param(r,"productId");
+        if(id==null&&productId!=null){
+            var product=catalog.detail(c,"products",Input.id(productId));
+            var keys=CatalogService.journeyCardKeys(product,cards);
+            require(!keys.isEmpty(),409,"PRODUCT_JOURNEY_UNAVAILABLE");
+            r.setAttribute("builderName",product.get("name"));r.setAttribute("builderProduct",product.get("name"));
+            for(String key:keys){byKey.get(key).put("selected",true);selectedOrder.add(key);}
         }
         var order=new LinkedHashSet<String>();selectedOrder.stream().filter(key->key.startsWith("place:")).forEach(order::add);order.addAll(byKey.keySet());
         r.setAttribute("journeyStatus","PLANNING");r.setAttribute("options",ontology.options(c));
@@ -553,15 +555,25 @@ public final class WebHandler {
     }
     private static Map<String,String> journeyText(String status){
         return switch(status){
-            case "CONFIRMED"->Map.of("title","내 여행","intro","제작을 확정한 패스입니다. 여행을 마치면 사용 완료로 보관하세요.","section","제작 확정","empty","제작을 확정한 패스가 없습니다","emptyHint","여행 만들기에서 카드를 골라 임시 저장하거나 제작을 확정해 보세요.");
-            case "ARCHIVED"->Map.of("title","내 여행","intro","사용을 마친 패스와 여행 기록을 아카이브에 보관합니다.","section","아카이브","empty","사용 완료한 패스가 없습니다","emptyHint","확정한 패스에서 사용 완료를 누르면 여기에 보관됩니다.");
+            case "ARCHIVED"->Map.of("title","여행 기록","intro","사용을 마친 여행과 기록을 보관합니다.","section","여행 기록","empty","사용 완료한 패스가 없습니다","emptyHint","확정한 패스에서 사용 완료를 누르면 여기에 보관됩니다.");
             default->Map.of("title","여행 만들기","intro","카드를 탐색해 새 패스를 제작하거나 임시 저장한 패스를 이어 만드세요.","section","제작 중","empty","제작 중인 패스가 없습니다","emptyHint","여행 만들기에서 카드를 골라 임시 저장하거나 제작을 확정해 보세요.");
         };
     }
-    private static void journeyCovers(Connection c,List<Map<String,Object>> journeys) throws java.sql.SQLException {
+    private static void productCover(Map<String,Object> product,List<Map<String,Object>> cards){
+        var keys=CatalogService.journeyCardKeys(product,cards);
+        product.put("journeyAvailable",!keys.isEmpty());
+        var byKey=new HashMap<Object,Map<String,Object>>();cards.forEach(card->byKey.put(card.get("key"),card));
+        cardCover(product,keys.stream().map(byKey::get).toList());
+    }
+    private static void cardCover(Map<String,Object> cover,List<Map<String,Object>> cards){
+        for(var card:cards)if(card.get("image")!=null){
+            cover.put("coverImage",card.get("image"));cover.put("coverKind",((String)card.get("kind")).toUpperCase(Locale.ROOT));return;
+        }
+    }
+    private void journeyCovers(Connection c,List<Map<String,Object>> journeys) throws java.sql.SQLException {
         if(journeys.isEmpty())return;
         var byId=new HashMap<Object,Map<String,Object>>();journeys.forEach(journey->byId.put(journey.get("id"),journey));
-        var cards=new JourneyService().coverCards(c,journeys.stream().map(journey->(String)journey.get("id")).toList());
+        var cards=journeyService.coverCards(c,journeys.stream().map(journey->(String)journey.get("id")).toList());
         for(var card:cards){
             var journey=byId.get(card.get("journeyId"));
             if(journey.containsKey("coverImage"))continue;
@@ -573,8 +585,8 @@ public final class WebHandler {
             }
         }
     }
-    private static void journeyOptions(Connection c,HttpServletRequest r,String uid,String role) throws java.sql.SQLException {
-        if("VISITOR".equals(role))r.setAttribute("journeys",new JourneyService().list(c,uid,"PLANNING"));
+    private void journeyOptions(Connection c,HttpServletRequest r,String uid,String role) throws java.sql.SQLException {
+        if("VISITOR".equals(role))r.setAttribute("journeys",journeyService.list(c,uid,"PLANNING"));
     }
     private static Map<String,Object> annotation(HttpServletRequest r){return form(r,"materialKind","sourceUrl","checkedOn","evidenceNote");}
     // Structured place metadata has its own form controls.
