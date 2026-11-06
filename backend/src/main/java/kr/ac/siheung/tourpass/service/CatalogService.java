@@ -15,8 +15,34 @@ public final class CatalogService {
             cards.add(card);
         }
         for(var dining:diningCards(c))cards.add(card("dining",dining));
+        var benefits=benefitsByCard(c);
+        for(var card:cards){var list=benefits.get(card.get("key"));if(list!=null)card.put("tourpassBenefits",list);}
         return cards;
     }
+    /** Journey card key of the tourism place or dining card a virtual merchant stands for. */
+    public static String cardKey(Map<String,Object> benefit){return benefit.get("placeId")!=null?"place:"+benefit.get("placeId"):"dining:"+benefit.get("diningCode");}
+    @SuppressWarnings("unchecked")
+    public Map<String,List<Map<String,Object>>> benefitsByCard(Connection c) throws SQLException {
+        var byCard=new HashMap<String,List<Map<String,Object>>>();
+        for(var product:withBenefits(c,"products",null))
+            for(var benefit:(List<Map<String,Object>>)product.get("benefits")){benefit.put("productName",product.get("name"));byCard.computeIfAbsent(cardKey(benefit),k->new ArrayList<>()).add(benefit);}
+        return byCard;
+    }
+    /** The product whose benefits cover the most of the given cards, the cheaper one on ties; null when none covers any. */
+    @SuppressWarnings("unchecked")
+    public Map<String,Object> productFor(Connection c,Collection<String> keys) throws SQLException {
+        Map<String,Object> best=null;long bestCount=0;
+        for(var product:withBenefits(c,"products",null)){
+            var matched=((List<Map<String,Object>>)product.get("benefits")).stream().filter(b->keys.contains(cardKey(b))).toList();
+            long count=matched.stream().map(CatalogService::cardKey).distinct().count();
+            if(count==0||!onSale(product)||count<bestCount||count==bestCount&&price(product)>=price(best))continue;
+            best=product;bestCount=count;product.put("matchedBenefits",matched);product.put("matchedCount",count);
+        }
+        return best;
+    }
+    private static int price(Map<String,Object> product){return ((Number)product.get("priceWon")).intValue();}
+    /** A product without a price (0 won) is not on sale yet. */
+    public static boolean onSale(Map<String,Object> product){return price(product)>0;}
     private static Map<String,Object> card(String kind,Map<String,Object> card){
         card.put("kind",kind);card.put("kindLabel",switch(kind){case "place"->"관광지";case "event"->"행사";default->"음식점 / 카페";});
         card.put("key",kind+":"+card.get(kind.equals("place")?"id":"code"));
@@ -29,7 +55,7 @@ public final class CatalogService {
     public static Map<String,Object> demo(Map<String,Object> m){if(m!=null&&(Boolean.TRUE.equals(m.get("demoOnly"))||"DEMO".equals(m.get("materialKind"))))m.put("notice",NOTICE);return m;}
     public List<Map<String,Object>> list(Connection c,String collection,String region) throws SQLException {
         List<Map<String,Object>> all;
-        if(collection.equals("products"))all=CatalogDao.products(c);
+        if(collection.equals("products")){all=CatalogDao.products(c);}
         else {concept(c,"region",region);all=CatalogDao.merchants(c,region);}
         all.forEach(CatalogService::demo);return all;
     }

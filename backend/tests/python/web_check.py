@@ -142,7 +142,8 @@ for region in ('1', '2', '3'):
         ids = [item['id'] for item in json.load(response)['items']]
     guide = public.get('/merchants?tab=facilities&regionId='+region)
     assert re.findall(r'/merchants/detail\?id=([0-9]+)', guide) == ids
-visitor.get('/products/detail?id=1'); visitor.submit('/passes/issue')
+assert '/passes/checkout?productId=1' in visitor.get('/products/detail?id=1')
+checkout = visitor.get('/passes/checkout?productId=1'); assert '9,900원 결제하기' in checkout and '회권' not in checkout; visitor.submit('/passes/issue')
 assert visitor.location == '/passes'
 pid = re.search(r'/passes/detail\?id=([0-9]+)', visitor.get('/passes')).group(1)
 text = visitor.get('/passes/detail?id='+pid)
@@ -154,7 +155,7 @@ for key in ('startsAt','expiresAt'):
     assert kst in text, (key, kst)
 code = html.unescape(re.search(r'class="code">(.*?)</p>', text).group(1))
 other.get('/passes/detail?id='+pid, 404)
-assert all('<button disabled>지금 발급 · 24시간</button>' in visitor.get(path) for path in ('/products/detail?id=1','/merchants'))
+assert '<button disabled>결제하기</button>' in visitor.get('/passes/checkout?productId=1')
 text=visitor.get('/passes'); assert 'class="code">'+html.escape(code)+'</p>' in text and '남은 시간' in text
 csrf=re.search(r'name="csrf" value="([^"]+)"',visitor.get('/profile')).group(1)
 visitor.request('/passes/issue', {'csrf':csrf,'productId':'1'},409)
@@ -228,6 +229,11 @@ visitor.get('/journeys/new')
 visitor.submit('/journeys/create', {'name':'실패 여행','placeId':['1','999999']},404)
 with visitor.api('/api/v1/me/journeys') as response:
     assert json.load(response) == before_journeys
+# The review step can confirm a trip and continue straight to buying its best-fitting pass.
+text=other.get('/journeys/new'); assert 'id="purchase-journey"' in text and re.search(r'data-cards="[^"]*place:1\b', text)
+other.submit('/journeys/create', {'name':'구매 여행','placeId':['1'],'intent':'purchase'})
+assert re.fullmatch(r'/passes/checkout\?productId=1&journeyId=[0-9]+', other.location), other.location
+assert '구매 여행' in other.get(other.location) and '결제하기' in other.text
 visitor.get('/journeys/new')
 visitor.submit('/journeys/create', {'name':'<script>나의 여행</script>','travelDate':'2026-10-01','placeId':['2','1','2'],'intent':'confirm'})
 journey_url=visitor.location
@@ -259,19 +265,17 @@ text=visitor.get(photo_url)
 assert '사진을 올리면 포토카드' in text
 other.get(photo_url,404)
 text=visitor.get(journey_url)
-assert '보관된 여행입니다' in text and '이용권 연결 이력' in text and '현재 연결 중' in text
+assert '보관된 여행입니다' in text and '이 여행의 투어패스' in text and 'class="code">'+html.escape(code)+'</p>' in text
 with visitor.api('/api/v1/me/journeys/'+jid) as response:
     history=json.load(response)['benefitPassHistory']
-linked_kst=datetime.fromisoformat(history[0]['linkedAt']).astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S 한국 시간')
-assert linked_kst in text
+assert history[0]['issuedPassId']==pid and history[0]['disconnectedAt'] is None
 assert '나의 여행' in visitor.get('/journeys?status=ARCHIVED')
 visitor.get(journey_url); visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'','status':'CONFIRMED','issuedPassId':''})
 assert visitor.location.endswith('/journeys?status=CONFIRMED')
 visitor.get(photo_url,409)
 assert '/journeys/photocards' not in visitor.get(journey_url)
 text=visitor.get(journey_url)
-assert '연결된 이용권이 없습니다' in text and '해제:' in text
-assert '현재 연결 중' not in text and linked_kst in text
+assert '이 여행의 투어패스' not in text
 # All admin form variants render and retain their service contracts.
 for collection in ('products','merchants','benefits'):
     admin.get('/admin/catalog?collection='+collection)

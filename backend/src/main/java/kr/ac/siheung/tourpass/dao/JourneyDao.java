@@ -53,7 +53,7 @@ public final class JourneyDao {
         return one(c,OntologyDao.SELECTABLE_PLACES+" AND p.id=?",source);
     }
     public static Map<String,Object> selectableMerchant(Connection c, Object source) throws SQLException {
-        return one(c,"SELECT m.name,r.name region_name,m.location_description,'DEMO' material_kind FROM merchant m JOIN place p ON p.id=m.place_id JOIN region r ON r.id=p.region_id WHERE m.id=? AND m.active=TRUE AND r.active=TRUE",source);
+        return one(c,"SELECT m.name,r.name region_name,m.location_description,'DEMO' material_kind FROM merchant m JOIN region r ON r.id=m.region_id WHERE m.id=? AND m.active=TRUE AND r.active=TRUE",source);
     }
     public static String addCard(Connection c, Object id, Object placeId, Object kind, Object key, Object position, Object name, Object region, Object location, Object material) throws SQLException {
         return insert(c,"INSERT INTO journey_place(journey_id,place_id,card_kind,card_key,position,place_name,region_name,location_description,material_kind) VALUES(?,?,?,?,?,?,?,?,?)",id,placeId,kind,key,position,name,region,location,material);

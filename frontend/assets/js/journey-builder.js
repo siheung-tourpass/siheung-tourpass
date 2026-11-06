@@ -278,6 +278,25 @@
     setStatus('success', '카드를 섞었어요. 선택한 관광지와 여행 순서는 그대로예요.');
   });
 
+  // Same rule as the server: the product covering the most selected cards, the cheaper one on ties.
+  function renderOffer() {
+    const preview = form.querySelector('#trip-offer-preview');
+    const purchase = form.querySelector('#purchase-journey');
+    if (!preview || !purchase) return;
+    let best = null;
+    form.querySelectorAll('#pass-offers li').forEach(offer => {
+      const count = offer.dataset.cards.split(' ').filter(key => selected.has(key)).length;
+      const price = Number(offer.dataset.price);
+      if (count && (!best || count > best.count || count === best.count && price < best.price)) best = { offer, count, price };
+    });
+    preview.hidden = !best;
+    purchase.hidden = !best;
+    form.querySelector('#confirm-journey').hidden = Boolean(best);
+    if (!best) return;
+    preview.querySelector('[data-offer=name]').textContent = best.offer.dataset.name;
+    preview.querySelector('[data-offer=summary]').textContent = `담은 장소 중 ${best.count}곳에서 혜택을 받을 수 있어요. ${best.price.toLocaleString('ko-KR')}원`;
+  }
+
   function renderSelection(focus) {
     list.replaceChildren();
     const ids = [...selected];
@@ -319,6 +338,7 @@
     form.querySelector('#selection-empty').hidden = selected.size > 0;
     const save = form.querySelector('#confirm-journey');
     if (save) save.disabled = selected.size === 0;
+    renderOffer();
     nextStep.disabled = step === 'start' && selected.size === 0;
     nextStep.hidden = step === 'review';
     nextStep.textContent = step === 'start' ? '이 카드로 시작' : '여행 확인';

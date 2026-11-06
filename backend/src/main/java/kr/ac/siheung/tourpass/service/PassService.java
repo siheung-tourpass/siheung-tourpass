@@ -2,6 +2,8 @@ package kr.ac.siheung.tourpass.service;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import kr.ac.siheung.tourpass.dao.AuthDao;
+import kr.ac.siheung.tourpass.dao.JourneyDao;
 import kr.ac.siheung.tourpass.dao.PassDao;
 import static kr.ac.siheung.tourpass.service.Problem.require;
 public final class PassService {
@@ -25,16 +27,34 @@ public final class PassService {
         if(filter!=null)all.removeIf(p->!filter.equals(p.get("status")));return all;
     }
     public Map<String,Object> issue(Connection c,String user,Map<String,Object> body) throws SQLException {
-        Input.fields(body,"productId");String productId=Input.id(body.get("productId"));
+        Input.fields(body,"productId","productId,journeyId");
+        return issue(c,user,Input.id(body.get("productId")),body.get("journeyId")==null?null:Input.id(body.get("journeyId")));
+    }
+    /** Demo purchase at the product price: from a trip dated after today the pass starts at that date's KST midnight and is linked to the trip. */
+    public Map<String,Object> issue(Connection c,String user,String productId,String journeyId) throws SQLException {
+        AuthDao.lockCurrentUser(c,user);
         var p=PassDao.lockProduct(c,productId);require(p!=null,404,"NOT_FOUND");require(Boolean.TRUE.equals(p.get("active")),409,"PRODUCT_INACTIVE");
+        require(CatalogService.onSale(p),409,"PRODUCT_INACTIVE");
         var bs=PassDao.issuableBenefits(c,productId);require(!bs.isEmpty(),409,"NO_ISSUABLE_BENEFITS");
         Instant now=Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
-        require(PassDao.activePass(c,user,now)==null,409,"ACTIVE_PASS_EXISTS");
-        String id=null;for(int retry=0;retry<3&&id==null;retry++){id=PassDao.create(c,user,productId,AuthService.token(),p.get("name"),now,now.plus(Duration.ofHours(24)));}
+        Map<String,Object> journey=null;
+        if(journeyId!=null){journey=JourneyDao.findOwned(c,true,journeyId,user);require(journey!=null,404,"NOT_FOUND");}
+        Instant start=start(journey,now),end=start.plus(Duration.ofHours(24));
+        require(PassDao.overlappingPass(c,user,start,end)==null,409,"ACTIVE_PASS_EXISTS");
+        String id=null;for(int retry=0;retry<3&&id==null;retry++){id=PassDao.create(c,user,productId,AuthService.token(),p.get("name"),p.get("priceWon"),start,end);}
         require(id!=null,503,"RETRY_LATER");
         PassDao.snapshotBenefits(c,id,bs);
+        if(journey!=null){JourneyDao.disconnectPass(c,now,journeyId);JourneyDao.connectPass(c,journeyId,id,now);JourneyDao.save(c,journeyId,Map.of("issuedPassId",id));}
         return detail(c,user,id,false);
     }
+    /** A trip dated after today starts at that date's KST midnight; anything else starts now. */
+    public static Instant start(Map<String,Object> journey,Instant now){
+        if(journey==null||journey.get("travelDate")==null)return now;
+        Instant day=LocalDate.parse((String)journey.get("travelDate")).atStartOfDay(KST).toInstant();return day.isAfter(now)?day:now;
+    }
+    /** Whether the owner already holds an uncancelled pass for any part of the period. */
+    public boolean overlaps(Connection c,String user,Instant start,Instant end) throws SQLException {return PassDao.overlappingPass(c,user,start,end)!=null;}
+    private static final ZoneId KST=ZoneId.of("Asia/Seoul");
     public Map<String,Object> cancel(Connection c,String admin,String id,Map<String,Object> body) throws SQLException {
         Input.fields(body,"reason");String reason=Input.text(body.get("reason"),500,false);var p=PassDao.lock(c,id);require(p!=null,404,"NOT_FOUND");
         if(p.get("cancelledAt")==null){Instant now=Instant.now();require(now.isBefore(Instant.parse((String)p.get("expiresAt"))),409,"PASS_EXPIRED");PassDao.cancel(c,now,admin,reason,id);p=PassDao.get(c,id);}

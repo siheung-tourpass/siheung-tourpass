@@ -369,7 +369,7 @@ paths:
     post:
       tags: [방문객 · 이용권]
       summary: "상품으로 24시간 이용권을 발급한다. 사용 중인 이용권이 있으면 거절한다."
-      description: "상품으로 24시간 이용권을 발급한다. 사용 중인 이용권이 있으면 거절한다."
+      description: "상품 가격으로 24시간 이용권을 시연 결제로 발급한다. 포함 혜택은 각 1회 쓸 수 있다. 0원 상품은 PRODUCT_INACTIVE로 거절한다. journeyId를 주면 그 여행에 연결하고, 오늘 이후 여행 날짜면 그날 0시(한국 시간)에 시작한다. 기간이 겹치는 취소되지 않은 이용권이 있으면 ACTIVE_PASS_EXISTS로 거절한다."
       parameters:
         - {$ref: '#/components/parameters/CsrfToken'}
       requestBody:
@@ -1471,6 +1471,7 @@ components:
         name: {type: string}
         description: {type: string}
         durationHours: {type: integer}
+        priceWon: {type: integer, description: "상품 가격. 0원이면 판매 준비 중"}
         demoOnly: {type: boolean}
         active: {type: boolean}
         createdAt: {type: string}
@@ -1760,6 +1761,7 @@ components:
         code: {type: string}
         productName: {type: string}
         durationHours: {type: integer}
+        priceWon: {type: integer, description: "구매 시 가격"}
         startsAt: {type: string}
         expiresAt: {type: string}
         demoOnly: {type: boolean}
@@ -1862,6 +1864,7 @@ components:
         name: {type: string}
         description: {type: string}
         durationHours: {type: integer}
+        priceWon: {type: integer, description: "상품 가격. 0원이면 판매 준비 중"}
         demoOnly: {type: boolean}
         active: {type: boolean}
         createdAt: {type: string}
@@ -2106,6 +2109,7 @@ components:
       required: [productId]
       properties:
         productId: {$ref: '#/components/schemas/Id'}
+        journeyId: {$ref: '#/components/schemas/Id'}
     RedemptionFeedbackSave:
       type: object
       description: "세 필드 모두 필수다. rating은 1~5, comment는 최대 500자다."
