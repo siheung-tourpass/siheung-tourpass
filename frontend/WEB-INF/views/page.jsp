@@ -14,12 +14,13 @@
 <c:when test="${view eq 'product'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
 <c:when test="${view eq 'checkout'}"><c:set var="headerBackPath" value="${empty checkoutJourney ? '/products/detail?id='.concat(data.id) : '/journeys/detail?id='.concat(checkoutJourney.id)}"/></c:when>
 <c:when test="${view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants?tab=facilities"/></c:when>
+<c:when test="${view eq 'catalog' and guideTab eq 'facilities'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
 <c:when test="${view eq 'place'}"><c:set var="headerBackPath" value="/explore"/></c:when>
 <c:when test="${(view eq 'history' or view eq 'feedback') and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
 <c:when test="${view eq 'pass'}"><c:set var="headerBackPath" value="${user.role eq 'ADMIN' ? '/admin/passes' : '/passes'}"/></c:when>
 </c:choose>
 <header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/images/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div>
-<c:if test="${(empty user or user.role eq 'VISITOR') and view ne 'landing' and view ne 'login'}"><c:set var="topTab" value="${view eq 'catalog' ? guideTab : view eq 'product' ? 'products' : view eq 'merchant' ? 'facilities' : ''}"/><nav class="top-tabs" aria-label="투어패스 안내"><a href="${root}/merchants?tab=facilities" ${topTab eq 'facilities' ? 'aria-current=page' : ''}>이용 가능 시설</a><a href="${root}/merchants?tab=usage" ${topTab eq 'usage' ? 'aria-current=page' : ''}>이용 방법</a><a href="${root}/merchants?tab=notes" ${topTab eq 'notes' ? 'aria-current=page' : ''}>유의사항</a></nav></c:if></header>
+</header>
 <main id="main" tabindex="-1">
 <c:choose>
 <c:when test="${view eq 'landing'}"><%@ include file="/WEB-INF/views/site/landing.jspf" %></c:when>
@@ -35,6 +36,7 @@
 <a class="home-card home-passes" href="${root}/passes"><div><h2>진행 중인 여행</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>방문 날짜와 메모를 남겨 보세요.</p></div><span class="home-card-action">패스 보기 <span aria-hidden="true">→</span></span></a>
 </c:if>
 </div>
+<c:if test="${user.role eq 'VISITOR'}"><details class="guide-section home-how-to"><summary>이용 방법</summary><%@ include file="/WEB-INF/views/site/how-to.jspf" %></details></c:if>
 </div>
 </c:when>
 <c:when test="${view eq 'place-feedback-statistics'}"><%@ include file="/WEB-INF/views/admin/place-feedback-statistics.jspf" %></c:when>

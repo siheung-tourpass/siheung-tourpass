@@ -198,13 +198,17 @@ visitor.submit('/journeys/create', {'name':'장소 없음','intent':'confirm'},4
 text=visitor.get('/profile')
 nav=text.split('aria-label="주 메뉴"')[1]
 assert all('<span>'+label+'</span>' in nav for label in ('홈','내 투어패스','여행 만들기','내 여행','프로필'))
-assert all(label in text for label in ('aria-label="투어패스 안내"','/merchants?tab=facilities','/merchants?tab=usage','/merchants?tab=notes'))
-for tab,title in (('products','전체 상품'),('facilities','이용 가능 시설'),('usage','이용 방법'),('notes','유의사항')):
+assert 'aria-label="투어패스 안내"' not in text and '/merchants?tab=' not in text
+assert '/merchants?tab=facilities' in public.get('/merchants')
+assert '/merchants/detail?id=' in visitor.get('/passes') or '아직 투어패스가 없어요' in visitor.get('/passes')
+for tab,title in (('products','전체 상품'),('facilities','이용 가능 시설')):
     guide=public.get('/merchants?tab='+tab)
     assert 'id="guide-'+tab+'-title">'+title+'</h1>' in guide and guide.count('<h1')==1
 public.get('/merchants?tab=unknown',400)
+public.get('/merchants?tab=usage',303); assert public.location == '/merchants'
+assert '이렇게 이용해요' in public.get('/') and '<summary>이용 방법</summary>' in visitor.get('/')
 assert '/merchants?tab=' not in staff.get('/merchant/redeem')
-assert '혜택 사용 이력' in visitor.get('/passes')
+assert '혜택 사용 이력' in visitor.get('/passes') and '<summary>투어패스 유의사항</summary>' in visitor.get('/passes')
 text=visitor.get('/journeys?status=ARCHIVED')
 assert 'aria-label="내 여행 구분"' not in text and '/journeys?status=CONFIRMED' not in text
 visitor.get('/journeys?status=CONFIRMED',303); assert visitor.location == '/passes'
