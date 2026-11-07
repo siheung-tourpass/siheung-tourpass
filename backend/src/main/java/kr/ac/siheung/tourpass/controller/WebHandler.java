@@ -244,6 +244,7 @@ public final class WebHandler {
         method(r,"GET");String journeyId=id(r);var journey=journeyService.detail(c,uid,journeyId);
         if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journeyId);
         journeyCovers(c,List.of(journey));tourpassBenefits(c,r,journey);
+        var benefitPass=(Map<?,?>)journey.get("benefitPass");if(benefitPass!=null)r.setAttribute("benefitPassQr",GoodsService.qr((String)benefitPass.get("code")));
         r.setAttribute("journeyStatus",journey.get("status"));r.setAttribute("benefitPasses",passes.list(c,uid,Map.of()));return page("journey",journey);
     }
     /** Benefits per trip card: the linked pass's issued benefits, otherwise what each card offers and the best-fitting product. */
