@@ -191,7 +191,8 @@ async function login(request, root) {
  await page.goto(root+'/journeys');
  await page.getByRole('link',{name:'새 여행 만들기',exact:true}).click();
  assert(await page.locator('#guide-products-title').isVisible());
- assert.equal(await page.locator('.top-tabs').getByRole('link',{name:'전체 상품',exact:true}).count(),0);
+ assert.equal(await page.locator('.top-tabs').count(),0);
+ assert(await page.getByRole('link',{name:'혜택 받는 곳 모아 보기 →',exact:true}).isVisible());
  assert(await page.locator('.journey-business-card').getByRole('link',{name:'직접 카드 고르기',exact:true}).isVisible());
  const productStart=page.getByRole('link',{name:'이 상품으로 여행 시작',exact:true}).first();
  if(await productStart.count()){
