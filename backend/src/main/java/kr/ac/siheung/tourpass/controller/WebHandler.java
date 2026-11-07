@@ -305,7 +305,8 @@ public final class WebHandler {
         var active=list.stream().filter(p->"ACTIVE".equals(p.get("status"))).findFirst()
             .or(()->list.stream().filter(p->"NOT_STARTED".equals(p.get("status"))).min(Comparator.comparing(p->(String)p.get("startsAt"))));
         if(active.isPresent()){
-            r.setAttribute("activeBenefitPass",display(passes.detail(c,uid,String.valueOf(active.get().get("id")),false)));
+            var activePass=passes.detail(c,uid,String.valueOf(active.get().get("id")),false);
+            r.setAttribute("activeBenefitPass",display(activePass));r.setAttribute("benefitPassQr",GoodsService.qr((String)activePass.get("code")));
             if("ACTIVE".equals(active.get().get("status"))){long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
             r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");}
         }
@@ -316,7 +317,8 @@ public final class WebHandler {
     }
     public Page passDetail(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
-        method(r,"GET");return page("pass",passes.detail(c,uid,id(r),false));
+        method(r,"GET");var pass=passes.detail(c,uid,id(r),false);
+        if(pass.get("code")!=null)r.setAttribute("benefitPassQr",GoodsService.qr((String)pass.get("code")));return page("pass",pass);
     }
     public Page issuePass(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
