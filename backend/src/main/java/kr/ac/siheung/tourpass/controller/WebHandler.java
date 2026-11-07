@@ -201,7 +201,8 @@ public final class WebHandler {
         var directCover=new LinkedHashMap<String,Object>();directCover.put("code","direct");
         cardCover(directCover,cards);r.setAttribute("directCover",directCover);
         var merchants=catalog.withBenefits(c,"merchants",Input.param(q.get("regionId")));
-        String tab=param(r,"tab");r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities","usage","notes"));
+        String tab=param(r,"tab");if("usage".equals(tab)||"notes".equals(tab))return redirect("/merchants");
+        r.setAttribute("guideTab",tab==null?"products":Input.choice(tab,"products","facilities"));
         return page("catalog",Map.of("products",products,"merchants",merchants));
     }
     public Page product(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {

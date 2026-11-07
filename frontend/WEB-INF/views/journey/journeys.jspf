@@ -14,7 +14,7 @@
 <button>저장</button></form></details>
 <c:if test="${data.status eq 'ARCHIVED'}"><p><a class="button" href="${root}/journeys/photocards?id=${data.id}">포토카드 보기</a></p><p>보관된 여행입니다. 기록은 계속 수정할 수 있습니다. 복원하면 내 투어패스의 진행 중인 여행으로 이동합니다.</p></c:if>
 <c:if test="${empty data.places}"><p class="empty-state">저장된 장소가 없습니다.</p></c:if>
-<p>장소 정보는 담을 당시 기준입니다. 방문 날짜와 만족도는 본인 기록이며 방문 인증이 아닙니다.</p>
+<p>장소 정보는 담을 당시 기준입니다. 방문 날짜와 만족도는 본인 기록이며 방문 인증이 아닙니다. 여행 패스는 만료되지 않아요. 관광지·행사·음식점 안내는 영업·예약·이동 가능성을 보장하지 않으니 방문 전 공식 안내를 확인하세요.</p>
 <c:if test="${not empty data.places}"><section class="journey-records" aria-label="여행 카드별 기록"><div class="record-navigation" hidden><button type="button" id="record-previous" class="secondary" aria-label="이전 기록 카드">←</button><span id="record-position" role="status" aria-live="polite"></span><button type="button" id="record-next" class="secondary" aria-label="다음 기록 카드">→</button></div><div class="record-cards" tabindex="0" role="region" aria-label="좌우로 넘겨 여행 기록 작성"><c:forEach var="p" items="${data.places}" varStatus="order"><article class="journey-record-card destination-card" id="record-${p.id}"><c:set var="badgeBenefits" value="${p.tourpassBenefits}"/><%@ include file="/WEB-INF/views/shared/benefit-badge.jspf" %><h2>${order.count}. <c:out value="${p.placeName}"/></h2><p>${p.cardKind eq 'EVENT' ? '행사' : p.cardKind eq 'MERCHANT' ? '가맹점' : p.cardKind eq 'DINING' ? '음식점·카페' : '관광지'}</p><p><c:out value="${p.regionName}"/> · <c:out value="${p.locationDescription}"/> · <c:out value="${p.materialKind eq 'REAL' ? '실제 관광 소개' : '시연 자료'}"/></p>
 <p><c:out value="${empty p.visitedOn ? '방문 전' : '다녀옴 · 본인 기록'}"/> <c:out value="${p.visitedOn}"/></p>
 

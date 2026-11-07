@@ -756,10 +756,6 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .pass-row small { color: var(--color-muted); }
 .pass-row:hover { color: var(--color-accent); }
 /* Tour pass guide tabs under the site header */
-.top-tabs { display: flex; justify-content: center; gap: var(--space-xs); overflow-x: auto; scrollbar-width: none; padding: 0 var(--space-md) var(--space-sm); }
-.top-tabs::-webkit-scrollbar { display: none; }
-.top-tabs a { flex: 0 0 auto; padding: var(--space-sm) var(--space-md); border-radius: var(--radius-pill); color: var(--color-ink); font-weight: 700; text-decoration: none; white-space: nowrap; }
-@media (max-width: 480px) { .top-tabs { justify-content: flex-start; } .top-tabs a { padding-inline: var(--space-sm); font-size: var(--text-sm); } }
 @media (max-width: 600px) { .guide .pass-card, .page-passes .pass-card { grid-template-columns: 1fr; } .guide .pass-card-action, .page-passes .pass-card-action { padding: 0 var(--space-xl) var(--space-xl); align-items: stretch; } .guide .pass-card-action form { width: 100%; } }
 .guide-benefit-list { padding-left: var(--space-xl); margin-block: var(--space-sm) 0; }
 .guide-benefit-list li + li { margin-top: var(--space-xs); }
