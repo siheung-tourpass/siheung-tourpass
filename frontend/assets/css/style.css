@@ -775,6 +775,8 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .benefit-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trip-pass { margin-block: var(--space-xl); }
 .trip-pass h2 { margin-top: 0; }
+.trip-pass-qr { display: block; width: min(280px, 100%); height: auto; aspect-ratio: 1; margin: 0 auto var(--space-md); fill: var(--color-print-ink); shape-rendering: crispEdges; }
+.trip-pass-qr .qr-paper { fill: oklch(100% 0 0); }
 .trip-pass-label { margin: 0 0 var(--space-xs); color: var(--color-accent); font-size: var(--text-sm); font-weight: 800; }
 .trip-offer { border: 2px solid var(--color-accent); }
 .trip-offer .button { width: 100%; margin-top: var(--space-lg); }
