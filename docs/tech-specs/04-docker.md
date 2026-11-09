@@ -1,6 +1,6 @@
 # Docker 실행 안내 — 시흥 투어패스
 
-[문서 안내](../README.md#관련-문서)
+[문서 안내](../../README.md#관련-문서)
 
 Java·Maven·PostgreSQL을 설치하지 않고 로컬에서 앱과 DB를 함께 실행한다. Docker와 Docker Compose가 필요하며 명령은 저장소 루트에서 실행한다. 로컬 개발·시연용 구성이며 운영 배포에 사용하지 않는다.
 
@@ -10,7 +10,7 @@ Java·Maven·PostgreSQL을 설치하지 않고 로컬에서 앱과 DB를 함께 
 docker compose up --build
 ```
 
-처음에는 이미지 빌드로 몇 분 걸릴 수 있다. 로그에 `Started TourpassApplication`이 표시되면 `http://localhost:8080/siheung-tourpass/`에 접속한다. 시연 계정은 [사용 방법](../README.md#사용-방법)을 따른다. 이후에는 코드가 바뀌지 않았다면 `--build` 없이 실행한다.
+처음에는 이미지 빌드로 몇 분 걸릴 수 있다. 로그에 `Started TourpassApplication`이 표시되면 `http://localhost:8080/siheung-tourpass/`에 접속한다. 시연 계정은 [사용 방법](../../README.md#사용-방법)을 따른다. 이후에는 코드가 바뀌지 않았다면 `--build` 없이 실행한다.
 
 8080 포트를 이미 사용 중이면 포트를 지정한다.
 
@@ -37,8 +37,8 @@ TOURPASS_PORT=8081 docker compose up --build
 | 바꾼 내용 | 명령어 |
 | --- | --- |
 | Java·JSP·CSS·JS, 행사·음식점 JSON | `docker compose up -d --build app` |
-| 투어패스 시연 자료 JSON | [초기화](#초기화) 후 다시 실행. 기존 DB 유지는 [적재](data-collection/tourpass-data.md#적재) 절차 |
-| 기존 DB의 스키마·관광 자료 | [마이그레이션](../README.md#시작하기)·[추가 적재](data-collection/tourism-data.md#추가-적재시연-자료-전환) 절차 적용 |
+| 투어패스 시연 자료 JSON | [초기화](#초기화) 후 다시 실행. 기존 DB 유지는 [적재](../data-collection/tourpass-data.md#적재) 절차 |
+| 기존 DB의 스키마·관광 자료 | [마이그레이션](../../README.md#시작하기)·[추가 적재](../data-collection/tourism-data.md#추가-적재시연-자료-전환) 절차 적용 |
 | 보관할 데이터가 없는 DB를 초기 자료로 재생성 | [초기화](#초기화) 후 `docker compose up -d --build` |
 
 프론트엔드 파일도 WAR에 포함되므로 화면만 고쳐도 다시 빌드한다. 초기화 SQL은 DB 볼륨이 비어 있을 때만 실행된다.
@@ -54,8 +54,8 @@ TOURPASS_PORT=8081 docker compose up --build
 
 ## 초기 자료
 
-스키마·시연 계정·관광 자료·[투어패스 시연 자료](data-collection/tourpass-data.md)를 자동으로 적재한 뒤 [가상 자료 삭제 SQL](../backend/sql/remove-demo.sql)로 가상 장소·시연 빈 지역·시연 상품·가맹점 A/B를 지운다. 실제 관광지는 검토 대기로 적재되므로 시연 전에 관리자 화면에서 승인한다. 실제 자료의 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재)를 따른다.
+스키마·시연 계정·관광 자료·[투어패스 시연 자료](../data-collection/tourpass-data.md)를 자동으로 적재한 뒤 [가상 자료 삭제 SQL](../../backend/sql/remove-demo.sql)로 가상 장소·시연 빈 지역·시연 상품·가맹점 A/B를 지운다. 실제 관광지는 검토 대기로 적재되므로 시연 전에 관리자 화면에서 승인한다. 실제 자료의 승인 조건은 [관광 데이터 적재](../data-collection/tourism-data.md#적재)를 따른다.
 
 ## 카카오 로그인
 
-기본 실행에서는 버튼이 준비 중으로 표시된다. 사용하려면 [카카오 로그인 설정](../README.md#카카오-로그인-설정)의 환경 변수를 저장소 루트의 `.env`에 작성하고 다시 실행한다. `.env`는 커밋하지 않는다.
+기본 실행에서는 버튼이 준비 중으로 표시된다. 사용하려면 [카카오 로그인 설정](../../README.md#카카오-로그인-설정)의 환경 변수를 저장소 루트의 `.env`에 작성하고 다시 실행한다. `.env`는 커밋하지 않는다.

@@ -28,7 +28,7 @@ public final class RedemptionService {
     public Map<String,Object> getLookup(Connection c,String user,String id) throws SQLException {
         var token=storedLookup(c,user,id,false);assigned(c,user,token.merchantId());
         var benefits=lookupBenefits(c,PassDao.get(c,token.passId()),token.merchantId(),Instant.now());
-        return new LinkedHashMap<>(Map.of("id",id,"confirmationToken",id,"confirmationExpiresAt",token.expiresAt().toString(),"used",token.used(),"benefits",benefits));
+        return Map.of("id",id,"confirmationToken",id,"confirmationExpiresAt",token.expiresAt().toString(),"used",token.used(),"benefits",benefits);
     }
     private List<Map<String,Object>> lookupBenefits(Connection c,Map<String,Object> pass,String merchant,Instant now) throws SQLException {
         var benefits=new ArrayList<Map<String,Object>>();

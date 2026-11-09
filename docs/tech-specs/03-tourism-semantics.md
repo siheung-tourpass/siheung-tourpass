@@ -1,8 +1,8 @@
 # 추천 모델 — 시흥 투어패스
 
-[문서 안내](../README.md#관련-문서)
+[문서 안내](../../README.md#관련-문서)
 
-추천의 개념 계층·점수 계산·정렬을 관리한다. 입력·피드백 조건은 [방문객 요구사항](specs/visitor.md#추천피드백), 자료 승인·출처는 [관광 데이터](data-collection/tourism-data.md), 담당 서비스는 [구현 계획](../plan.md#기능별-구현-경계)을 따른다.
+추천의 개념 계층·점수 계산·정렬을 관리한다. 입력·피드백 조건은 [방문객 요구사항](../func-specs/02-visitor.md#추천피드백), 자료 승인·출처는 [관광 데이터](../data-collection/tourism-data.md), 담당 서비스는 [구현 계획](01-plan.md#기능별-구현-경계)을 따른다.
 
 ## 계층
 
@@ -14,7 +14,7 @@
 
 ## 계산
 
-추천 입력은 [방문객 기능 4](specs/visitor.md#추천피드백), 후보 승인 조건은 [관광 데이터 적재](data-collection/tourism-data.md#적재), 피드백 적용 대상은 [방문객 기능 6](specs/visitor.md#추천피드백)을 따른다.
+추천 입력은 [방문객 기능 4](../func-specs/02-visitor.md#추천피드백), 후보 승인 조건은 [관광 데이터 적재](../data-collection/tourism-data.md#적재), 피드백 적용 대상은 [방문객 기능 6](../func-specs/02-visitor.md#추천피드백)을 따른다.
 
 | 단계 | 계산·처리 |
 | --- | --- |

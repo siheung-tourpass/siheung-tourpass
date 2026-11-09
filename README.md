@@ -10,20 +10,27 @@
 
 ### 주요 화면
 
-| 서비스 소개 | 여행 덱 구성 | 카드 상세 안내 | 여행 확인 |
-| --- | --- | --- | --- |
-| [![관광지와 행사 카드를 보여주는 서비스 소개](docs/assets/landing.png)](docs/assets/landing.png) | [![시작 관광지 주변의 후보를 비교하고 여행 카드 선택](docs/assets/journey-builder.png)](docs/assets/journey-builder.png) | [![카드의 소개와 공식 안내 확인](docs/assets/card-details.png)](docs/assets/card-details.png) | [![여행 순서와 이름을 확인하는 저장 전 화면](docs/assets/journey-review.png)](docs/assets/journey-review.png) |
-| 관광지·행사 카드를 둘러보고 여행 만들기를 시작한다. | 담은 장소 주변의 후보를 비교하고 여행에 추가한다. | 카드의 소개·이용 조건과 공식 출처를 확인한다. | 카드 순서·여행 이름·날짜를 정하고 임시 저장하거나 제작을 확정한다. |
+방문객의 탐색·여행 구성·혜택 이용·기록 흐름을 담았다. 모바일 360×784 화면을 2배 해상도로 캡처했으며, 이미지를 누르면 원본을 볼 수 있다.
+
+| 서비스 소개 | 상품 선택 | 여행 덱 구성 |
+| --- | --- | --- |
+| [![관광지·행사 카드와 서비스 소개](docs/assets/landing.png)](docs/assets/landing.png) | [![혜택 상품별 추천 여행 구성과 여행 시작 버튼](docs/assets/tourpass-products.png)](docs/assets/tourpass-products.png) | [![시작 장소 주변의 후보 카드와 직선거리 안내](docs/assets/journey-builder.png)](docs/assets/journey-builder.png) |
+| 관광지·행사를 둘러보고 여행 만들기를 시작한다. | 상품의 혜택 장소를 담아 여행을 시작한다. | 주변 후보를 비교하며 원하는 장소를 여행에 추가한다. |
+
+| 여행 확인·구매 진입 | 내 투어패스 | 방문 기록 |
+| --- | --- | --- |
+| [![여행 이름·날짜와 추천 투어패스 가격 확인](docs/assets/journey-review.png)](docs/assets/journey-review.png) | [![현재 투어패스의 남은 시간과 가맹점 제시 코드](docs/assets/my-tourpass.png)](docs/assets/my-tourpass.png) | [![방문 날짜·만족도·나만의 메모를 저장하는 여행 기록](docs/assets/journey-record.png)](docs/assets/journey-record.png) |
+| 이름·날짜와 추천 상품·가격을 확인하고 시연 구매로 이동한다. | 남은 이용 시간을 확인하고 가맹점에 코드를 제시한다. | 방문 날짜·만족도·메모를 남겨 여행을 보관한다. |
 
 ## 기술 스택
 
-Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 구현 경계는 [구현 계획](plan.md#기술-구조)을 따른다.
+Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 구현 경계는 [구현 계획](docs/tech-specs/01-plan.md#기술-구조)을 따른다.
 
 ![시흥 투어패스 시스템 아키텍처](docs/assets/architecture.svg)
 
 ## 시작하기
 
-Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행할 수 있다. 명령어와 초기 자료의 차이는 [Docker 실행 안내](docs/docker.md)를 따른다. 아래는 직접 설치하는 절차다.
+Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행할 수 있다. 명령어와 초기 자료의 차이는 [Docker 실행 안내](docs/tech-specs/04-docker.md)를 따른다. 아래는 직접 설치하는 절차다.
 
 명령은 저장소 루트에서 실행한다.
 
@@ -94,9 +101,9 @@ Docker를 사용하면 `docker compose up --build`로 앱과 DB를 함께 실행
 | 카카오 로그인 | 로그인 → 카카오톡으로 로그인 → 카카오 동의 → 방문객 홈. 처음 로그인하면 별도 방문객 계정을 생성하며 기존 여행은 기존 계정에 유지된다. 서비스 로그아웃은 카카오 계정 로그아웃과 별개다. |
 | 계정 | 프로필 → 계정 정보·화면 설정·로그아웃 |
 
-초기 자료의 담기 조건은 [여행 구성](docs/specs/visitor.md#담기와-보존), 추천 승인 절차는 [데이터 적재](docs/data-collection/tourism-data.md#적재)를 따른다.
+초기 자료의 담기 조건은 [여행 구성](docs/func-specs/02-visitor.md#담기와-보존), 추천 승인 절차는 [데이터 적재](docs/data-collection/tourism-data.md#적재)를 따른다.
 
-포토카드는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [포토카드 정책](docs/specs/admin.md#카드-출력)을 따른다.
+포토카드는 A4 세로, 배율 100%, 머리글/바닥글을 끄고 출력한다. QR에는 서비스 경로까지 포함한 접속 주소를 설정하고 휴대전화로 열리는지 확인한다. 사진 이용 범위는 [포토카드 정책](docs/func-specs/04-admin.md#카드-출력)을 따른다.
 
 ### API
 
@@ -106,7 +113,7 @@ Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다.
 
 ## 테스트
 
-[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 자동 검사 명령·초기화 순서는 워크플로를 원본으로 사용한다. `api`·`web`·`tourism` 작업의 초기 자료가 다르며, DB를 변경하므로 시연·보관용 DB와 분리한다. 검증 범위는 [구현 계획](plan.md#검증-전략), 최종 판정은 [완료 기준](spec.md#완료-기준)을 따른다.
+[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 자동 검사 명령·초기화 순서는 워크플로를 원본으로 사용한다. `api`·`web`·`tourism` 작업의 초기 자료가 다르며, DB를 변경하므로 시연·보관용 DB와 분리한다. 검증 범위는 [구현 계획](docs/tech-specs/01-plan.md#검증-전략), 최종 판정은 [완료 기준](docs/func-specs/01-common.md#완료-기준)을 따른다.
 
 브라우저 검사는 Node.js·Playwright·Chrome과 별도 테스트 서버의 시연 계정이 필요하다. 외부 경로의 Playwright는 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 아래 URL은 테스트 서버에 맞게 바꾼다.
 
@@ -118,25 +125,28 @@ Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다.
 
 ## 관련 문서
 
+기능 명세·요구사항은 `docs/func-specs/`, 기술 명세·구현 계획은 `docs/tech-specs/`에서 관리합니다.
+
 문서 관리 원칙은 [작업 지침](AGENTS.md)을 따른다. 아래에서 변경할 내용의 담당 문서를 찾는다.
 
 ### 요구사항·구조·화면
 
 | 문서 | 담당 내용 |
 | --- | --- |
-| [공통 요구사항](spec.md) | 범위·공통 인증·이용권 정책·API 계약·완료 기준 |
-| [방문객 요구사항](docs/specs/visitor.md) | 공개 탐색·이용권 발급/조회·여행·추천·피드백·사진·방문 기록 |
-| [가맹점 담당자 요구사항](docs/specs/merchant.md) | 혜택 확인·사용 권한 |
-| [관리자 요구사항](docs/specs/admin.md) | 자료 관리·검토·피드백 통계·카드 출력 |
-| [구현 계획](plan.md) | 소스 구조·구현 경계·검증 전략·남은 작업 |
-| [디자인 기준](docs/design.md) | 역할별 메뉴·화면 배치·조작·상태·접근성 |
-| [추천 모델](docs/tourism-semantics.md) | 개념 계층·추천 점수·정렬·추론 경계 |
+| [기능 명세 안내](docs/func-specs/README.md) | 공통·역할별 문서 읽는 순서 |
+| [공통 요구사항](docs/func-specs/01-common.md) | 범위·공통 인증·이용권 정책·API 계약·완료 기준 |
+| [방문객 요구사항](docs/func-specs/02-visitor.md) | 공개 탐색·이용권 발급/조회·여행·추천·피드백·사진·방문 기록 |
+| [가맹점 담당자 요구사항](docs/func-specs/03-merchant.md) | 혜택 확인·사용 권한 |
+| [관리자 요구사항](docs/func-specs/04-admin.md) | 자료 관리·검토·피드백 통계·카드 출력 |
+| [구현 계획](docs/tech-specs/01-plan.md) | 소스 구조·구현 경계·검증 전략·남은 작업 |
+| [디자인 기준](docs/tech-specs/02-design.md) | 역할별 메뉴·화면 배치·조작·상태·접근성 |
+| [추천 모델](docs/tech-specs/03-tourism-semantics.md) | 개념 계층·추천 점수·정렬·추론 경계 |
 
 ### 실행·검증·협업
 
 | 문서 | 담당 내용 |
 | --- | --- |
-| [Docker 실행 안내](docs/docker.md) | Docker 로컬 실행·변경 반영·초기 자료 |
+| [Docker 실행 안내](docs/tech-specs/04-docker.md) | Docker 로컬 실행·변경 반영·초기 자료 |
 | [작업 지침](AGENTS.md) | 문서와 코드 변경 원칙 |
 | [이슈·PR 작성 규칙](docs/collaboration.md) | 이슈·PR 제목과 본문 작성 방법 |
 

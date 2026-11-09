@@ -80,7 +80,7 @@
     const region = anchor?.dataset.savedOnly !== 'true' ? anchor?.dataset.regionId : '';
     const available = rankedCards.filter(card => !selected.has(card.dataset.cardKey));
     const distances = new Map(cards.map(card => [card, distance(origin, point(card))]));
-    available.sort((a, b) => origin ? (distances.get(a) === distances.get(b) ? 0 : distances.get(a) - distances.get(b))
+    available.sort((a, b) => origin ? distances.get(a) - distances.get(b)
       : Number(!!region && b.dataset.regionId === region) - Number(!!region && a.dataset.regionId === region));
     cards.forEach(card => {
       const label = controls.get(card).distance;
@@ -324,11 +324,11 @@
     });
     cards.forEach(card => {
       const checked = isSelected(card);
-      const { checkbox, label, toggle } = controls.get(card);
+      const { checkbox, label, toggle, name } = controls.get(card);
       checkbox.checked = selected.has(card.dataset.cardKey);
       card.classList.toggle('is-selected', checked);
       label.textContent = step === 'start' ? checked ? '✓ 시작 카드로 선택됨' : '시작 카드로 선택' : checked ? '✓ 내 여행에 담김' : '여행에 담기';
-      toggle.setAttribute('aria-label', `${controls.get(card).name} ${step === 'start' ? checked ? '시작 카드 선택 해제' : '시작 카드로 선택' : checked ? '여행에서 빼기' : '여행에 담기'}`);
+      toggle.setAttribute('aria-label', `${name} ${step === 'start' ? checked ? '시작 카드 선택 해제' : '시작 카드로 선택' : checked ? '여행에서 빼기' : '여행에 담기'}`);
       toggle.setAttribute('aria-pressed', String(checked));
     });
     form.querySelector('#selection-count').textContent = `${selected.size}장`;

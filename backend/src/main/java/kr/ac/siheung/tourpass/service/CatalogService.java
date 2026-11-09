@@ -23,7 +23,7 @@ public final class CatalogService {
     public static String cardKey(Map<String,Object> benefit){return benefit.get("placeId")!=null?"place:"+benefit.get("placeId"):"dining:"+benefit.get("diningCode");}
     /** Complete, distinct benefit locations in benefit order; empty when any card is unavailable. */
     public static List<String> journeyCardKeys(Map<String,Object> product,List<Map<String,Object>> cards) {
-        var available=new HashSet<Object>();cards.forEach(card->available.add(card.get("key")));
+        var available=cards.stream().map(card->card.get("key")).collect(java.util.stream.Collectors.toSet());
         var keys=new LinkedHashSet<String>();
         for(Object value:(List<?>)product.get("benefits")){
             String key=cardKey(Input.object(value));
@@ -47,10 +47,13 @@ public final class CatalogService {
     public Map<String,Object> productFor(Connection c,Collection<String> keys) throws SQLException {
         Map<String,Object> best=null;long bestCount=0;
         for(var product:withBenefits(c,"products",null)){
+            if(!onSale(product))continue;
             var matched=((List<Map<String,Object>>)product.get("benefits")).stream().filter(b->keys.contains(cardKey(b))).toList();
             long count=matched.stream().map(CatalogService::cardKey).distinct().count();
-            if(count==0||!onSale(product)||count<bestCount||count==bestCount&&price(product)>=price(best))continue;
-            best=product;bestCount=count;product.put("matchedBenefits",matched);product.put("matchedCount",count);
+            if(count>0&&(best==null||count>bestCount||count==bestCount&&price(product)<price(best))){
+                best=product;bestCount=count;
+                product.put("matchedBenefits",matched);product.put("matchedCount",count);
+            }
         }
         return best;
     }

@@ -29,7 +29,7 @@ public final class RecommendationService {
             if(companionMatched)explanations.add("동반 유형 +1");int base=2*matches.size()+(companionMatched?1:0);int count=0,sum=0;
             for(var evaluation:evaluations.values()){
                 var selectedReasons=evaluation.reasons();boolean samePlace=id.equals(evaluation.placeId());
-                boolean themeMatch=(selectedReasons.isEmpty()||selectedReasons.contains("INTEREST"))&&evaluation.themes().stream().anyMatch(paths::containsKey);
+                boolean themeMatch=(selectedReasons.isEmpty()||selectedReasons.contains("INTEREST"))&&!Collections.disjoint(evaluation.themes(),paths.keySet());
                 if(samePlace||themeMatch){
                     int adjustment=evaluation.rating()-3;sum+=adjustment;count++;
                     String labels=selectedReasons.isEmpty()?"사유 미선택":String.join("·",selectedReasons.stream().map(FeedbackService.REASONS::get).toList());
