@@ -57,28 +57,21 @@ async function login(request, root) {
  assert.equal((await page.request.post(root+'/logout',{form:{csrf:homeSession.csrfToken}})).status(),200);
  await page.goto(root+'/explore');await page.waitForSelector('.is-deck-mode');
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
- assert(await page.locator('#builder-next').isDisabled());
- assert.equal(await page.locator('#bar-count').textContent(),'마음에 드는 한 장을 골라 주세요');
- assert.equal(await page.locator('#deck-summary').isVisible(),false);
- assert(await page.locator('#start-preferences').isVisible());
- // A single proposal has no deck controls; multiple proposals reveal navigation.
- const proposals=await page.locator('[data-card-kind=place]').evaluateAll(cards=>cards.slice(0,2).map(card=>({place:{id:Number(card.dataset.cardKey.split(':')[1])},explanation:'조건에 맞는 관광지'})));
+ // The builder opens on deck building: recommendations lead the deck and the sheet sits folded on the menu.
+ assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
+ assert(await page.locator('#builder-next').isVisible());
+ assert.equal(await page.locator('#deck-sheet-handle').getAttribute('aria-expanded'),'false');
+ assert.equal(await page.locator('.bottom-nav').isVisible(),false,'deck building hides the bottom menu');
+ assert(await page.locator('[data-card-type=event]').isVisible());
+ const proposals=await page.locator('[data-card-kind=place]').evaluateAll(cards=>cards.slice(-2).map(card=>({place:{id:Number(card.dataset.cardKey.split(':')[1])},explanation:'조건에 맞는 관광지'})));
  assert.equal(proposals.length,2);
- let proposalItems=proposals.slice(0,1);
- await page.route('**/recommendations?**',route=>route.fulfill({json:{items:proposalItems}}));
+ await page.route('**/recommendations?**',route=>route.fulfill({json:{items:proposals}}));
  await page.locator('[name=themeId]').selectOption({index:1});
- await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
- assert.equal(await page.locator('.deck-navigation').isVisible(),false);
- assert.equal(await page.locator('#start-alternatives').isVisible(),false);
- assert.equal(await page.locator('.builder-card:visible').count(),1);
- proposalItems=proposals;
- await page.locator('[name=themeId]').selectOption({index:2});
- await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
- assert(await page.locator('.deck-navigation').isVisible());
- assert(await page.locator('#start-alternatives').isVisible());
+ await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
+ assert.deepEqual(await page.locator('#browse-cards > article:not([hidden])').evaluateAll(cards=>cards.slice(0,2).map(card=>card.dataset.cardKey)),proposals.map(item=>'place:'+item.place.id));
+ assert.equal(await page.locator('.builder-card.is-current').getAttribute('data-card-key'),'place:'+proposals[0].place.id);
+ assert.equal(await page.locator('.builder-card.is-match').count(),2);
  await page.unroute('**/recommendations?**');
- await page.locator('[name=themeId]').selectOption('');
- await page.waitForFunction(()=>document.querySelector('#journey-builder').dataset.suggesting==='false');
  const themes=page.locator('select[name=themeId] option:not([value=""])');
  assert(await themes.count()>=2);
  await page.locator('[name=themeId]').selectOption(await themes.nth(1).getAttribute('value'));
@@ -91,59 +84,43 @@ async function login(request, root) {
  assert.equal(await page.locator('[name=themeId]').inputValue(),themeId);
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  if(recommendation.items.length)assert.equal(await page.locator('.builder-card.is-current').getAttribute('data-card-key'),'place:'+recommendation.items[0].place.id);
- // Start modes show their own candidates and keep deck composition on the next page.
- await page.locator('[name=startMode]').selectOption('region');
- const regionId=await page.locator('#start-region option:not([value=""])').first().getAttribute('value');
- await page.locator('#start-region').selectOption(regionId);
+ // Detailed conditions narrow the deck by region, card type and event date.
+ await page.locator('.builder-filter-panel summary').click();
+ const regionId=await page.locator('[name=regionId] option:not([value=""])').first().getAttribute('value');
+ await page.locator('[name=regionId]').selectOption(regionId);
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert(await page.locator('.builder-card:visible').count()>0);
- assert(await page.locator('.builder-card:visible').evaluateAll((cards,region)=>cards.every(card=>card.dataset.cardKind==='place'&&card.dataset.regionId===region),regionId));
- await page.locator('[name=startMode]').selectOption('event');
- assert(await page.locator('#start-event-panel').isVisible());
+ assert(await page.locator('.builder-card:visible').evaluateAll((cards,region)=>cards.every(card=>card.dataset.cardKind==='event'||card.dataset.regionId===region),regionId));
+ await page.locator('[name=regionId]').selectOption('');
+ await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
+ await page.locator('[data-card-type=event]').click();
  assert(await page.locator('.builder-card:visible').count()>0);
  assert(await page.locator('.builder-card:visible').evaluateAll(cards=>cards.every(card=>card.dataset.cardKind==='event')));
- await page.locator('#start-event-date').fill('1900-01-01');
+ await page.locator('#card-date').fill('1900-01-01');
  assert(await page.locator('#builder-empty').isVisible());
- await page.locator('#start-event-date').fill('');
- await page.locator('.builder-card.is-current .card-select-toggle').click();
- await page.locator('#builder-next').click();
- assert(await page.locator('#deck-summary').isVisible());
- assert.equal(await page.locator('#builder-first-card').isVisible(),false);
- await page.locator('#builder-back').click();
- assert.equal(await page.locator('[name=startMode]').inputValue(),'event');
- await page.locator('.builder-card.is-selected .card-select-toggle').click();
- await page.locator('[name=startMode]').selectOption('theme');
- assert.equal(await page.locator('[name=themeId]').inputValue(),themeId);
- await page.locator('[name=startMode]').selectOption('direct');
- assert(await page.locator('#builder-search-panel').evaluate(el=>el.open));
+ await page.locator('#card-date').fill('');
+ await page.locator('[data-card-type=all]').click();
  // Choosing a card keeps it in view and ranks unselected cards by straight-line distance.
  const anchor=await page.locator('.builder-card[data-card-kind=place]').evaluateAll(cards=>{
   const card=cards.find(card=>card.dataset.latitude&&card.dataset.longitude);
   return card?{key:card.dataset.cardKey,name:card.querySelector('h3').textContent,region:card.dataset.regionId}:null;
  });
  assert(anchor,'The fixture needs a tourism card with sourced coordinates');
- await page.locator('[name=startMode]').selectOption('direct');
- await page.locator('#builder-search-panel').evaluate(el=>el.open=true);
- await page.locator('.builder-filter-panel summary').click();
  await page.locator('#card-search').fill(anchor.name);
  await page.locator(`.builder-card[data-card-key="${anchor.key}"] .card-select-toggle`).click();
- assert.equal(await page.locator('#bar-count').textContent(),anchor.name);
- assert.equal(await page.locator('#bar-label').textContent(),'시작 카드');
+ assert.equal(await page.locator('#sheet-count').textContent(),'1장');
+ // The deck re-sorts from the pick and highlights the new basis.
+ await page.waitForFunction(()=>document.querySelector('#builder-context').classList.contains('is-updated'));
+ await page.waitForTimeout(350);
+ assert.match(await page.locator('#deck-feedback').textContent(),/가까운 순으로 다시 놓았어요/);
  await page.locator('#card-search').fill('');
- assert(await page.locator('#builder-first-card').isVisible());
- assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'start');
- await page.locator('#builder-next').click();
- assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
- assert(await page.locator('#builder-page-title').evaluate(el=>el===document.activeElement));
- assert.equal(await page.locator('#builder-first-card').isVisible(),false);
- assert(await page.locator('#builder-first-card').evaluate(el=>el.disabled));
- assert.equal(await page.locator('.builder-card.is-current').getAttribute('data-card-key'),anchor.key);
  const ordered=await page.locator('#browse-cards > article').evaluateAll(cards=>cards.map(card=>({distance:card.dataset.distanceKm,key:card.dataset.cardKey,latitude:card.dataset.latitude,longitude:card.dataset.longitude})));
  let previous=-1;
  for(const card of ordered.slice(1)){
   const km=card.distance===undefined?Infinity:Number(card.distance);
   assert(km>=previous,'Known points must be closest first; unknown points last');previous=km;
  }
+ assert.equal(ordered[0].key,anchor.key);
  await page.locator('#deck-next').click();
  assert.equal(await page.locator('.builder-card.is-current').getAttribute('data-card-key'),ordered[1].key);
  assert(await page.locator('.builder-card.is-current .card-distance').isVisible());
@@ -154,29 +131,36 @@ async function login(request, root) {
  await page.locator('[type=reset]').click();
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert.equal(await page.locator('.card-select-toggle[aria-pressed=true]').count(),1);
+ // Deck building folds the map and list into a bottom sheet; the handle unfolds it.
+ const sheetHandle=page.locator('#deck-sheet-handle');
+ assert.equal(await sheetHandle.getAttribute('aria-expanded'),'false');
+ assert.equal(await page.locator('#selected-places [data-action="빼기"]').isVisible(),false);
+ await sheetHandle.click();
+ assert.equal(await sheetHandle.getAttribute('aria-expanded'),'true');
+ await page.keyboard.press('Escape');
+ assert.equal(await sheetHandle.getAttribute('aria-expanded'),'false');
+ assert(await sheetHandle.evaluate(el=>el===document.activeElement));
+ await sheetHandle.click();
  await page.locator('#selected-places [data-action="빼기"]').click();
  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
  await page.locator('#builder-next').click();
  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'review');
+ assert(await page.locator('#builder-page-title').evaluate(el=>el===document.activeElement));
  await page.locator('#builder-back').click();
- await page.locator('#builder-back').click();
- assert(await page.locator('#builder-first-card').isVisible());
- assert.equal(await page.locator('#builder-first-card').evaluate(el=>el.disabled),false);
- await page.locator('[name=startMode]').selectOption('direct');
- await page.locator('#builder-search-panel').evaluate(el=>el.open=true);
- await page.locator('.builder-filter-panel summary').click();
+ assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
  for(const width of [320,1280]){
   await page.setViewportSize({width,height:900});
   for(const kind of ['event','dining','place']){
    await page.locator(`[data-card-type=${kind}]`).click();await page.waitForTimeout(150);
-   const card=page.locator('.builder-card.is-current');
+   const card=page.locator(`[data-card-key="${await page.locator('.builder-card.is-current').getAttribute('data-card-key')}"]`);
    const select=card.locator('.card-select-toggle');
-   await select.click({position:{x:80,y:100}});
-   assert.equal(await select.getAttribute('aria-pressed'),'true');
-   assert(await card.evaluate(el=>el.classList.contains('is-selected')));
+   // Flip first: a pick re-sorts the deck, after which this card is no longer the current one.
    await card.locator('.card-front .card-flip').click();await page.waitForTimeout(330);
    assert(await card.evaluate(el=>el.classList.contains('is-flipped')));
    await card.locator('.card-back .card-flip').click();await page.waitForTimeout(330);
+   await select.click({position:{x:80,y:100}});
+   assert.equal(await select.getAttribute('aria-pressed'),'true');
+   assert(await card.evaluate(el=>el.classList.contains('is-selected')));
    await select.focus();await page.keyboard.press('Space');assert.equal(await select.getAttribute('aria-pressed'),'false');
   }
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
@@ -199,35 +183,18 @@ async function login(request, root) {
   await productStart.click();await page.waitForSelector('#journey-builder[data-step="build"]');
   assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
   assert(await page.locator('#selected-places li').count()>0);
+  assert.equal(await page.locator('#builder-browse-title').textContent(),'다음 후보','a product start skips the recommendations');
+  assert.equal(await page.locator('.builder-card.is-current .card-select-toggle').getAttribute('aria-pressed'),'false','the deck opens on a card not yet picked');
   assert(await page.locator('[name=name]').inputValue());
   await page.goto(root+'/merchants');
  }
  await page.getByRole('link',{name:'직접 카드 고르기',exact:true}).click();await page.waitForSelector('.is-deck-mode');await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
- assert(await page.locator('#start-preferences').isVisible());
- await page.locator('[name=startMode]').selectOption('direct');
+ assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
  const keys=[];
  for(const kind of ['event','dining','place']){
   await page.locator(`[data-card-type=${kind}]`).click();const card=page.locator('.builder-card.is-current');keys.push(await card.getAttribute('data-card-key'));await card.locator('.card-select-toggle').click({position:{x:80,y:100}});
-  if(kind==='event')await page.locator('#builder-next').click();
  }
  assert.equal(await page.locator('#selected-places li').count(),3);
- // Revisiting the first step replaces only the first card, with no implicit navigation.
- await page.locator('#builder-back').click();
- const replacement=await page.locator('.builder-card[data-card-kind=place]').evaluateAll((cards,keys)=>{
-  const card=cards.find(card=>!keys.includes(card.dataset.cardKey));
-  return {key:card.dataset.cardKey,name:card.querySelector('h3').textContent};
- },keys);
- assert(await page.locator('#builder-search-panel').evaluate(el=>el.open));
- await page.locator('#card-search').fill(replacement.name);
- await page.locator(`[data-card-key="${replacement.key}"] .card-select-toggle`).click();
- assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'start');
- assert.deepEqual(await page.locator('#selected-places input').evaluateAll(items=>items.map(x=>x.value)),[replacement.key,...keys.slice(1)]);
- await page.locator('[data-card-type=event]').click();
- const originalName=await page.locator(`[data-card-key="${keys[0]}"] h3`).textContent();
- await page.locator('#card-search').fill(originalName);
- await page.locator(`[data-card-key="${keys[0]}"] .card-select-toggle`).click();
- await page.locator('#card-search').fill('');
- await page.locator('#builder-next').click();
  assert.deepEqual(await page.locator('#selected-places input').evaluateAll(items=>items.map(x=>x.value)),keys);
  await page.locator('#builder-next').click();
  assert.equal(await page.locator('#journey-filters').isVisible(),false);
@@ -267,7 +234,6 @@ async function login(request, root) {
  assert.equal(await page.locator('.builder-card:visible').count(),0);
  assert.equal(await page.locator('#builder-empty').isVisible(),true);
  await page.locator('#card-search').fill('');
- await page.locator('#shuffle-cards').click();
  assert.deepEqual(await page.locator('#selected-places input[name=cardKey]').evaluateAll(inputs=>inputs.map(input=>input.value)),order);
  await page.locator('#builder-next').click();
  await page.locator('input[name=name]').fill('통합 카드 브라우저 검증');await page.locator('#save-journey').click();await page.waitForLoadState();

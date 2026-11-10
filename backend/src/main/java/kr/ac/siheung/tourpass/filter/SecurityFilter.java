@@ -9,6 +9,8 @@ import kr.ac.siheung.tourpass.controller.ApiHandler;
 import kr.ac.siheung.tourpass.controller.WebHandler;
 import kr.ac.siheung.tourpass.service.*;
 public final class SecurityFilter implements Filter {
+    /** OpenStreetMap tiles for the trip builder map; `data:` is Leaflet's blank image for removed tiles. Scripts and styles stay same-origin. */
+    static final String MAP_TILES="https://tile.openstreetmap.org";
     public static boolean isApiPath(String path){return path.equals("/api/v1")||path.startsWith("/api/v1/");}
     public static String requiredRole(String path){
         if(isApiPath(path)){
@@ -21,7 +23,7 @@ public final class SecurityFilter implements Filter {
         return null;
     }
     public void doFilter(ServletRequest req,ServletResponse res,FilterChain chain) throws IOException,ServletException {
-        var r=(HttpServletRequest)req;var out=(HttpServletResponse)res;r.setCharacterEncoding("UTF-8");out.setCharacterEncoding("UTF-8");out.setHeader("X-Content-Type-Options","nosniff");out.setHeader("Referrer-Policy","no-referrer");out.setHeader("Cache-Control","no-store");out.setHeader("Content-Security-Policy","default-src 'self'; frame-ancestors 'none'; base-uri 'none'");
+        var r=(HttpServletRequest)req;var out=(HttpServletResponse)res;r.setCharacterEncoding("UTF-8");out.setCharacterEncoding("UTF-8");out.setHeader("X-Content-Type-Options","nosniff");out.setHeader("Referrer-Policy","no-referrer");out.setHeader("Cache-Control","no-store");out.setHeader("Content-Security-Policy","default-src 'self'; img-src 'self' data: "+MAP_TILES+"; frame-ancestors 'none'; base-uri 'none'");
         // Scalar injects styles and embeds icons; only this page gets the exception.
         if(r.getServletPath().equals("/assets/api-docs/index.html"))out.setHeader("Content-Security-Policy","default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'");
         try{

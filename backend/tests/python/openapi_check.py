@@ -9,7 +9,7 @@ from http_support import opener, send
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / 'frontend/assets/api-docs/openapi.yaml'
 CONTROLLER = ROOT / 'backend/src/main/java/kr/ac/siheung/tourpass/controller/ApiController.java'
-STRICT_POLICY = "default-src 'self'; frame-ancestors 'none'; base-uri 'none'"
+STRICT_POLICY = "default-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; frame-ancestors 'none'; base-uri 'none'"
 METHODS = {'get', 'post', 'put', 'patch', 'delete'}
 SAMPLES = {'token': 'x', 'type': 'has-theme'}
 ACCOUNTS = {'/me/': 'visitor', '/merchant/': 'staff-a', '/admin/': 'admin'}
@@ -100,6 +100,9 @@ def check_page():
     for path in ('/', '/assets/css/style.css', '/api/v1/'):
         _, headers, _ = send(http, urllib.request.Request(web + path))
         assert headers['Content-Security-Policy'] == STRICT_POLICY, path
+    for name in ('leaflet.js', 'leaflet.css'):
+        status, _, _ = send(http, urllib.request.Request(web + '/webjars/leaflet/1.9.4/dist/' + name))
+        assert status == 200, name
     status, _, _ = send(http, urllib.request.Request(web + '/webjars/scalar__api-reference/none.js'))
     assert status == 404
 

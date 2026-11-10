@@ -51,6 +51,8 @@ jobs:
           sh backend/scripts/check-boundaries.sh
           node backend/tests/javascript/card_scroll_check.cjs
           node backend/tests/javascript/photocard_print_check.cjs
+          node backend/tests/javascript/builder_map_check.cjs
+          node backend/tests/javascript/deck_sheet_check.cjs
           python3 backend/tests/python/tourism_sql_check.py
       - name: Seed test database
         run: |
