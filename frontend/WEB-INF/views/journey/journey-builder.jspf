@@ -1,31 +1,22 @@
 <%@ page pageEncoding="UTF-8" %>
 <h1 id="builder-page-title" tabindex="-1">${empty draft ? '여행 만들기' : '여행 이어 만들기'}</h1><c:if test="${not empty draft}"><p><c:out value="${draft.name}"/> · 제작 중</p></c:if>
 <c:if test="${not empty builderProduct}"><p class="builder-product-note"><c:out value="${builderProduct}"/>의 혜택 장소를 담았어요. 카드와 순서를 바꾼 뒤 저장하세요. 투어패스 구매는 별도예요.</p></c:if>
-<nav id="builder-steps" aria-label="여행 만들기 단계" hidden><ol><li data-step="start">1. 시작 카드</li><li data-step="build">2. 덱 구성</li><li data-step="review">3. 여행 확인</li></ol></nav>
+<nav id="builder-steps" aria-label="여행 만들기 단계" hidden><ol><li data-step="build">1. 덱 구성</li><li data-step="review">2. 여행 확인</li></ol></nav>
 <p id="builder-step-hint" hidden></p>
-<p class="builder-intro">관심 있는 관광지에서 시작해 행사·음식점·카페도 함께 골라 보세요. 담은 카드 주변의 후보를 비교하며 여행을 이어 갈 수 있어요.</p>
+<p class="builder-intro">취향에 맞는 추천 관광지부터 행사·음식점·카페까지 함께 골라 보세요. 담은 카드 주변의 후보를 비교하며 여행을 이어 갈 수 있어요.</p>
 <form id="journey-filters" method="get" action="${root}/journeys/new" data-recommendations-url="${root}/recommendations">
 <fieldset id="builder-filters" disabled>
 
-<section id="start-preferences" aria-label="시작 취향">
-<fieldset id="builder-first-card"><legend>어디서부터 골라 볼까요?</legend>
-<div class="start-choice-fields"><label>둘러보는 방법<select name="startMode"><option value="theme">취향으로 찾기</option><option value="region">지역으로 찾기</option><option value="event">행사 찾기</option><option value="direct">직접 검색</option></select></label>
-<fieldset id="start-theme-panel" class="builder-themes"><label>여행 취향<select name="themeId"><option value="">전체 둘러보기</option><c:forEach var="item" items="${options.themes}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label></fieldset></div>
-<div id="start-region-panel" hidden><label>시작할 지역<select id="start-region"><option value="">시흥시 전체</option><c:forEach var="item" items="${options.regions}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label></div>
-<div id="start-event-panel" hidden><label>참여하고 싶은 날짜 · 선택<input id="start-event-date" type="date"></label><p class="form-hint">행사 일정과 공식 안내를 확인하고 첫 카드로 골라 보세요. 검토 대기 행사는 안내 자료이며 개최·예약 가능 여부는 공식 출처에서 확인해 주세요.</p></div>
-</fieldset>
-</section>
-<details id="builder-search-panel" open><summary>직접 찾기 · 검색·세부 조건</summary>
-<label class="deck-search-label">카드 검색<input id="card-search" type="search" placeholder="이름, 위치, 소개로 찾기" autocomplete="off"></label>
+<div class="builder-picks"><label>여행 취향<select name="themeId"><option value="">전체 둘러보기</option><c:forEach var="item" items="${options.themes}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label>
+<label class="deck-search-label">카드 검색<input id="card-search" type="search" placeholder="이름, 위치, 소개로 찾기" autocomplete="off"></label></div>
 <details class="builder-filter-panel"><summary>세부 조건</summary><div class="builder-advanced">
 <%@ include file="/WEB-INF/views/catalog/recommendation-region.jspf" %>
 <label>행사 날짜<input id="card-date" type="date"></label>
 <label>동반 유형<select name="companionId"><option value="">선택 안 함</option><c:forEach var="item" items="${options.companionTypes}"><option value="${item.id}"><c:out value="${item.name}"/></option></c:forEach></select></label>
 <p class="form-hint">아이와 함께라면 동반 유형과 추천 이유를 살펴보고, 체험 연령·보호자 동반·접수 조건은 공식 안내에서 확인해 주세요.</p>
-<p class="form-hint">지역은 관광지·음식점·카페에 적용해요. 테마·동반 유형은 첫 관광지 추천에 반영해요.</p>
+<p class="form-hint">지역은 관광지·음식점·카페에 적용해요. 여행 취향·지역·동반 유형은 관광지 추천에 반영해요.</p>
 <div class="actions"><button type="reset" class="secondary">조건 초기화</button></div>
 </div></details>
-</details>
 </fieldset>
 </form>
 <p id="builder-status" class="result-meta" role="status" aria-live="polite">카드를 골라 여행에 담아 보세요.</p>
@@ -37,10 +28,9 @@
 
 
 <div class="card-types" role="group" aria-label="카드 종류"><button type="button" class="secondary" data-card-type="all" aria-pressed="true">전체</button><button type="button" class="secondary" data-card-type="place" aria-pressed="false">관광지</button><button type="button" class="secondary" data-card-type="event" aria-pressed="false">행사</button><button type="button" class="secondary" data-card-type="dining" aria-pressed="false">음식점·카페</button></div>
-<button type="button" id="shuffle-cards" class="secondary">섞기 ↻</button><p id="card-count" role="status" aria-live="polite"></p>
+<p id="card-count" role="status" aria-live="polite"></p>
 </div>
 <section id="builder-browse-section" aria-labelledby="builder-browse-title"><div class="deck-heading"><h2 id="builder-browse-title">발견할 카드</h2><div class="deck-navigation" hidden><button type="button" id="deck-previous" class="secondary" aria-label="이전 카드">←</button><span id="deck-position" role="status" aria-live="polite"></span><button type="button" id="deck-next" class="secondary" aria-label="다음 카드">→</button></div></div>
-<p id="start-alternatives" class="form-hint" hidden>다른 카드도 있어요</p>
 <p id="builder-context" class="form-hint"></p>
 <p id="builder-empty" class="empty-state" ${empty data ? '' : 'hidden'}>조건에 맞는 카드가 없습니다. 검색어·카드 종류·날짜·지역을 바꿔 보세요.</p>
 <div id="deck-stage" class="deck-stage" tabindex="0" role="group" aria-label="여행 카드 덱 · 좌우로 밀어 탐색"><div id="browse-cards" class="builder-cards" tabindex="0" role="region" aria-label="좌우 스크롤로 카드 탐색"><c:forEach var="card" items="${data}"><c:choose><c:when test="${card.kind eq 'place'}"><c:set var="place" value="${card}"/>
@@ -74,14 +64,15 @@
 
 <p id="deck-feedback" class="deck-feedback" role="status" aria-live="polite">좌우로 넘겨 보고, 카드를 눌러 담거나 빼세요.</p>
 </section></div>
-<section id="deck-summary" aria-labelledby="selection-title"><header class="pass-cover-popover-heading"><h2 id="selection-title">담은 카드 <span id="selection-count" class="count" role="status" aria-live="polite">0장</span></h2></header>
+<section id="deck-summary" aria-labelledby="selection-title"><button type="button" id="deck-sheet-handle" class="deck-sheet-handle" aria-controls="selection-summary" aria-expanded="false" hidden><span class="deck-sheet-title">담은 카드 <span id="sheet-count">0장</span></span><span class="deck-sheet-label">지도·순서 보기</span></button><button type="button" id="builder-next" hidden>여행 확인</button><header class="pass-cover-popover-heading"><h2 id="selection-title">담은 카드 <span id="selection-count" class="count" role="status" aria-live="polite">0장</span></h2><button type="button" id="builder-back" class="secondary" hidden>덱 수정</button></header>
 <aside id="selection-summary" class="builder-summary panel" aria-labelledby="selection-title" tabindex="-1">
+<div id="builder-map" class="builder-map" role="region" aria-label="담은 카드 위치 지도 · 핀을 누르면 그 카드로 이동해요" hidden></div><p id="builder-map-note" class="form-hint" hidden></p>
 <p id="selection-empty">아직 담은 카드가 없어요. 마음에 드는 카드를 눌러 담아 주세요.</p>
 <ol id="selected-places"></ol>
-<template id="selected-place-template"><li><span></span><div class="selection-controls">
-<button type="button" class="secondary" data-action="위로" title="위로"><span aria-hidden="true">↑</span></button>
-<button type="button" class="secondary" data-action="아래로" title="아래로"><span aria-hidden="true">↓</span></button>
-<button type="button" class="secondary" data-action="빼기" title="빼기"><span aria-hidden="true">×</span></button>
+<template id="selected-place-template"><li><small class="selection-leg" hidden></small><span class="selection-order" aria-hidden="true"></span><span class="selection-thumb" aria-hidden="true"></span><span class="selection-text"><strong class="selection-name"></strong><small class="selection-meta"></small></span><div class="selection-controls">
+<button type="button" class="secondary" data-action="위로" title="위로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
+<button type="button" class="secondary" data-action="아래로" title="아래로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+<button type="button" class="secondary" data-action="빼기" title="빼기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
 </div><input type="hidden" name="cardKey"></li></template>
 <section id="journey-details"><c:choose><c:when test="${user.role eq 'VISITOR'}"><h3>이 여행에 이름을 붙여 주세요</h3>
 <label>패스 이름<input name="name" maxlength="100" required placeholder="나의 시흥 여행" autocomplete="off" value="${fn:escapeXml(empty draft ? builderName : draft.name)}"></label>
@@ -90,7 +81,7 @@
 <ul id="pass-offers" hidden><c:forEach var="offer" items="${passOffers}"><li data-product-id="${offer.id}" data-name="${fn:escapeXml(offer.name)}" data-price="${offer.priceWon}" data-cards="${fn:escapeXml(offer.cards)}"></li></c:forEach></ul>
 </c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
 </aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 투어패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
-<div class="builder-selection-bar" hidden><button type="button" id="builder-back" class="secondary" hidden>이전 단계</button><span class="builder-selection-info"><small id="bar-label">담은 카드</small><span id="bar-count" role="status" aria-live="polite">0장 선택</span></span><button type="button" id="builder-next">이 카드로 시작</button></div>
 </form>
 <c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>
-<script src="${root}/assets/js/card-scroll.js" defer></script><script src="${root}/assets/js/journey-builder.js" defer></script>
+<link rel="stylesheet" href="${root}/webjars/leaflet/1.9.4/dist/leaflet.css"><script src="${root}/webjars/leaflet/1.9.4/dist/leaflet.js" defer></script>
+<script src="${root}/assets/js/card-scroll.js" defer></script><script src="${root}/assets/js/builder-map.js" defer></script><script src="${root}/assets/js/deck-sheet.js" defer></script><script src="${root}/assets/js/journey-builder.js" defer></script>

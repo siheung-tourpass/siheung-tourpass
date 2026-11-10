@@ -33,7 +33,7 @@
 | --- | --- |
 | 여행 | [JourneyService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/JourneyService.java)가 구성·스냅샷·방문 기록·이용권 연결을 관리한다. 여행 행 잠금으로 변경을 직렬화한다. |
 | 투어패스 구매 | [PassService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/PassService.java)가 시연 결제 발급·가격 보존·여행 날짜 기준 시작·기간 중복 거절·여행 자동 연결을 한 트랜잭션에서 처리한다. 중복 판정은 방문객 행 잠금으로 직렬화한다. |
-| 탐색·선택 | [공통 보드](../../frontend/WEB-INF/views/journey/journey-builder.jspf)와 [선택 상태](../../frontend/assets/js/journey-builder.js)를 공개 탐색·생성·편집에서 공유한다. [카드 이동](../../frontend/assets/js/card-scroll.js)은 여행 기록에서도 사용한다. |
+| 탐색·선택 | [공통 보드](../../frontend/WEB-INF/views/journey/journey-builder.jspf)와 [선택 상태](../../frontend/assets/js/journey-builder.js)를 공개 탐색·생성·편집에서 공유한다. [카드 이동](../../frontend/assets/js/card-scroll.js)은 여행 기록에서도 사용한다. [하단 시트](../../frontend/assets/js/deck-sheet.js)는 덱 구성에서 지도·담은 목록을 접고 펼치기만 담당한다. [지도](../../frontend/assets/js/builder-map.js)는 선택 상태 이벤트만 받아 그리며 Leaflet은 WebJar로 제공하고 OpenStreetMap 타일만 외부에서 불러온다(CSP `img-src`). |
 | 관계·추론 | [OntologyService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/OntologyService.java)가 타입·순환·승인 경로·추론·검토를 담당한다. |
 | 추천 | [RecommendationService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/RecommendationService.java)가 후보 제외·분수 정렬·이유·이용권 사용 가능 판정을 담당한다. 계산 기준은 [추천 모델](03-tourism-semantics.md)을 따른다. |
 | 평가 | [FeedbackService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/FeedbackService.java)가 성공 이력 소유권·최초 테마 보존·혜택 평가 변경을, [PlaceFeedbackService](../../backend/src/main/java/kr/ac/siheung/tourpass/service/PlaceFeedbackService.java)가 관광지 평가 저장·집계를 담당한다. |

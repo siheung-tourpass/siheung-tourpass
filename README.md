@@ -24,7 +24,7 @@
 
 ## 기술 스택
 
-Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 구현 경계는 [구현 계획](docs/tech-specs/01-plan.md#기술-구조)을 따른다.
+Spring Boot 3.5·Spring MVC·JSP/JSTL·Java 17·JDBC·PostgreSQL 16 이상·Maven 3.9. 지도는 Leaflet과 OpenStreetMap 타일을 사용한다. 구현 경계는 [구현 계획](docs/tech-specs/01-plan.md#기술-구조)을 따른다.
 
 ![시흥 투어패스 시스템 아키텍처](docs/assets/architecture.svg)
 

@@ -11,6 +11,7 @@
     <dependency><groupId>jakarta.servlet.jsp.jstl</groupId><artifactId>jakarta.servlet.jsp.jstl-api</artifactId></dependency>
     <dependency><groupId>org.glassfish.web</groupId><artifactId>jakarta.servlet.jsp.jstl</artifactId></dependency>
     <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId></dependency>
+    <dependency><groupId>org.webjars.npm</groupId><artifactId>leaflet</artifactId><version>1.9.4</version></dependency>
     <dependency><groupId>org.webjars.npm</groupId><artifactId>scalar__api-reference</artifactId><version>1.68.0</version><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
   </dependencies>
   <build><finalName>siheung-tourpass</finalName>

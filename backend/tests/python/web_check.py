@@ -108,6 +108,7 @@ visitor.request('/missing',{},403)
 text = public.get('/explore')
 assert all('data-card-kind="'+kind+'"' in text for kind in ('place', 'event', 'dining'))
 assert 'id="save-journey"' not in text
+assert 'id="builder-map"' in text and '/webjars/leaflet/1.9.4/dist/leaflet.js' in text and '/assets/js/builder-map.js' in text and 'id="deck-sheet-handle"' in text and '/assets/js/deck-sheet.js' in text
 assert '4000원' in public.get('/products/detail?id=1')
 public.get('/passes', 303); assert public.location == '/login'
 visitor.get('/admin', 403)
