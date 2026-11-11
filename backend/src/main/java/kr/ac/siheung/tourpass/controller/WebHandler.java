@@ -60,7 +60,7 @@ public final class WebHandler {
         }catch(Problem e){error(r,out,e);}catch(Exception e){r.getServletContext().log("Request failed: "+r.getServletPath(),e);error(r,out,new Problem(500,"INTERNAL_ERROR"));}
     }
     public void missing(HttpServletRequest r,HttpServletResponse out) throws IOException,ServletException {
-        try{Database.transaction(c->SecurityFilter.authorize(c,r));out.sendError(404);}
+        try{Database.transaction(c->SecurityFilter.authorize(c,r));error(r,out,new Problem(404,"NOT_FOUND"));}
         catch(Problem e){error(r,out,e);}
     }
     private static final KakaoLoginService kakao=new KakaoLoginService();
@@ -96,6 +96,11 @@ public final class WebHandler {
     public static void error(HttpServletRequest r,HttpServletResponse out,Problem e) throws IOException,ServletException {
         if(e.code.equals("AUTH_REQUIRED")){seeOther(out,r.getContextPath()+"/login");return;}
         r.setAttribute("kakaoEnabled",kakao.enabled());
+        String path=r.getServletPath();
+        String recovery=path.startsWith("/admin")?"/admin":path.startsWith("/merchant/")?"/merchant/redeem":path.startsWith("/journeys")?"/journeys":path.startsWith("/passes")?"/passes":path.startsWith("/feedback")?"/feedback/history":"/explore";
+        if(e.code.equals("FORBIDDEN"))recovery="/explore";
+        r.setAttribute("recoveryHref",recovery);
+        r.setAttribute("recoveryLabel",switch(recovery){case "/admin"->"관리 화면으로 돌아가기";case "/merchant/redeem"->"이용권 코드 다시 조회";case "/journeys"->"내 여행 목록 확인";case "/passes"->"내 투어패스 확인";case "/feedback/history"->"사용 이력 확인";default->"여행 카드 둘러보기";});
         r.setAttribute("view",e.code.startsWith("KAKAO_") ? "login" : r.getServletPath().equals("/login") && Set.of("INVALID_CREDENTIALS","INVALID_INPUT","CSRF_INVALID").contains(e.code)?"login":"error");r.setAttribute("message",message(e.code));r.setAttribute("errorCode",e.code);r.setAttribute("csrf",r.getSession().getAttribute("csrf"));out.setStatus(e.status);out.setContentType("text/html;charset=UTF-8");r.getRequestDispatcher("/WEB-INF/views/page.jsp").forward(r,out);
     }
     public static String message(String code){return switch(code){
@@ -276,6 +281,7 @@ public final class WebHandler {
         story.put("lead",when+where+places.size()+"곳을 돌아다녔어요.");
         story.put("stats","방문 기록 "+visited+"/"+places.size()+"곳 · 사진 "+photos+"장"+(pass==null?"":" · 투어패스 혜택 "+used+"곳 사용"));
         String travel=(String)journey.get("travelDate"),today=LocalDate.now(KST_ZONE).toString();
+        story.put("today",today);
         story.put("defaultVisit",travel==null||travel.compareTo(today)>0?today:travel);
         return story;
     }

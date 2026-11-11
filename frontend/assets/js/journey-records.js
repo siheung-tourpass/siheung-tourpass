@@ -12,6 +12,6 @@
     form.elements.photo.addEventListener('change', () => { if (form.elements.photo.files.length) form.requestSubmit(); });
   }
   // Coming back from a save, reopen the place that was edited.
-  const target = location.hash && document.querySelector(location.hash);
+  const target = document.getElementById(location.hash.slice(1));
   target?.querySelector('.trip-stop-edit')?.setAttribute('open', '');
 })();

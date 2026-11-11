@@ -161,7 +161,10 @@ assert '혜택 사용 내역' in text and 'trip-pass-qr' not in text and 'class=
 code = issued['code']
 assert '/passes/refund' in text and '환불하기' in text
 other.get('/passes/detail?id='+pid, 404)
-assert '<button disabled>결제하기</button>' in visitor.get('/passes/checkout?productId=1')
+text = visitor.get('/passes/checkout?productId=1')
+assert 'role="status"' in text and '이용 기간이 겹치는' in text
+assert not any(form['action'].endswith('/passes/issue') for form in visitor.forms)
+assert f'href="{urllib.parse.urlsplit(BASE).path}/passes">내 투어패스 확인</a>' in text
 text=visitor.get('/passes'); assert 'class="code"' not in text and 'trip-pass-qr' not in text and '구매 내역' in text
 csrf=re.search(r'name="csrf" value="([^"]+)"',visitor.get('/profile')).group(1)
 visitor.request('/passes/issue', {'csrf':csrf,'productId':'1'},409)

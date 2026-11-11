@@ -128,7 +128,7 @@ async function login(request, root) {
  const north=(Number(closest.latitude)-Number(origin.latitude))*111.195;
  const east=(Number(closest.longitude)-Number(origin.longitude))*111.195*Math.cos(Number(origin.latitude)*Math.PI/180);
  assert(Math.abs(Number(closest.distance)-Math.hypot(north,east))<.1,'Displayed distance must match the coordinate separation');
- await page.locator('[type=reset]').click();
+ await page.locator('#journey-filters [type=reset]').click();
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  assert.equal(await page.locator('.card-select-toggle[aria-pressed=true]').count(),1);
  // Deck building folds the map and list into a bottom sheet; the handle unfolds it.
@@ -295,6 +295,7 @@ async function login(request, root) {
  const plain=await plainContext.newPage();
  const plainSession=await login(plain.request,root);
  await plain.goto(root+'/journeys/new');
+ assert(await plain.locator('main').isVisible(),'The no-script list must be visible immediately');
  assert.equal(await plain.locator('.card-select-toggle:visible').count(),0);
  const pick=plain.locator('.builder-card[data-card-kind=place] input[type=checkbox]').first();
  await pick.check();const plainKey=await pick.getAttribute('value');

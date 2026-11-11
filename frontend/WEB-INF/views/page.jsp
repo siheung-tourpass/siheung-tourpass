@@ -15,8 +15,9 @@
 <c:when test="${view eq 'checkout'}"><c:set var="headerBackPath" value="${empty checkoutJourney ? '/products/detail?id='.concat(data.id) : '/journeys/detail?id='.concat(checkoutJourney.id)}"/></c:when>
 <c:when test="${view eq 'merchant'}"><c:set var="headerBackPath" value="/merchants?tab=facilities"/></c:when>
 <c:when test="${view eq 'catalog' and guideTab eq 'facilities'}"><c:set var="headerBackPath" value="/merchants"/></c:when>
-<c:when test="${view eq 'place'}"><c:set var="headerBackPath" value="/explore"/></c:when>
-<c:when test="${(view eq 'history' or view eq 'feedback') and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
+<c:when test="${view eq 'place' or view eq 'public-card'}"><c:set var="headerBackPath" value="/explore"/></c:when>
+<c:when test="${view eq 'feedback'}"><c:set var="headerBackPath" value="/feedback/history"/></c:when>
+<c:when test="${view eq 'history' and user.role eq 'VISITOR'}"><c:set var="headerBackPath" value="/passes"/></c:when>
 <c:when test="${view eq 'pass'}"><c:set var="headerBackPath" value="${user.role eq 'ADMIN' ? '/admin/passes' : '/passes'}"/></c:when>
 </c:choose>
 <header class="site-header"><div class="header-inner"><div class="header-leading"><c:if test="${not empty headerBackPath}"><a class="header-back" href="${root}${fn:escapeXml(headerBackPath)}" aria-label="목록으로 돌아가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a></c:if></div><a class="brand" href="${root}/"><img class="brand-mark" src="${root}/assets/images/siheung_bi.png" width="44" height="44" alt="시흥시">시흥 투어패스</a><div aria-hidden="true"></div></div>
@@ -32,8 +33,8 @@
 <div class="home-card-grid">
 <a class="home-card home-start" href="${root}${user.role eq 'VISITOR' ? '/merchants' : '/explore'}"><div><span class="home-card-label">장소 · 행사 · 음식점</span><h2>새 여행 만들기</h2><p>투어패스 상품을 고르거나<br>직접 카드를 담아 시작하세요.</p></div><span class="home-card-action">${user.role eq 'VISITOR' ? '전체 상품 보기' : '카드 둘러보기'} <span aria-hidden="true">↗</span></span></a>
 <c:if test="${user.role eq 'VISITOR'}">
-<a class="home-card home-drafts" href="${root}/journeys"><div><h2>만들던 여행</h2><strong class="home-card-count">${homeDraftCount}<span>개 제작 중</span></strong><p class="home-draft-name"><c:out value="${empty homeLatestDraft ? '아직 제작 중인 여행이 없어요.' : homeLatestDraft.name}"/></p></div><span class="home-card-action">${empty homeLatestDraft ? '제작 중 목록' : '이어 만들기'} <span aria-hidden="true">→</span></span></a>
-<a class="home-card home-passes" href="${root}/passes"><div><h2>진행 중인 여행</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>방문 날짜와 메모를 남겨 보세요.</p></div><span class="home-card-action">패스 보기 <span aria-hidden="true">→</span></span></a>
+<a class="home-card home-drafts" href="${root}${empty homeLatestDraft ? '/merchants' : '/journeys/edit?id='.concat(homeLatestDraft.id)}"><div><h2>만들던 여행</h2><strong class="home-card-count">${homeDraftCount}<span>개 제작 중</span></strong><p class="home-draft-name"><c:out value="${empty homeLatestDraft ? '아직 제작 중인 여행이 없어요.' : homeLatestDraft.name}"/></p></div><span class="home-card-action">${empty homeLatestDraft ? '새 여행 만들기' : '이어 만들기'} <span aria-hidden="true">→</span></span></a>
+<a class="home-card home-passes" href="${root}/passes"><div><h2>진행 중인 여행</h2><strong class="home-card-count">${homePassCount}<span>개 제작 확정</span></strong><p>혜택 코드를 확인하고 여행을 이어가세요.</p></div><span class="home-card-action">내 투어패스 보기 <span aria-hidden="true">→</span></span></a>
 </c:if>
 </div>
 <c:if test="${user.role eq 'VISITOR'}"><details class="guide-section home-how-to"><summary>이용 방법</summary><%@ include file="/WEB-INF/views/site/how-to.jspf" %></details></c:if>
@@ -45,7 +46,7 @@
 <c:when test="${view eq 'journey-builder'}"><%@ include file="/WEB-INF/views/journey/journey-builder.jspf" %></c:when>
 <c:when test="${view eq 'journey-photocards'}"><%@ include file="/WEB-INF/views/journey/journey-photocards.jspf" %></c:when>
 <c:when test="${view eq 'journeys' or view eq 'journey'}"><%@ include file="/WEB-INF/views/journey/journeys.jspf" %></c:when>
-<c:when test="${view eq 'error'}"><h1>요청 확인</h1><p class="error" role="alert"><c:out value="${message}"/></p><p>오류 코드: <c:out value="${errorCode}"/></p><a href="${root}/">처음으로</a></c:when>
+<c:when test="${view eq 'error'}"><section class="panel recovery-panel"><h1>요청을 완료하지 못했어요</h1><p class="error" role="alert"><c:out value="${message}"/></p><p>아래 화면에서 현재 상태를 확인한 뒤 다시 시도해 주세요.</p><div class="actions"><a class="button" href="${root}${recoveryHref}"><c:out value="${recoveryLabel}"/></a><a class="button secondary" href="${root}/">홈으로</a></div><details><summary>오류 정보</summary><p>오류 코드: <c:out value="${errorCode}"/></p></details></section></c:when>
 <c:when test="${view eq 'login'}"><%@ include file="/WEB-INF/views/site/login.jspf" %></c:when>
 <c:when test="${view eq 'catalog' or view eq 'product' or view eq 'merchant' or view eq 'place'}"><%@ include file="/WEB-INF/views/catalog/catalog.jspf" %></c:when>
 <c:when test="${view eq 'recommendations'}"><%@ include file="/WEB-INF/views/catalog/recommendations.jspf" %></c:when>

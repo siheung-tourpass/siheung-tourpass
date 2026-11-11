@@ -32,7 +32,7 @@
 </div>
 <section id="builder-browse-section" aria-labelledby="builder-browse-title"><div class="deck-heading"><h2 id="builder-browse-title">${empty selectedCardOrder ? '추천 카드' : '다음 후보'}</h2><div class="deck-navigation" hidden><button type="button" id="deck-previous" class="secondary" aria-label="이전 카드">←</button><span id="deck-position" role="status" aria-live="polite"></span><button type="button" id="deck-next" class="secondary" aria-label="다음 카드">→</button></div></div>
 <p id="builder-context" class="form-hint"><c:if test="${empty selectedCardOrder}">취향에 맞는 추천 관광지부터 보여드려요. 카드를 담으면 그 카드에서 가까운 후보부터 보여드려요.</c:if></p>
-<p id="builder-empty" class="empty-state" ${empty data ? '' : 'hidden'}>조건에 맞는 카드가 없습니다. 검색어·카드 종류·날짜·지역을 바꿔 보세요.</p>
+<div id="builder-empty" class="empty-state" ${empty data ? '' : 'hidden'}><h3>조건에 맞는 카드가 없어요</h3><p>검색어와 세부 조건을 바꾸거나 전체 카드를 다시 확인해 보세요.</p><button type="reset" form="journey-filters" class="secondary">전체 카드 보기</button></div>
 <div id="deck-stage" class="deck-stage" tabindex="0" role="group" aria-label="여행 카드 덱 · 좌우로 밀어 탐색"><div id="browse-cards" class="builder-cards" tabindex="0" role="region" aria-label="좌우 스크롤로 카드 탐색"><c:forEach var="card" items="${data}"><c:choose><c:when test="${card.kind eq 'place'}"><c:set var="place" value="${card}"/>
 <article class="builder-card ${not empty place.image ? 'has-background' : ''}" data-card-kind="${card.kind}" data-latitude="${place.coordinates.latitude}" data-longitude="${place.coordinates.longitude}" data-card-key="${fn:escapeXml(card.key)}" data-region-id="${place.regionId}" data-saved-only="${place.savedOnly}">
 <div class="card-front"><c:if test="${not empty place.image}"><%@ include file="/WEB-INF/views/shared/card-background.jspf" %></c:if>
@@ -75,12 +75,12 @@
 <button type="button" class="secondary" data-action="빼기" title="빼기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
 </div><input type="hidden" name="cardKey"></li></template>
 <section id="journey-details"><c:choose><c:when test="${user.role eq 'VISITOR'}"><h3>이 여행에 이름을 붙여 주세요</h3>
-<label>패스 이름<input name="name" maxlength="100" required placeholder="나의 시흥 여행" autocomplete="off" value="${fn:escapeXml(empty draft ? builderName : draft.name)}"></label>
+<label>여행 이름<input name="name" maxlength="100" required placeholder="나의 시흥 여행" autocomplete="off" value="${fn:escapeXml(empty draft ? builderName : draft.name)}"></label>
 <label>여행 날짜 · 선택<input type="date" name="travelDate" value="${fn:escapeXml(draft.travelDate)}"></label>
 <div id="trip-offer-preview" class="panel trip-offer" hidden><p class="trip-pass-label">이 여행에 맞는 투어패스</p><h3 data-offer="name"></h3><p data-offer="summary"></p></div>
 <ul id="pass-offers" hidden><c:forEach var="offer" items="${passOffers}"><li data-product-id="${offer.id}" data-name="${fn:escapeXml(offer.name)}" data-price="${offer.priceWon}" data-cards="${fn:escapeXml(offer.cards)}"></li></c:forEach></ul>
 </c:when><c:otherwise><p>여행 패스 저장은 방문객 로그인 후 사용할 수 있어요.</p><a class="button" href="${root}/login">로그인하기</a></c:otherwise></c:choose></section>
-</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">제작 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 투어패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
+</aside><c:if test="${user.role eq 'VISITOR'}"><div class="deck-summary-actions"><div class="actions"><button id="save-journey" class="secondary" name="intent" value="draft">임시 저장</button><button id="confirm-journey" name="intent" value="confirm">여행 확정</button><button id="purchase-journey" name="intent" value="purchase" hidden>확정하고 투어패스 구매</button></div><p class="form-hint">확정한 여행은 내 투어패스에서 확인할 수 있어요. 구성을 바꾸려면 제작 중으로 되돌려 주세요.</p></div></c:if></section></div>
 </form>
 <c:if test="${not empty draft}"><details class="draft-delete"><summary>제작 중 패스 삭제</summary><p>선택한 장소와 임시 저장한 내용이 삭제됩니다. 되돌릴 수 없습니다.</p><form method="post" action="${root}/journeys/delete"><%@ include file="/WEB-INF/views/shared/csrf.jspf" %><input type="hidden" name="id" value="${draft.id}"><button>이 패스 삭제</button></form></details></c:if>
 <link rel="stylesheet" href="${root}/webjars/leaflet/1.9.4/dist/leaflet.css"><script src="${root}/webjars/leaflet/1.9.4/dist/leaflet.js" defer></script>

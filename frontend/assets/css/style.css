@@ -29,7 +29,7 @@ article > :last-child { margin-bottom: 0; }
 label { display: block; margin: var(--space-xl) 0; font-size: var(--text-sm); font-weight: 600; color: var(--color-muted); }
 label:first-child { margin-top: 0; }
 input, select, textarea, button { font: inherit; max-width: 100%; }
-input:not([type=checkbox]):not([type=hidden]), select, textarea { display: block; width: 100%; padding: var(--space-md) var(--space-lg); margin-top: var(--space-sm); border: 1px solid var(--color-rule); border-radius: var(--radius-control); color: var(--color-ink); font-weight: 400; font-size: var(--text-base); }
+input:not([type=checkbox]):not([type=hidden]):where(:not(.visually-hidden)), select, textarea { display: block; width: 100%; padding: var(--space-md) var(--space-lg); margin-top: var(--space-sm); border: 1px solid var(--color-rule); border-radius: var(--radius-control); color: var(--color-ink); font-weight: 400; font-size: var(--text-base); }
 input:hover, select:hover, textarea:hover { border-color: var(--color-muted); }
 input:focus, select:focus, textarea:focus { border-color: var(--color-accent); background: var(--color-surface); }
 input::placeholder, textarea::placeholder { color: var(--color-muted); }
@@ -45,7 +45,7 @@ button:hover, .button:hover { background: var(--color-accent-hover); text-decora
 button:active, .button:active { opacity: .8; }
 button:disabled, input:disabled, select:disabled, textarea:disabled { opacity: .45; cursor: not-allowed; }
 .secondary:hover { background: var(--color-rule); }
-form[action$="/delete"] button, form[action$="/remove"] button, form[action$="/deactivate"] button, form[action$="/cancel"] button { color: var(--color-danger); background: var(--color-danger-soft); }
+form[action$="/delete"] button, form[action$="/remove"] button, form[action$="/deactivate"] button, form[action$="/cancel"] button, button.danger { color: var(--color-danger); background: var(--color-danger-soft); }
 form[action$="/add"], form[action$="/record"] { border-top: 1px solid var(--color-rule); margin-top: var(--space-xl); padding-top: var(--space-sm); }
 dl { gap: var(--space-lg); padding: var(--space-xl) 0; margin: 0; }
 dt { color: var(--color-muted); font-size: var(--text-sm); }
@@ -103,7 +103,7 @@ main > h1 { margin-bottom: var(--space-sm); }
 main > h1 + p { margin-top: 0; margin-bottom: var(--space-2xl); }
 article, .panel, main > form, details { padding: var(--panel-padding); }
 article h2 a { text-decoration: none; display: inline-block; padding-block: var(--space-xs); }
-input:not([type=checkbox]):not([type=hidden]), select, textarea { min-height: var(--control-height); border-color: var(--color-border); }
+input:not([type=checkbox]):not([type=hidden]):where(:not(.visually-hidden)), select, textarea { min-height: var(--control-height); border-color: var(--color-border); }
 button, .button { white-space: nowrap; min-height: var(--control-height); transition: transform var(--dur-short) var(--ease-out); }
 button:active:not(:disabled), .button:active { transform: scale(.98); opacity: 1; }
 button:disabled:hover { background: var(--color-accent); }
@@ -195,8 +195,10 @@ main > #journey-builder { padding: 0; background: none; border: 0; box-shadow: n
 #journey-details button { width: 100%; margin-top: var(--space-xl); }
 .page-journey-builder { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
 html:has(.page-journey-builder) { scroll-padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
-/* Keep the list layout from flashing before the deck script takes over; reveal anyway if it never runs. */
-.page-journey-builder:not(.is-deck-mode) :is(main, .bottom-nav) { visibility: hidden; animation: builder-reveal 0s 1.5s forwards; }
+/* Only defer the list when a deck script can run; no-script users see it immediately. */
+@media (scripting: enabled) {
+  .page-journey-builder:not(.is-deck-mode) :is(main, .bottom-nav) { visibility: hidden; animation: builder-reveal 0s 1.5s forwards; }
+}
 @keyframes builder-reveal { to { visibility: visible; } }
 @media (min-width: 640px) {
   .builder-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -382,8 +384,9 @@ html[data-reduce-motion=true] .map-pin.is-new span { animation: none; }
 .map-route { stroke: var(--color-accent); stroke-width: 3; stroke-opacity: .7; stroke-dasharray: 6 6; fill: none; }
 @media (min-width: 960px) { .builder-map { height: 320px; } }
 .deck-summary-actions { flex-shrink: 0; padding-top: var(--space-md); border-top: 1px solid var(--color-rule); background: var(--color-surface); }
-.deck-summary-actions .actions { display: flex; gap: var(--space-sm); margin: 0; }
-.deck-summary-actions .actions button { flex: 1; width: auto; margin: 0; padding-inline: var(--space-md); }
+.deck-summary-actions .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); margin: 0; }
+.deck-summary-actions .actions button { flex: 1; width: auto; margin: 0; padding-inline: var(--space-md); white-space: normal; }
+.deck-summary-actions .actions button:not(.secondary) { grid-column: 1 / -1; grid-row: 1; }
 .deck-summary-actions .form-hint { margin: var(--space-sm) 0 0; }
 .builder-card .card-background { display: block; width: 100%; height: auto; }
 .is-deck-mode .card-front .place-pick { display: none; }
@@ -470,7 +473,7 @@ input:user-invalid, select:user-invalid, textarea:user-invalid, input[aria-inval
 main > h1 { margin-top: 0; }
 button, .button { font-weight: 700; }
 .secondary { background: var(--color-surface); border: 1px solid var(--color-rule); }
-input:not([type=checkbox]):not([type=hidden]), select, textarea { box-shadow: none; }
+input:not([type=checkbox]):not([type=hidden]):where(:not(.visually-hidden)), select, textarea { box-shadow: none; }
 .bottom-nav { position: fixed; z-index: 5; display: block; background: var(--color-surface); top: auto; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); bottom: calc(var(--navigation-lift) + env(safe-area-inset-bottom)); margin-block: 0; padding: 0 var(--space-xs); box-shadow: var(--shadow-floating); }
 @media (max-width: 39.99rem) {
   .brand { font-size: 1.25rem; }
@@ -507,7 +510,7 @@ input:not([type=checkbox]):not([type=hidden]), select, textarea { box-shadow: no
 .journey-business-card { border-radius: var(--radius-panel); }
 button, .button { box-shadow: var(--shadow-primary); }
 .secondary { box-shadow: var(--shadow-control); }
-input:not([type=checkbox]):not([type=hidden]), select, textarea { background: var(--color-surface-inset); }
+input:not([type=checkbox]):not([type=hidden]):where(:not(.visually-hidden)), select, textarea { background: var(--color-surface-inset); }
 input:focus-visible, select:focus-visible, textarea:focus-visible { background: var(--color-surface); }
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front .card-kind { color: var(--color-accent); }
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front > .card-flip { margin: 0; color: var(--color-accent); }
@@ -817,3 +820,9 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .product-pass .pass-card-action :is(button, .button) { margin-top: 0; }
 
 .product-benefits { margin-block: var(--space-md); padding: 0; background: transparent; font-size: var(--text-sm); }
+
+.recovery-panel { max-width: 640px; margin-inline: auto; }
+.recovery-panel h1 { margin-top: 0; }
+.recovery-panel .actions > * { flex: 1 1 auto; }
+
+.checkout-benefit-terms { display: block; margin-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }

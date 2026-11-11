@@ -345,7 +345,10 @@
     });
     preview.hidden = !best;
     purchase.hidden = !best;
-    form.querySelector('#confirm-journey').hidden = Boolean(best);
+    const confirm = form.querySelector('#confirm-journey');
+    confirm.hidden = false;
+    confirm.classList.toggle('secondary', Boolean(best));
+    confirm.textContent = best ? '구매 없이 여행 확정' : '여행 확정';
     if (!best) return;
     preview.querySelector('[data-offer=name]').textContent = best.offer.dataset.name;
     preview.querySelector('[data-offer=summary]').textContent = `담은 장소 중 ${best.count}곳에서 혜택을 받을 수 있어요. ${best.price.toLocaleString('ko-KR')}원`;

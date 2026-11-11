@@ -10,7 +10,7 @@
 
 ### 주요 화면
 
-방문객의 탐색·여행 구성·혜택 이용·기록 흐름을 담았다. 모바일 360×784 화면을 2배 해상도로 캡처했으며, 이미지를 누르면 원본을 볼 수 있다.
+방문객의 탐색·여행 구성·혜택 이용·기록 흐름을 담았다. 단계별 최신 캡처와 UX 검토는 [핵심 유저 플로우](docs/tech-specs/05-user-flows.md)에서 확인한다. 모바일 360×784 화면을 2배 해상도로 캡처했으며, 이미지를 누르면 원본을 볼 수 있다.
 
 | 서비스 소개 | 상품 선택 | 여행 덱 구성 |
 | --- | --- | --- |
@@ -113,19 +113,21 @@ Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다.
 
 ## 테스트
 
-[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 자동 검사 명령·초기화 순서는 워크플로를 원본으로 사용한다. `api`·`web`·`tourism` 작업의 초기 자료가 다르며, DB를 변경하므로 시연·보관용 DB와 분리한다. 검증 범위는 [구현 계획](docs/tech-specs/01-plan.md#검증-전략), 최종 판정은 [완료 기준](docs/func-specs/01-common.md#완료-기준)을 따른다.
+[GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·자동 검사를 실행한다. 자동 검사 명령·초기화 순서는 워크플로를 원본으로 사용한다. `api`·`web`·`tourism` 작업의 초기 자료가 다르며, DB를 변경하므로 시연·보관용 DB와 분리한다. 검증 범위는 [테스트 명세](docs/test-specs/README.md#검증-전략), 최종 판정은 [완료 기준](docs/func-specs/01-common.md#완료-기준)을 따른다.
 
 브라우저 검사는 Node.js·Playwright·Chrome과 별도 테스트 서버의 시연 계정이 필요하다. 외부 경로의 Playwright는 `PLAYWRIGHT_MODULE`에 모듈 경로를 지정한다. 아래 URL은 테스트 서버에 맞게 바꾼다.
 
 | 검사 | 명령 |
 | --- | --- |
 | 카드 탐색·선택·저장 | `node backend/tests/browser/cards_browser_check.cjs http://localhost:8080/siheung-tourpass` |
+| 빈 검색·구매 없이 확정·오류 복구 | `node backend/tests/browser/ux_flow_check.cjs http://localhost:8080/siheung-tourpass` |
 | 여행 사진 업로드·교체·삭제·소유권 | `node backend/tests/browser/journey_photos_check.cjs http://localhost:8080/siheung-tourpass` |
+| 핵심 흐름·단계별 캡처 | `node backend/tests/browser/user_flows_check.cjs http://localhost:8080/siheung-tourpass .runtime/user-flows` (실제 관광·혜택 자료를 적재한 새 검증 DB 사용) |
 | 관리자·포토카드 출력 | `node backend/tests/browser/admin_browser_check.cjs http://localhost:8080/siheung-tourpass` |
 
 ## 관련 문서
 
-기능 명세·요구사항은 `docs/func-specs/`, 기술 명세·구현 계획은 `docs/tech-specs/`에서 관리합니다.
+기능 명세·요구사항은 `docs/func-specs/`, 기술 명세·구현 계획은 `docs/tech-specs/`, 테스트 명세는 `docs/test-specs/`에서 관리합니다.
 
 문서 관리 원칙은 [작업 지침](AGENTS.md)을 따른다. 아래에서 변경할 내용의 담당 문서를 찾는다.
 
@@ -138,8 +140,10 @@ Bruno에서 [컬렉션](backend/bruno)을 열고 `Local` 환경을 선택한다.
 | [방문객 요구사항](docs/func-specs/02-visitor.md) | 공개 탐색·이용권 발급/조회·여행·추천·피드백·사진·방문 기록 |
 | [가맹점 담당자 요구사항](docs/func-specs/03-merchant.md) | 혜택 확인·사용 권한 |
 | [관리자 요구사항](docs/func-specs/04-admin.md) | 자료 관리·검토·피드백 통계·카드 출력 |
-| [구현 계획](docs/tech-specs/01-plan.md) | 소스 구조·구현 경계·검증 전략·남은 작업 |
-| [디자인 기준](docs/tech-specs/02-design.md) | 역할별 메뉴·화면 배치·조작·상태·접근성 |
+| [구현 계획](docs/tech-specs/01-plan.md) | 소스 구조·구현 경계·남은 작업 |
+| [테스트 명세](docs/test-specs/README.md) | 검증 범위·방법·판정 기준 |
+| [디자인 기준](docs/tech-specs/02-design.md) | UX 원칙(시각적 위계·일관성·데드엔드 방지), 역할별 메뉴·화면 배치·조작·상태·접근성 |
+| [핵심 유저 플로우](docs/tech-specs/05-user-flows.md) | 방문객·담당자·관리자 핵심 흐름의 실제 화면 캡처·UX 검토·검증 범위 |
 | [추천 모델](docs/tech-specs/03-tourism-semantics.md) | 개념 계층·추천 점수·정렬·추론 경계 |
 
 ### 실행·검증·협업
