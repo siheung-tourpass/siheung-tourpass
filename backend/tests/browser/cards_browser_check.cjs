@@ -279,13 +279,13 @@ async function login(request, root) {
   r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});saved=await r.json();assert.deepEqual(saved.places.map(x=>x.cardKey),order.slice(1));
   const beforeStatus=saved.places;
   r=await page.request.patch(root+'/api/v1/me/journeys/'+id,{headers:{'X-CSRF-Token':'api','Authorization':'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')},data:{status:'CONFIRMED'}});assert.equal(r.status(),200);
-  for(const [current,next,label] of [['CONFIRMED','ARCHIVED','사용 완료 · 아카이브'],['ARCHIVED','CONFIRMED','진행 중인 여행으로 복원'],['CONFIRMED','PLANNING','제작 중으로 보내기']]){
+  for(const [current,next,label] of [['CONFIRMED','PLANNING','제작 중으로 보내기']]){
    await page.goto(root+'/journeys?status='+current);
    const statusCard=page.locator('.journey-card').filter({has:page.locator(`a[href$="detail?id=${id}"]`)});
    await statusCard.locator('.journey-ticket-action').click();
    await checkAccessiblePopup(page,statusCard.locator('section[id^=pass-status-]'));
    await statusCard.locator('section[id^=pass-status-]').getByRole('button',{name:label,exact:true}).click();
-   await page.waitForURL(next==='CONFIRMED'?root+'/passes':root+'/journeys?status='+next);
+   await page.waitForURL(root+'/journeys?status='+next);
    r=await page.request.get(root+'/api/v1/me/journeys/'+id,{headers:{Authorization:'Basic '+Buffer.from('visitor:DemoPass!2026').toString('base64')}});const changed=await r.json();
    assert.equal(changed.status,next);assert.deepEqual(changed.places.map(({_links,...data})=>data),beforeStatus.map(({_links,...data})=>data));
   }

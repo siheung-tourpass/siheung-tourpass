@@ -12,7 +12,7 @@ public final class JourneyService {
     private static final Map<String,Set<String>> TRANSITIONS=Map.of(
         "PLANNING",Set.of("PLANNING","CONFIRMED"),
         "CONFIRMED",Set.of("CONFIRMED","PLANNING","ARCHIVED"),
-        "ARCHIVED",Set.of("ARCHIVED","CONFIRMED"));
+        "ARCHIVED",Set.of("ARCHIVED"));
     private static String date(Object value) {
         String date=Input.date(value,true);
         require(date==null||LocalDate.parse(date).getYear()>=1000,400,"INVALID_INPUT");
@@ -60,12 +60,16 @@ public final class JourneyService {
     }
     private void saveValues(Connection c,String user,String id,Map<String,Object> j,Map<String,Object> b) throws SQLException {
         Input.fields(b,"","name,travelDate,status,issuedPassId");var v=new LinkedHashMap<String,Object>();
+        // A finished trip is a record of what happened; its name and date stay as they were.
+        require(!"ARCHIVED".equals(j.get("status"))||!(b.containsKey("name")||b.containsKey("travelDate")),409,"JOURNEY_COMPLETED");
         if(b.containsKey("name"))v.put("name",Input.text(b.get("name"),100,false));
         if(b.containsKey("travelDate"))v.put("travelDate",date(b.get("travelDate")));
         if(b.containsKey("status")){
             String status=Input.choice(b.get("status"),"PLANNING","CONFIRMED","ARCHIVED");
             require(TRANSITIONS.get(j.get("status")).contains(status),409,"INVALID_JOURNEY_TRANSITION");
             if(status.equals("CONFIRMED"))require(JourneyDao.firstCard(c,id)!=null,400,"JOURNEY_EMPTY");
+            // A purchased pass was matched to this composition, so the trip can no longer be reopened.
+            if(status.equals("PLANNING")&&!status.equals(j.get("status")))require(j.get("issuedPassId")==null,409,"JOURNEY_LOCKED");
             v.put("status",status);
         }
         if(b.containsKey("issuedPassId")){
@@ -103,7 +107,7 @@ public final class JourneyService {
         return detail(c,user,id);
     }
     public void delete(Connection c,String user,String id) throws SQLException {
-        planning(c,user,id);
+        require(owned(c,user,id,true).get("issuedPassId")==null,409,"JOURNEY_LOCKED");planning(c,user,id);
         JourneyDao.delete(c,id);
     }
     public record CardKey(String kind,String source) {

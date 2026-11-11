@@ -18,7 +18,9 @@ public final class PassService {
         var p=PassDao.find(c,id,owner,admin);require(p!=null,404,"NOT_FOUND");
         Instant now=Instant.now();p.put("status",status(p,now));var bs=PassDao.benefits(c,id);
         for(var b:bs){String reason=availability(p,b,now);b.put("usable",reason.equals("AVAILABLE"));b.put("reason",reason);b.remove("merchantActive");b.remove("benefitActive");CatalogService.demo(b);}
-        p.put("benefits",bs);if(admin){p.remove("code");p.put("redemptions",PassDao.history(c,id));}return CatalogService.demo(p);
+        p.put("benefits",bs);if(admin){p.remove("code");p.put("redemptions",PassDao.history(c,id));}
+        else p.put("refundable",refundBlock(c,p,bs,now,false)==null);
+        return CatalogService.demo(p);
     }
     public List<Map<String,Object>> list(Connection c,String owner,Map<String,List<String>> q) throws SQLException {
         String filter=Input.param(q.get("status"));if(filter!=null)Input.choice(filter,"ACTIVE","EXPIRED","CANCELLED","NOT_STARTED");
@@ -55,6 +57,22 @@ public final class PassService {
     /** Whether the owner already holds an uncancelled pass for any part of the period. */
     public boolean overlaps(Connection c,String user,Instant start,Instant end) throws SQLException {return PassDao.overlappingPass(c,user,start,end)!=null;}
     private static final ZoneId KST=ZoneId.of("Asia/Seoul");
+    public static final String REFUND_REASON="방문객 환불";
+    /** The owner may refund a pass that is unexpired and wholly unused; the pass row lock serializes this against redemption. */
+    public Map<String,Object> refund(Connection c,String owner,String id) throws SQLException {
+        var p=PassDao.lock(c,id);require(p!=null&&owner.equals(String.valueOf(p.get("ownerId"))),404,"NOT_FOUND");
+        Instant now=Instant.now();String block=refundBlock(c,p,PassDao.benefits(c,id),now,true);require(block==null,409,block);
+        PassDao.cancel(c,now,owner,REFUND_REASON,id);JourneyDao.detachPass(c,now,id);p=PassDao.get(c,id);
+        return Map.of("passId",id,"cancelledAt",p.get("cancelledAt"),"cancelledBy",p.get("cancelledBy"),"reason",p.get("cancelReason"));
+    }
+    /** Why the pass cannot be refunded now, or null; locks the finished-trip check when refunding. */
+    private static String refundBlock(Connection c,Map<String,Object> p,List<Map<String,Object>> benefits,Instant now,boolean lock) throws SQLException {
+        if(p.get("cancelledAt")!=null)return "PASS_CANCELLED";
+        if(!now.isBefore(Instant.parse((String)p.get("expiresAt"))))return "PASS_EXPIRED";
+        if(benefits.stream().anyMatch(b->b.get("usedAt")!=null||!java.util.Objects.equals(b.get("remainingCount"),b.get("useLimit"))))return "PASS_USED";
+        if(JourneyDao.completedWithPass(c,p.get("id"),lock)!=null)return "PASS_TRIP_COMPLETED";
+        return null;
+    }
     public Map<String,Object> cancel(Connection c,String admin,String id,Map<String,Object> body) throws SQLException {
         Input.fields(body,"reason");String reason=Input.text(body.get("reason"),500,false);var p=PassDao.lock(c,id);require(p!=null,404,"NOT_FOUND");
         if(p.get("cancelledAt")==null){Instant now=Instant.now();require(now.isBefore(Instant.parse((String)p.get("expiresAt"))),409,"PASS_EXPIRED");PassDao.cancel(c,now,admin,reason,id);p=PassDao.get(c,id);}

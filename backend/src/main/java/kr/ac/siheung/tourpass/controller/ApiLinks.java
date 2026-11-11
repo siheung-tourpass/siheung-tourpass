@@ -101,6 +101,7 @@ public final class ApiLinks {
             String feedback="/me"+path+"/feedback";
             add(links,"feedback",base,feedback,"GET");add(links,"save-feedback",base,feedback,"PUT");
         }
+        if(path.matches("/me/passes/[0-9]+")&&Boolean.TRUE.equals(result.get("refundable")))add(links,"refund",base,path+"/refund","PUT");
         if(path.matches("/admin/passes/[0-9]+"))add(links,"cancellation",base,path+"/cancellation","PUT");
         if(path.matches("/admin/ontology/places/[0-9]+")||path.matches("/admin/ontology/relations/[^/]+/[0-9]+/[0-9]+"))add(links,"review",base,path+"/review","PUT");
         if(path.matches("/merchant/pass-lookups/[^/]+")&&!Boolean.TRUE.equals(result.get("used"))&&java.time.Instant.now().isBefore(java.time.Instant.parse(result.get("confirmationExpiresAt").toString())))

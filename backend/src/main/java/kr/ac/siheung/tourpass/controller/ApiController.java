@@ -141,6 +141,14 @@ public class ApiController {
         api.handle(request, response, "GET", x -> ok(passes.detail(x.connection(), x.userId(), Input.id(id), false)));
     }
 
+    @RequestMapping({"/me/passes/{id}/refund", "/me/passes/{id}/refund/"})
+    public void refund(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        api.handle(request, response, "PUT", x -> {
+            Input.fields(x.body(), "");
+            return ok(passes.refund(x.connection(), x.userId(), Input.id(id)));
+        });
+    }
+
     @RequestMapping({"/me/redemptions", "/me/redemptions/"})
     public void history(HttpServletRequest request, HttpServletResponse response) throws IOException {
         api.handle(request, response, "GET", x -> ok(CatalogService.page(redemption.history(x.connection(), x.userId(), false, Input.param(x.query().get("passId"))), x.query())));

@@ -111,8 +111,10 @@ public final class WebHandler {
         case "NOT_FOUND","PASS_CODE_NOT_FOUND"->"조회할 수 있는 자료가 없습니다.";
         case "ACTIVE_PASS_EXISTS"->"이미 사용 예정이거나 사용 중인 투어패스가 있습니다. 내 투어패스를 확인해 주세요.";
         case "BENEFIT_ALREADY_USED"->"이미 사용한 혜택입니다.";
-        case "PASS_EXPIRED","EXPIRED"->"만료된 패스입니다.";
-        case "PASS_CANCELLED","CANCELLED"->"취소된 패스입니다.";
+        case "PASS_EXPIRED"->"만료된 패스입니다.";case "EXPIRED"->"만료";
+        case "PASS_USED"->"혜택을 사용한 투어패스는 환불할 수 없습니다.";
+        case "PASS_TRIP_COMPLETED"->"사용 완료한 여행의 투어패스는 환불할 수 없습니다.";
+        case "PASS_CANCELLED"->"취소된 패스입니다.";case "CANCELLED"->"취소됨";
         case "PASS_NOT_STARTED"->"사용 기간이 시작되지 않았습니다.";
         case "NOT_STARTED"->"사용 예정";
         case "MERCHANT_INACTIVE"->"비활성 가맹점입니다.";
@@ -124,10 +126,11 @@ public final class WebHandler {
         case "DUPLICATE_RELATION","DUPLICATE_RESOURCE","DUPLICATE_FEEDBACK"->"이미 등록된 자료입니다.";
         case "REVIEW_REQUIRED"->"근거와 연결 자료의 승인을 확인해 주세요.";
         case "JOURNEY_NOT_COMPLETED"->"사용 완료한 여행에서만 포토카드를 확인할 수 있습니다.";
-        case "JOURNEY_LOCKED"->"제작 중인 패스만 구성을 바꾸거나 삭제할 수 있습니다.";
+        case "JOURNEY_LOCKED"->"제작 중인 패스만 구성을 바꾸거나 삭제할 수 있고, 투어패스를 구매한 여행은 제작 중으로 되돌리거나 삭제할 수 없습니다.";
         case "PRODUCT_JOURNEY_UNAVAILABLE"->"이 상품의 혜택 장소 자료가 준비되지 않았습니다. 다른 상품이나 직접 카드 고르기로 시작해 주세요.";
+        case "JOURNEY_COMPLETED"->"사용 완료한 여행은 이름과 날짜를 바꿀 수 없습니다.";
         case "JOURNEY_EMPTY"->"제작 확정 전에 카드를 한 장 이상 담아 주세요.";
-        case "INVALID_JOURNEY_TRANSITION"->"제작 중 → 제작 확정 → 사용 완료 순서로 변경해 주세요.";
+        case "INVALID_JOURNEY_TRANSITION"->"제작 중 → 제작 확정 → 사용 완료 순서로 변경해 주세요. 사용 완료는 되돌릴 수 없습니다.";
         case "PLANNING"->"제작 중";case "CONFIRMED"->"제작 확정";case "ARCHIVED"->"사용 완료";
         case "AVAILABLE"->"사용 가능";case "ACTIVE"->"유효";case "SUCCESS"->"사용 성공";
         case "APPROVED"->"승인";case "DRAFT"->"검토 대기";case "REJECTED"->"반려";
@@ -139,7 +142,9 @@ public final class WebHandler {
             String key=e.getKey().toString();Object v=e.getValue();copy.put(key,display(v));
             if(key.endsWith("At")&&v instanceof String text)try{copy.put(key+"Kst",KST.format(Instant.parse(text)));}catch(java.time.DateTimeException ignored){}
             if(Set.of("status","reason","reviewStatus","result").contains(key)&&v instanceof String text)copy.put(key+"Label",message(text));
-        }return copy;}
+        }
+        if("CANCELLED".equals(map.get("status"))&&PassService.REFUND_REASON.equals(map.get("cancelReason")))copy.put("statusLabel","환불됨");
+        return copy;}
         if(value instanceof List<?> list)return list.stream().map(WebHandler::display).toList();return value;
     }
     private static String param(HttpServletRequest r,String name){return Input.param(values(r,name));}
@@ -245,9 +250,36 @@ public final class WebHandler {
         method(r,"GET");String journeyId=id(r);var journey=journeyService.detail(c,uid,journeyId);
         if(journey.get("status").equals("PLANNING"))return redirect("/journeys/edit?id="+journeyId);
         journeyCovers(c,List.of(journey));tourpassBenefits(c,r,journey);
-        var benefitPass=(Map<?,?>)journey.get("benefitPass");if(benefitPass!=null)r.setAttribute("benefitPassQr",GoodsService.qr((String)benefitPass.get("code")));
-        r.setAttribute("journeyStatus",journey.get("status"));r.setAttribute("benefitPasses",passes.list(c,uid,Map.of()));return page("journey",journey);
+        var benefitPass=(Map<?,?>)journey.get("benefitPass");
+        // The code is presented from the trip in progress; a finished trip only names the pass it used.
+        if(benefitPass!=null)r.setAttribute("passRefundable",Boolean.TRUE.equals(benefitPass.get("refundable")));
+        if(benefitPass!=null&&usable(benefitPass)&&"CONFIRMED".equals(journey.get("status"))){
+            r.setAttribute("benefitPassQr",GoodsService.qr((String)benefitPass.get("code")));
+            if("ACTIVE".equals(benefitPass.get("status"))){long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)benefitPass.get("expiresAt"))).toMinutes());
+            r.setAttribute("benefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");}
+        }
+        if("ARCHIVED".equals(journey.get("status")))r.setAttribute("tripStory",tripStory(journey));
+        r.setAttribute("journeyStatus",journey.get("status"));return page("journey",journey);
     }
+    /** A one-line account of a finished trip: when, where, how much was recorded and which pass benefits were used. */
+    @SuppressWarnings("unchecked")
+    private static Map<String,Object> tripStory(Map<String,Object> journey){
+        var places=(List<Map<String,Object>>)journey.get("places");
+        var regions=places.stream().map(p->(String)p.get("regionName")).filter(Objects::nonNull).distinct().toList();
+        String when=journey.get("travelDate")==null?"":LocalDate.parse((String)journey.get("travelDate")).format(DateTimeFormatter.ofPattern("M월 d일"))+"에 ";
+        String where=regions.isEmpty()?"":String.join("·",regions)+" 일대 ";
+        for(var p:places)if(p.get("visitedOn")!=null)p.put("visitedLabel",LocalDate.parse((String)p.get("visitedOn")).format(DateTimeFormatter.ofPattern("M월 d일")));
+        long visited=places.stream().filter(p->p.get("visitedOn")!=null).count(),photos=places.stream().filter(p->Boolean.TRUE.equals(p.get("hasPhoto"))).count();
+        var pass=(Map<String,Object>)journey.get("benefitPass");
+        long used=pass==null?0:((List<Map<String,Object>>)pass.get("benefits")).stream().filter(b->b.get("usedAt")!=null).count();
+        var story=new LinkedHashMap<String,Object>();
+        story.put("lead",when+where+places.size()+"곳을 돌아다녔어요.");
+        story.put("stats","방문 기록 "+visited+"/"+places.size()+"곳 · 사진 "+photos+"장"+(pass==null?"":" · 투어패스 혜택 "+used+"곳 사용"));
+        String travel=(String)journey.get("travelDate"),today=LocalDate.now(KST_ZONE).toString();
+        story.put("defaultVisit",travel==null||travel.compareTo(today)>0?today:travel);
+        return story;
+    }
+    private static final ZoneId KST_ZONE=ZoneId.of("Asia/Seoul");
     /** Benefits per trip card: the linked pass's issued benefits, otherwise what each card offers and the best-fitting product. */
     @SuppressWarnings("unchecked")
     private void tourpassBenefits(Connection c,HttpServletRequest r,Map<String,Object> journey) throws java.sql.SQLException {
@@ -283,7 +315,9 @@ public final class WebHandler {
         String uid=userId(user);
         method(r,"POST");var b=form(r,"name","travelDate","status","issuedPassId");b.keySet().removeIf(key->!r.getParameterMap().containsKey(key));if("".equals(b.get("issuedPassId")))b.put("issuedPassId",null);
         String journeyId=id(r);
-        var journey=journeyService.save(c,uid,journeyId,b);return redirect(b.containsKey("status")?("CONFIRMED".equals(journey.get("status"))?"/passes":"/journeys?status="+journey.get("status")):"/journeys/detail?id="+journeyId);
+        var journey=journeyService.save(c,uid,journeyId,b);String status=b.containsKey("status")?(String)journey.get("status"):null;
+        // A finished trip opens on its records; other status changes return to that status's list.
+        return redirect(status==null||status.equals("ARCHIVED")?"/journeys/detail?id="+journeyId:status.equals("CONFIRMED")?"/passes":"/journeys?status="+status);
     }
     public Page addPlace(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
@@ -303,14 +337,6 @@ public final class WebHandler {
         String uid=userId(user);
         var q=query(r);
         method(r,"GET");var list=passes.list(c,uid,q);
-        var active=list.stream().filter(p->"ACTIVE".equals(p.get("status"))).findFirst()
-            .or(()->list.stream().filter(p->"NOT_STARTED".equals(p.get("status"))).min(Comparator.comparing(p->(String)p.get("startsAt"))));
-        if(active.isPresent()){
-            var activePass=passes.detail(c,uid,String.valueOf(active.get().get("id")),false);
-            r.setAttribute("activeBenefitPass",display(activePass));r.setAttribute("benefitPassQr",GoodsService.qr((String)activePass.get("code")));
-            if("ACTIVE".equals(active.get().get("status"))){long minutes=Math.max(0,Duration.between(Instant.now(),Instant.parse((String)active.get().get("expiresAt"))).toMinutes());
-            r.setAttribute("activeBenefitPassRemaining",minutes/60+"시간 "+minutes%60+"분");}
-        }
         var activeJourneys=journeyService.list(c,uid,"CONFIRMED");journeyCovers(c,activeJourneys);
         r.setAttribute("activeJourneys",display(activeJourneys));
         r.setAttribute("benefitHistory",display(redemption.history(c,uid,false,null)));
@@ -319,8 +345,18 @@ public final class WebHandler {
     public Page passDetail(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
         method(r,"GET");var pass=passes.detail(c,uid,id(r),false);
-        if(pass.get("code")!=null)r.setAttribute("benefitPassQr",GoodsService.qr((String)pass.get("code")));return page("pass",pass);
+        r.setAttribute("passRefundable",Boolean.TRUE.equals(pass.get("refundable")));
+        if(usable(pass)){
+            // Only a trip in progress presents the code; the pass page links there.
+            var trip=journeyService.list(c,uid,"CONFIRMED").stream().filter(j->String.valueOf(pass.get("id")).equals(String.valueOf(j.get("issuedPassId")))).findFirst();
+            if(trip.isPresent())r.setAttribute("passJourneyHref","/journeys/detail?id="+trip.get().get("id"));
+        }
+        return page("pass",pass);
     }
+    public Page refundPass(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
+        method(r,"POST");String passId=id(r);passes.refund(c,userId(user),passId);return redirect("/passes/detail?id="+passId);
+    }
+    private static boolean usable(Map<?,?> pass){return "ACTIVE".equals(pass.get("status"))||"NOT_STARTED".equals(pass.get("status"));}
     public Page issuePass(Connection c,HttpServletRequest r,Map<String,Object> user) throws Exception {
         String uid=userId(user);
         method(r,"POST");String journey=param(r,"journeyId");if(journey!=null)journey=Input.id(journey);

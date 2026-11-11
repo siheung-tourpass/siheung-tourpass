@@ -20,12 +20,12 @@ info:
 
     ## 구현 현황
 
-    전체 **47개 경로, 73개 요청**이 구현되어 있다. 아래 그룹은 이 페이지의 묶음 이름과 같으며, 위 검색창에 그룹 이름을 입력해 좁힐 수 있다.
+    전체 **48개 경로, 74개 요청**이 구현되어 있다. 아래 그룹은 이 페이지의 묶음 이름과 같으며, 위 검색창에 그룹 이름을 입력해 좁힐 수 있다.
 
     | 역할 | 경로 | 요청 | 기능 |
     | --- | --- | --- | --- |
     | 공개 | 8 | 8 | 상품·가맹점·장소 조회, 추천 |
-    | 방문객 | 12 | 21 | 여행 구성·기록, 이용권 발급·조회, 혜택 이력, 혜택·관광지 평가 |
+    | 방문객 | 13 | 22 | 여행 구성·기록, 이용권 발급·조회·환불, 혜택 이력, 혜택·관광지 평가 |
     | 담당자 | 5 | 6 | 담당 가맹점, 이용권 코드 확인, 혜택 사용 처리·이력 |
     | 관리자 | 22 | 38 | 이용권 조회·취소, 평가 통계, 상품·가맹점·혜택 관리, 온톨로지 관리·검토 |
 servers:
@@ -40,7 +40,7 @@ tags:
   - {name: 공개 · 장소·추천, description: "장소 정보를 보고 조건에 맞는 장소를 추천받는다."}
   - {name: 방문객 · 여행, description: "내 여행을 만들고 수정·확정·보관·삭제한다."}
   - {name: 방문객 · 여행 카드, description: "여행에 카드를 담고 빼고 순서를 바꾸며 방문 기록을 남긴다."}
-  - {name: 방문객 · 이용권, description: "이용권을 발급받고 내 이용권과 혜택 잔여를 확인한다."}
+  - {name: 방문객 · 이용권, description: "이용권을 발급받고 내 이용권과 혜택 잔여를 확인하며, 쓰지 않은 이용권을 환불한다."}
   - {name: 방문객 · 혜택 사용 이력, description: "내가 혜택을 사용한 내역을 확인한다."}
   - {name: 방문객 · 혜택 평가, description: "사용한 혜택을 평가한다. 추천 점수에 반영된다."}
   - {name: 방문객 · 관광지 평가, description: "장소 만족도를 평가한다. 혜택 평가·추천 점수와 별도로 집계한다."}
@@ -243,7 +243,7 @@ paths:
         '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
         '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
         '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
-        '409': {description: "INVALID_JOURNEY_TRANSITION, JOURNEY_LOCKED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "INVALID_JOURNEY_TRANSITION, JOURNEY_LOCKED, JOURNEY_COMPLETED (사용 완료한 여행의 이름·날짜 변경)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
         '415': {description: "UNSUPPORTED_MEDIA_TYPE", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
     delete:
       tags: [방문객 · 여행]
@@ -404,6 +404,23 @@ paths:
         '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
         '403': {description: "FORBIDDEN (역할 불일치)", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
         '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  /me/passes/{id}/refund:
+    put:
+      tags: [방문객 · 이용권]
+      summary: "혜택을 쓰지 않은 만료 전 이용권을 환불(취소)한다."
+      description: "혜택을 하나도 쓰지 않은 만료 전 이용권을 환불(취소)한다. 연결된 여행을 사용 완료했으면 거부한다. 시연 결제의 취소이며 연결된 여행에서 해제된다."
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/CsrfToken'}
+      responses:
+        '200':
+          description: 성공
+          content: {application/json: {schema: {$ref: '#/components/schemas/Cancellation'}}}
+        '400': {description: "INVALID_INPUT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '401': {description: "AUTH_REQUIRED, INVALID_CREDENTIALS", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '403': {description: "FORBIDDEN (역할 불일치), CSRF_INVALID", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '404': {description: "NOT_FOUND", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+        '409': {description: "PASS_USED, PASS_EXPIRED, PASS_CANCELLED, PASS_TRIP_COMPLETED", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
   /me/redemptions:
     get:
       tags: [방문객 · 혜택 사용 이력]
@@ -1717,6 +1734,7 @@ components:
         startsAt: {type: string}
         expiresAt: {type: string}
         cancelledAt: {type: [string, 'null']}
+        cancelReason: {type: [string, 'null'], description: "방문객이 환불한 이용권은 '방문객 환불'."}
         demoOnly: {type: boolean}
         status: {$ref: '#/components/schemas/PassStatus'}
         notice: {type: string}
@@ -1772,6 +1790,7 @@ components:
         status: {$ref: '#/components/schemas/PassStatus'}
         benefits: {type: array, items: {$ref: '#/components/schemas/IssuedBenefit'}}
         redemptions: {type: array, items: {$ref: '#/components/schemas/Redemption'}}
+        refundable: {type: boolean, description: "방문객 조회에만 포함한다. 지금 환불할 수 있으면 true."}
         notice: {type: string}
         _links: {$ref: '#/components/schemas/Links'}
     Redemption:
@@ -2074,7 +2093,7 @@ components:
         travelDate: {type: [string, 'null'], format: date}
     JourneyUpdate:
       type: object
-      description: "PLANNING↔CONFIRMED↔ARCHIVED 순서로만 전환한다. 장소가 없으면 CONFIRMED로 바꿀 수 없다."
+      description: "PLANNING↔CONFIRMED→ARCHIVED 순서로만 전환한다. ARCHIVED는 되돌릴 수 없고, 이용권이 연결된 여행은 PLANNING으로 되돌리거나 삭제할 수 없다(JOURNEY_LOCKED). 장소가 없으면 CONFIRMED로 바꿀 수 없다."
       additionalProperties: false
       properties:
         name: {type: string, maxLength: 100}
