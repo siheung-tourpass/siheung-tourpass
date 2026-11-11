@@ -1,5 +1,5 @@
-// Bottom sheet for the deck-building step: the map and picked list stay folded in one row above the
-// bottom menu until the handle or the map preview is pressed, or the handle is dragged up.
+// Bottom sheet for the deck-building step on narrow screens: folded, it shows a map strip over one row
+// above the bottom menu; pressing the handle or the map, or dragging the handle up, unfolds the picked list.
 // The open/closed look lives in CSS under [data-sheet].
 const DeckSheet = (() => {
   const DRAG_THRESHOLD = 48;
@@ -13,7 +13,7 @@ const DeckSheet = (() => {
       if (!enabled) return;
       sheet.dataset.sheet = open ? 'open' : 'peek';
       handle.setAttribute('aria-expanded', String(open));
-      label.textContent = open ? '접기' : '지도·순서 보기';
+      label.textContent = open ? '접기' : '목록·순서 보기';
       if (focus) handle.focus({ preventScroll: true });
     }
 

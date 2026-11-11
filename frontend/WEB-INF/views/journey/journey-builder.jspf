@@ -64,7 +64,7 @@
 
 <p id="deck-feedback" class="deck-feedback" role="status" aria-live="polite">좌우로 넘겨 보고, 카드를 눌러 담거나 빼세요.</p>
 </section></div>
-<section id="deck-summary" aria-labelledby="selection-title"><button type="button" id="deck-sheet-handle" class="deck-sheet-handle" aria-controls="selection-summary" aria-expanded="false" hidden><span class="deck-sheet-title">담은 카드 <span id="sheet-count">0장</span></span><span class="deck-sheet-label">지도·순서 보기</span></button><button type="button" id="builder-next" hidden>여행 확인</button><header class="pass-cover-popover-heading"><h2 id="selection-title">담은 카드 <span id="selection-count" class="count" role="status" aria-live="polite">0장</span></h2><button type="button" id="builder-back" class="secondary" hidden>덱 수정</button></header>
+<section id="deck-summary" aria-labelledby="selection-title"><button type="button" id="deck-sheet-handle" class="deck-sheet-handle" aria-controls="selection-summary" aria-expanded="false" hidden><span class="deck-sheet-title">담은 카드 <span id="sheet-count">0장</span></span><span class="deck-sheet-label">목록·순서 보기</span></button><button type="button" id="builder-next" hidden>여행 확인</button><header class="pass-cover-popover-heading"><h2 id="selection-title">담은 카드 <span id="selection-count" class="count" role="status" aria-live="polite">0장</span></h2><button type="button" id="builder-back" class="secondary" hidden>덱 수정</button></header>
 <aside id="selection-summary" class="builder-summary panel" aria-labelledby="selection-title" tabindex="-1">
 <div id="builder-map" class="builder-map" role="region" aria-label="담은 카드 위치 지도 · 핀을 누르면 그 카드로 이동해요" hidden></div><p id="builder-map-note" class="form-hint" hidden></p>
 <p id="selection-empty">아직 담은 카드가 없어요. 마음에 드는 카드를 눌러 담아 주세요.</p>

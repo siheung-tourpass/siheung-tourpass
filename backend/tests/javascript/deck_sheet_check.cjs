@@ -39,7 +39,7 @@ assert.equal(sheet.dataset.sheet, undefined);
 deck.setEnabled(true);
 assert(!handle.hidden);
 assert.deepEqual(state(), ['peek', 'false']);
-assert.equal(label.textContent, '지도·순서 보기');
+assert.equal(label.textContent, '목록·순서 보기');
 
 handle.fire('click');
 assert.deepEqual(state(), ['open', 'true']);

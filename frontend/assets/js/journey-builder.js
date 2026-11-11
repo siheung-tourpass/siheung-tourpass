@@ -29,6 +29,10 @@
   const stage = form.querySelector('#deck-stage');
   const summary = form.querySelector('#deck-summary');
   const sheet = DeckSheet.bind(summary, { handle: summary.querySelector('#deck-sheet-handle'), preview: summary.querySelector('#selection-summary'), label: summary.querySelector('.deck-sheet-label') });
+  // Wide screens keep the picked cards and map beside the deck instead of folding them into a sheet.
+  const wide = matchMedia('(min-width: 960px)');
+  const syncSheet = () => sheet.setEnabled(step === 'build' && !wide.matches);
+  wide.addEventListener('change', syncSheet);
   const title = document.querySelector('#builder-page-title');
   const backStep = form.querySelector('#builder-back');
   const nextStep = form.querySelector('#builder-next');
@@ -139,9 +143,9 @@
     context.classList.add('is-updated');
   }
 
-  /** The picked card pops and a photo dot flies into the sheet's map; the count bumps when it lands. */
+  /** The picked card pops and a photo dot flies into the map (sheet or side panel); the count bumps when it lands. */
   function flyToSheet(card) {
-    const count = summary.querySelector('#sheet-count');
+    const count = summary.querySelector(wide.matches ? '#selection-count' : '#sheet-count');
     const bump = () => { count.classList.remove('is-bumped'); void count.offsetWidth; count.classList.add('is-bumped'); };
     if (reducedMotion()) { bump(); return; }
     card.animate([{ scale: 1 }, { scale: 1.04 }, { scale: 1 }], { duration: 280, easing: 'ease-out' });
@@ -291,7 +295,7 @@
     filters.hidden = step === 'review';
     status.hidden = step === 'review';
     form.querySelector('.builder-catalog').hidden = step === 'review';
-    sheet.setEnabled(step === 'build');
+    syncSheet();
     form.querySelector('#journey-details').hidden = step !== 'review';
     const actions = form.querySelector('.deck-summary-actions');
     if (actions) actions.hidden = step !== 'review';
