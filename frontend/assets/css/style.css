@@ -195,6 +195,9 @@ main > #journey-builder { padding: 0; background: none; border: 0; box-shadow: n
 #journey-details button { width: 100%; margin-top: var(--space-xl); }
 .page-journey-builder { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
 html:has(.page-journey-builder) { scroll-padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+/* Keep the list layout from flashing before the deck script takes over; reveal anyway if it never runs. */
+.page-journey-builder:not(.is-deck-mode) :is(main, .bottom-nav) { visibility: hidden; animation: builder-reveal 0s 1.5s forwards; }
+@keyframes builder-reveal { to { visibility: visible; } }
 @media (min-width: 640px) {
   .builder-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
