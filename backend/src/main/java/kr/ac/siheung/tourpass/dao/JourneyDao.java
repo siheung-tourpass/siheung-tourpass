@@ -25,6 +25,13 @@ public final class JourneyDao {
     public static Map<String,Object> firstCard(Connection c, Object id) throws SQLException {
         return one(c,"SELECT id FROM journey_place WHERE journey_id=? LIMIT 1",id);
     }
+    public static Map<String,Object> completedWithPass(Connection c, Object pass, boolean lock) throws SQLException {
+        return one(c,"SELECT id FROM journey WHERE issued_pass_id=? AND status='ARCHIVED' LIMIT 1"+(lock?" FOR UPDATE":""),pass);
+    }
+    public static int detachPass(Connection c, java.time.Instant now, Object pass) throws SQLException {
+        update(c,"UPDATE journey_pass_history SET disconnected_at=? WHERE issued_pass_id=? AND disconnected_at IS NULL",now,pass);
+        return update(c,"UPDATE journey SET issued_pass_id=NULL WHERE issued_pass_id=?",pass);
+    }
     public static int disconnectPass(Connection c, java.time.Instant now, Object id) throws SQLException {
         return update(c,"UPDATE journey_pass_history SET disconnected_at=? WHERE journey_id=? AND disconnected_at IS NULL",now,id);
     }

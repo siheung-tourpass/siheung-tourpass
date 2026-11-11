@@ -156,10 +156,13 @@ with visitor.api('/api/v1/me/passes/'+pid) as response:
 for key in ('startsAt','expiresAt'):
     kst = datetime.fromisoformat(issued[key]).astimezone(ZoneInfo('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S 한국 시간')
     assert kst in text, (key, kst)
-code = html.unescape(re.search(r'class="code">(.*?)</p>', text).group(1))
+# Only a trip in progress presents the code; pass pages never do.
+assert '혜택 사용 내역' in text and 'trip-pass-qr' not in text and 'class="code"' not in text
+code = issued['code']
+assert '/passes/refund' in text and '환불하기' in text
 other.get('/passes/detail?id='+pid, 404)
 assert '<button disabled>결제하기</button>' in visitor.get('/passes/checkout?productId=1')
-text=visitor.get('/passes'); assert 'class="code">'+html.escape(code)+'</p>' in text and '남은 시간' in text
+text=visitor.get('/passes'); assert 'class="code"' not in text and 'trip-pass-qr' not in text and '구매 내역' in text
 csrf=re.search(r'name="csrf" value="([^"]+)"',visitor.get('/profile')).group(1)
 visitor.request('/passes/issue', {'csrf':csrf,'productId':'1'},409)
 staff.get('/merchant/redeem'); text=staff.submit('/merchant/redeem/lookup', {'merchantId':'1','code':code}, 200)
@@ -168,6 +171,16 @@ confirm = next(f['fields'] for f in staff.forms if f['action'].endswith('/mercha
 staff.submit('/merchant/redeem/confirm')
 assert '사용 성공' in staff.get(staff.location)
 staff.request('/merchant/redeem/confirm', confirm, 409)
+# A used pass cannot be refunded; an unused one is refunded once, by its owner only.
+assert '/passes/refund' not in visitor.get('/passes/detail?id='+pid)
+visitor.request('/passes/refund', {'csrf':csrf,'id':pid},409)
+other.get('/passes/checkout?productId=1'); other.submit('/passes/issue')
+pid2 = re.search(r'/passes/detail\?id=([0-9]+)', other.get('/passes')).group(1)
+visitor.request('/passes/refund', {'csrf':csrf,'id':pid2},404)
+other.get('/passes/detail?id='+pid2); other.submit('/passes/refund')
+assert other.location == '/passes/detail?id='+pid2
+text=other.get(other.location); assert '환불됨' in other.get('/passes') and '환불됨' in text and '방문객 환불' in text and '/passes/refund' not in text and 'class="code"' not in text
+other.request('/passes/refund', {'csrf':re.search(r'name="csrf" value="([^"]+)"',other.get('/profile')).group(1),'id':pid2},409)
 text=visitor.get('/feedback/history')
 rid=re.search(r'/feedback/edit\?id=([0-9]+)',text).group(1)
 text=visitor.get('/feedback/edit?id='+rid)
@@ -201,7 +214,7 @@ nav=text.split('aria-label="주 메뉴"')[1]
 assert all('<span>'+label+'</span>' in nav for label in ('홈','내 투어패스','여행 만들기','내 여행','프로필'))
 assert 'aria-label="투어패스 안내"' not in text and '/merchants?tab=' not in text
 assert '/merchants?tab=facilities' in public.get('/merchants')
-assert '/merchants/detail?id=' in visitor.get('/passes') or '아직 투어패스가 없어요' in visitor.get('/passes')
+assert '구매 내역' in visitor.get('/passes') or '아직 투어패스가 없어요' in visitor.get('/passes')
 for tab,title in (('products','전체 상품'),('facilities','이용 가능 시설')):
     guide=public.get('/merchants?tab='+tab)
     assert 'id="guide-'+tab+'-title">'+title+'</h1>' in guide and guide.count('<h1')==1
@@ -269,28 +282,36 @@ visitor.get(journey_url)
 csrf=next(f['fields']['csrf'] for f in visitor.forms if f['action'].endswith('/journeys/save'))
 visitor.request('/journeys/delete', {'csrf':csrf,'id':jid},409)
 visitor.get(journey_url)
-text=visitor.get(journey_url); assert '본인 기록이며 방문 인증이 아닙니다' in text
-visitor.get(journey_url); visitor.submit('/journeys/record', {'visitedOn':'2026-10-01','note':'<script>여행 메모</script>','rating':'4'})
+# A trip in progress shows the visit order only; records are written after it is finished.
+text=visitor.get(journey_url); assert 'journey-stops' in text and '여행 마치고 기록 남기기' in text
+assert '/journeys/record' not in text and '/journeys/photo' not in text and 'class="code"' not in text and 'trip-pass-qr' not in text
+# Once a pass is linked, the trip presents its code and can no longer be reopened or deleted.
+visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'2026-10-01','issuedPassId':pid})
+text=visitor.get(journey_url); assert 'class="code">'+html.escape(code)+'</p>' in text and '남은 시간' in text and 'trip-pass-qr' in text
+text=visitor.get('/passes/detail?id='+pid); assert 'class="code"' not in text and journey_url+'">코드·QR 보기' in text
+text=visitor.get('/passes'); assert '제작 중으로 보내기' not in text and '사용 완료 · 아카이브' in text
+visitor.request('/journeys/save', {'csrf':csrf,'id':jid,'status':'PLANNING'},409)
+visitor.get(journey_url); visitor.submit('/journeys/save', {'status':'ARCHIVED'})
+assert visitor.location.endswith(journey_url)
+text=visitor.get(journey_url); assert '방문 인증이 아니에요' in text and 'journey-stops' not in text and 'star-rating' in text
+visitor.submit('/journeys/record', {'visitedOn':'2026-10-01','note':'<script>여행 메모</script>','rating':'4'})
 assert '#record-' in visitor.location
 assert '&lt;script&gt;여행 메모' in visitor.get(journey_url)
-visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'2026-10-01','status':'ARCHIVED','issuedPassId':pid})
-assert visitor.location.endswith('/journeys?status=ARCHIVED')
 assert '/journeys/photocards' in visitor.get(journey_url)
 text=visitor.get(photo_url)
 assert '사진을 올리면 포토카드' in text
 other.get(photo_url,404)
 text=visitor.get(journey_url)
-assert '보관된 여행입니다' in text and '이 여행의 투어패스' in text and 'class="code">'+html.escape(code)+'</p>' in text
+assert '이렇게 다녀왔어요' in text and '이 여행의 투어패스' not in text and '이름·날짜 바꾸기' not in text and html.escape(code) not in text and 'trip-pass-qr' not in text
 with visitor.api('/api/v1/me/journeys/'+jid) as response:
     history=json.load(response)['benefitPassHistory']
 assert history[0]['issuedPassId']==pid and history[0]['disconnectedAt'] is None
-assert '나의 여행' in visitor.get('/journeys?status=ARCHIVED')
-visitor.get(journey_url); visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'','status':'CONFIRMED','issuedPassId':''})
-assert visitor.location.endswith('/passes')
-visitor.get(photo_url,409)
-assert '/journeys/photocards' not in visitor.get(journey_url)
-text=visitor.get(journey_url)
-assert '이 여행의 투어패스' not in text
+text=visitor.get('/journeys?status=ARCHIVED'); assert '나의 여행' in text and 'journey-ticket-action' not in text
+# A finished trip stays finished.
+for status in ('CONFIRMED','PLANNING'): visitor.request('/journeys/save', {'csrf':csrf,'id':jid,'status':status},409)
+for values in ({'name':'바꾼 이름'},{'travelDate':'2026-10-02'}): visitor.request('/journeys/save', {'csrf':csrf,'id':jid,**values},409)
+visitor.request('/journeys/delete', {'csrf':csrf,'id':jid},409)
+text=visitor.get('/passes/detail?id='+pid); assert html.escape(code) not in text and 'trip-pass-qr' not in text and '코드·QR 보기' not in text
 # All admin form variants render and retain their service contracts.
 for collection in ('products','merchants','benefits'):
     admin.get('/admin/catalog?collection='+collection)
@@ -336,7 +357,7 @@ admin.get('/admin/relations?type=sub-theme-of')
 admin.submit('/admin/relations/save', {'fromId':'2','toId':'1','materialKind':'DEMO','sourceUrl':'','checkedOn':'','evidenceNote':'시연 순환'},409)
 assert revision()==before
 admin.get('/admin/passes/detail?id='+pid); admin.submit('/admin/passes/cancel', {'reason':'화면 검사 취소'})
-assert '취소된 패스' in visitor.get('/passes/detail?id='+pid)
+assert '취소됨' in visitor.get('/passes/detail?id='+pid)
 visitor.get('/feedback/edit?id='+rid); visitor.submit('/feedback/create', {'rating':'4','comment':'취소 후 평가'})
 visitor.get('/profile'); visitor.submit('/logout')
 assert visitor.location == '/'

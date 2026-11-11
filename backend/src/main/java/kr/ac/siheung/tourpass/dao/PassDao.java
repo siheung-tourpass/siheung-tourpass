@@ -21,7 +21,7 @@ public final class PassDao {
         return rows(c,RedemptionDao.HISTORY+" WHERE p.id=? ORDER BY r.used_at DESC,r.id DESC",id);
     }
     public static List<Map<String,Object>> list(Connection c, String owner) throws SQLException {
-        return rows(c,"SELECT id,owner_id,product_id,product_name,price_won,starts_at,expires_at,cancelled_at,demo_only FROM issued_pass"+(owner==null?"":" WHERE owner_id=?")+" ORDER BY starts_at DESC,id DESC",owner==null?new Object[]{}:new Object[]{owner});
+        return rows(c,"SELECT id,owner_id,product_id,product_name,price_won,starts_at,expires_at,cancelled_at,cancel_reason,demo_only FROM issued_pass"+(owner==null?"":" WHERE owner_id=?")+" ORDER BY starts_at DESC,id DESC",owner==null?new Object[]{}:new Object[]{owner});
     }
     public static Map<String,Object> owned(Connection c, Object id, Object user) throws SQLException {
         return one(c,"SELECT id FROM issued_pass WHERE id=? AND owner_id=?",id,user);
