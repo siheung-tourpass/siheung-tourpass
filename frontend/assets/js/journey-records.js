@@ -1,19 +1,17 @@
 (() => {
-  const rail = document.querySelector('.record-cards');
-  if (!rail) return;
-  const cards = [...rail.children];
-  const previous = document.querySelector('#record-previous');
-  const next = document.querySelector('#record-next');
-  const position = document.querySelector('#record-position');
-  let activeCard = cards[Math.max(0, cards.findIndex(card => `#${card.id}` === location.hash))];
-  const go = CardScroll.bind(rail, {
-    cards: () => cards, current: () => activeCard, previous, next,
-    update(card, index, total) {
-      activeCard = card;
-      position.textContent = `${index + 1} / ${total}`;
-    }
-  });
-  rail.classList.add('is-record-carousel');
-  document.querySelector('.record-navigation').hidden = false;
-  go(activeCard);
+  // Picking a star needs a visit date; fill the trip date (or today) when none is set.
+  for (const form of document.querySelectorAll('.record-form')) {
+    const date = form.elements.visitedOn;
+    form.addEventListener('change', event => {
+      if (event.target.name === 'rating' && event.target.value && !date.value) date.value = form.dataset.defaultVisit;
+    });
+  }
+  // A chosen photo uploads right away; the save button stays only without JavaScript.
+  for (const form of document.querySelectorAll('.record-photo form[enctype]')) {
+    form.querySelector('.record-photo-submit').hidden = true;
+    form.elements.photo.addEventListener('change', () => { if (form.elements.photo.files.length) form.requestSubmit(); });
+  }
+  // Coming back from a save, reopen the place that was edited.
+  const target = location.hash && document.querySelector(location.hash);
+  target?.querySelector('.trip-stop-edit')?.setAttribute('open', '');
 })();

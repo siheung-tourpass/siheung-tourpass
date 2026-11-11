@@ -44,8 +44,9 @@ other.request('PATCH',p,{'status':'PLANNING'},expected=404)
 reopened=v.request('PATCH',p,{'status':'PLANNING'})[1]
 assert reopened['status']=='PLANNING' and [{k:v for k,v in place.items() if k!='_links'} for place in reopened['places']]==[{k:v for k,v in place.items() if k!='_links'} for place in before_reopen['places']]
 v.request('PATCH',p,{'status':'CONFIRMED'})
-v.request('PATCH',p,{'status':'ARCHIVED'})
+v.request('PATCH',p,{'name':'기록 보존 검사','status':'ARCHIVED'})
 v.request('PATCH',p,{'status':'PLANNING'},expected=409)
+v.request('PATCH',p,{'status':'CONFIRMED'},expected=409)
 v.request('POST',p+'/places',{'placeId':'3'},expected=409)
 v.request('DELETE',p+'/places/'+b,expected=409)
 v.request('POST',p+'/places/'+a+'/move',{'direction':'DOWN'},expected=409)
@@ -62,7 +63,6 @@ admin.request('PATCH','/admin/ontology/places/1',{'active':True})
 admin.request('PATCH','/admin/ontology/places/1',{'description':'변경 소개'})
 v.request('POST',s+'/places',{'placeId':'1'},expected=404)
 admin.request('PUT','/admin/ontology/places/1/review',{'status':'APPROVED'})
-v.request('PATCH',p,{'status':'CONFIRMED'})
 v.request('DELETE',p+'/places/'+b,expected=409)
 assert len(v.request('GET',p)[1]['places'])==2
 # Only own benefit passes can be attached; cancellation leaves the archive intact.
@@ -87,7 +87,9 @@ assert detached['benefitPassHistory'][0]['disconnectedAt']>=history[0]['linkedAt
 assert detached['benefitPassHistory'][0]['status']=='CANCELLED'
 v.request('PATCH',p,{'issuedPassId':None})
 assert v.request('GET',p)[1]['benefitPassHistory']==detached['benefitPassHistory']
-v.request('PATCH',p,{'name':'기록 보존 검사','issuedPassId':benefit['id'],'status':'ARCHIVED'})
+v.request('PATCH',p,{'issuedPassId':benefit['id'],'status':'ARCHIVED'})
+for values in ({'name':'바꾼 이름'},{'travelDate':'2026-10-02'}):
+    assert v.request('PATCH',p,values,expected=409)[1]['error']['code']=='JOURNEY_COMPLETED'
 history=v.request('GET',p)[1]['benefitPassHistory']
 assert len(history)==2 and history[0]['disconnectedAt'] is None
 assert history[1]['disconnectedAt'] is not None
@@ -105,6 +107,33 @@ history=replaced['benefitPassHistory']
 assert [h['issuedPassId'] for h in history]==[y['id'],x['id']]
 assert history[0]['disconnectedAt'] is None and history[1]['disconnectedAt']==history[0]['linkedAt']
 v.request('GET',op,expected=404)
+# A trip with a linked pass cannot be reopened or deleted.
+other.request('DELETE',op,expected=409)
+other.request('POST',op+'/places',{'placeId':'2'})
+other.request('PATCH',op,{'status':'CONFIRMED'})
+other.request('PATCH',op,{'status':'PLANNING'},expected=409)
+# Refunding an unused, unexpired pass cancels it, frees the trip and keeps the link history.
+z=other.request('POST','/me/passes',{'productId':'1'},expected=201)[1]
+assert z['_links']['refund']['method']=='PUT'
+other.request('PATCH',op,{'issuedPassId':z['id']})
+v.request('PUT','/me/passes/'+z['id']+'/refund',expected=404)
+refund=other.request('PUT','/me/passes/'+z['id']+'/refund')[1]
+assert refund['passId']==z['id'] and refund['reason']=='방문객 환불'
+refunded=other.request('GET','/me/passes/'+z['id'])[1]
+assert refunded['status']=='CANCELLED' and 'refund' not in refunded['_links']
+other.request('PUT','/me/passes/'+z['id']+'/refund',expected=409)
+freed=other.request('GET',op)[1]
+assert 'benefitPass' not in freed and freed['benefitPassHistory'][0]['issuedPassId']==z['id'] and freed['benefitPassHistory'][0]['disconnectedAt']
+assert other.request('PATCH',op,{'status':'PLANNING'})[1]['status']=='PLANNING'
+# A pass whose trip is finished cannot be refunded.
+w=other.request('POST','/me/passes',{'productId':'1'},expected=201)[1]
+other.request('PATCH',op,{'issuedPassId':w['id'],'status':'CONFIRMED'})
+other.request('PATCH',op,{'status':'ARCHIVED'})
+finished=other.request('GET','/me/passes/'+w['id'])[1]
+assert finished['refundable'] is False and 'refund' not in finished['_links']
+other.request('PUT','/me/passes/'+w['id']+'/refund',expected=409)
+assert other.request('GET','/me/passes/'+w['id'])[1]['status']!='CANCELLED'
+admin.request('PUT','/admin/passes/'+w['id']+'/cancellation',{'reason':'환불 제한 검사'})
 # Editing retains unavailable saved places and their records; invalid additions roll back.
 draft=v.request('POST','/me/journeys',{'name':'스냅샷 수정 검사'},expected=201)[1]
 draft_path='/me/journeys/'+draft['id']
@@ -131,6 +160,7 @@ assert edited['places'][0]['placeName']==saved['placeName']
 admin.request('PATCH','/admin/ontology/places/2',{'active':True})
 # Deletion cascades over both cards with records and benefit link history.
 v.request('PATCH',draft_path,{'issuedPassId':benefit['id']})
+v.request('DELETE',draft_path,expected=409)
 v.request('PATCH',draft_path,{'issuedPassId':None})
 assert len(v.request('GET',draft_path)[1]['benefitPassHistory'])==1
 v.request('DELETE',draft_path,expected=204)
@@ -138,4 +168,4 @@ assert v.request('GET','/me/passes/'+benefit['id'])[1]['id']==benefit['id']
 draft=v.request('POST','/me/journeys',{'name':'삭제할 임시 패스'},expected=201)[1]
 v.request('DELETE','/me/journeys/'+draft['id'],expected=204)
 v.request('GET','/me/journeys/'+draft['id'],expected=404)
-print('PASS: journey ownership, CSRF, concurrent deduplication, ordering, records, archive/restore, snapshots, benefit linkage')
+print('PASS: journey ownership, CSRF, concurrent deduplication, ordering, records, one-way archive, snapshots, benefit linkage')

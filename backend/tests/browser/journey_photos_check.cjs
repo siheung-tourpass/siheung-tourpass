@@ -34,7 +34,16 @@ const root = process.argv[2] || 'http://localhost:8080/siheung-tourpass';
     assert.equal((await upload(owner,Buffer.alloc(8*1024*1024+1))).status(),413);
     assert.equal((await owner.client.get(photoUrl)).status(),200,'Invalid replacement must preserve saved image');
     assert.equal((await upload(owner)).status(),303,'Replacement');
-    await api('PATCH',path,{status:'CONFIRMED'});await api('PATCH',path,{status:'ARCHIVED'});
+    // Deleting a card removes its photo; photocards open only once the trip is finished.
+    const spare=(await api('POST',path+'/places',{placeId:'2'})).places.find(place=>place.id!==itemId).id;
+    const spareUrl=root+`/journeys/photo?id=${journey.id}&itemId=${spare}`;
+    assert.equal((await owner.client.post(root+'/journeys/photo',{maxRedirects:0,multipart:{csrf:owner.csrf,id:journey.id,itemId:spare,photo:{name:'memory.png',mimeType:'image/png',buffer:image}}})).status(),303);
+    assert.equal((await owner.client.get(spareUrl)).status(),200);
+    await api('DELETE',path+'/places/'+spare);
+    assert.equal((await owner.client.get(spareUrl)).status(),404);
+    await api('PATCH',path,{status:'CONFIRMED'});
+    assert.equal((await owner.client.get(root+'/journeys/photocards?id='+journey.id)).status(),409);
+    await api('PATCH',path,{status:'ARCHIVED'});
     const html=await (await owner.client.get(root+'/journeys/photocards?id='+journey.id)).text();
     assert(html.includes('goods-card')&&html.includes('직접 촬영한 사진')&&html.includes('itemId='+itemId));
     assert.equal((await other.client.get(root+'/journeys/photocards?id='+journey.id)).status(),404);
@@ -42,16 +51,12 @@ const root = process.argv[2] || 'http://localhost:8080/siheung-tourpass';
     assert.equal((await owner.client.post(root+'/journeys/photo',{maxRedirects:0,form:{csrf:owner.csrf,id:journey.id,itemId,intent:'delete'}})).status(),303);
     assert.equal((await owner.client.get(photoUrl)).status(),404);
     assert.equal((await upload(owner)).status(),303);
-    await api('PATCH',path,{status:'CONFIRMED'});
-    assert.equal((await owner.client.get(root+'/journeys/photocards?id='+journey.id)).status(),409);
-    await api('PATCH',path,{status:'PLANNING'});await api('DELETE',path+'/places/'+itemId);
-    assert.equal((await owner.client.get(photoUrl)).status(),404);
     console.log('PASS: upload, replacement, validation, CSRF, ownership, private delivery, printing state and deletion');
   } finally {
+    // A finished trip cannot be reopened or deleted, so only an unfinished one is cleaned up.
     const current=await api('GET',path);
-    if(current.status==='ARCHIVED')await api('PATCH',path,{status:'CONFIRMED'});
-    if(current.status!=='PLANNING')await api('PATCH',path,{status:'PLANNING'});
-    await api('DELETE',path);
+    if(current.status==='CONFIRMED')await api('PATCH',path,{status:'PLANNING'});
+    if(current.status!=='ARCHIVED')await api('DELETE',path);
     await Promise.all(contexts.map(client=>client.dispose()));
   }
 })().catch(error=>{console.error(error);process.exitCode=1;});

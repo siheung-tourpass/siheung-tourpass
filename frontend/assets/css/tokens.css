@@ -43,6 +43,7 @@
   --color-danger-soft: #fff0ed;
   --color-notice: #f1ede2;
   --color-notice-ink: #675b3b;
+  --color-star: #e0a100;
   --color-accent-ink: var(--color-surface);
   --color-surface-raised: oklch(98.5% 0.004 160);
   --color-edge: oklch(100% 0 0);

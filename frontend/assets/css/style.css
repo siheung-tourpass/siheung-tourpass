@@ -244,7 +244,7 @@ html[data-reduce-motion=true] .builder-card:hover, html[data-reduce-motion=true]
 #deck-summary { position: static; width: 100%; max-width: 640px; margin: var(--space-xl) auto; padding: 0; border: 0; background: var(--color-surface); color: var(--color-ink); border-radius: var(--radius-panel); }
 .deck-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-xs); }
 .deck-heading h2 { margin: 0; font-size: var(--text-section); }
-#deck-position, #record-position { font-family: var(--font-mono); color: var(--color-muted); }
+#deck-position { font-family: var(--font-mono); color: var(--color-muted); }
 #deck-position { font-size: var(--text-sm); }
 .deck-feedback { min-height: 1.65em; font-size: var(--text-sm); margin-bottom: 0; }
 .is-deck-mode .builder-layout { display: block; }
@@ -277,10 +277,10 @@ html[data-reduce-motion=true] .is-deck-mode .builder-card { transition: none; }
 .is-deck-mode .builder-region { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .is-deck-mode .has-background .card-kind { align-self: flex-start; background: var(--color-card-panel); padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-control); }
 .is-deck-mode .has-background h3, .is-deck-mode .has-background .builder-region { text-shadow: 0 1px 3px var(--color-card-shade-bottom); }
-.deck-navigation, .record-navigation { display: flex; align-items: center; gap: var(--space-md); }
-.deck-navigation button, .record-navigation button { min-height: 44px; padding: var(--space-sm); }
+.deck-navigation { display: flex; align-items: center; gap: var(--space-md); }
+.deck-navigation button { min-height: 44px; padding: var(--space-sm); }
 .deck-navigation button { min-width: 44px; margin: 0; }
-#deck-position, #record-position { min-width: 7ch; text-align: center; }
+#deck-position { min-width: 7ch; text-align: center; }
 .is-deck-mode .builder-cards { scrollbar-width: thin; scrollbar-color: var(--color-accent) var(--color-rule); cursor: grab; gap: var(--space-md); }
 .is-deck-mode .builder-card .card-kind { align-self: flex-start; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin: 0 0 var(--space-lg); font-size: var(--text-sm); }
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-overview { flex-shrink: 1; min-height: 0; margin-top: auto; overflow-y: auto; scrollbar-width: thin; }
@@ -385,17 +385,6 @@ html[data-reduce-motion=true] .map-pin.is-new span { animation: none; }
 .deck-summary-actions .actions { display: flex; gap: var(--space-sm); margin: 0; }
 .deck-summary-actions .actions button { flex: 1; width: auto; margin: 0; padding-inline: var(--space-md); }
 .deck-summary-actions .form-hint { margin: var(--space-sm) 0 0; }
-.record-navigation { justify-content: flex-end; }
-.record-navigation button { width: 44px; }
-.record-cards.is-record-carousel { display: flex; gap: var(--space-lg); scroll-snap-type: x mandatory; padding-block: var(--space-md) var(--space-xl); }
-.is-record-carousel .journey-record-card { flex: 0 0 min(100%, var(--destination-card-width)); min-width: 0; margin: 0; padding: var(--space-xl); border: 1px solid var(--color-rule); }
-.journey-record-card h2 { font-size: var(--text-xl); }
-.journey-record-card > p { margin-block: var(--space-sm); font-size: var(--text-sm); }
-.journey-record-card .record-fields { display: grid; }
-.journey-record-card input, .journey-record-card select { min-width: 0; width: 100%; }
-.journey-record-card label { font-size: var(--text-sm); }
-.journey-record-card textarea { min-height: 80px; }
-.record-navigation[hidden] { display: none; }
 .builder-card .card-background { display: block; width: 100%; height: auto; }
 .is-deck-mode .card-front .place-pick { display: none; }
 article, .panel, main > form, main > details, .empty-state { box-shadow: var(--shadow-surface); }
@@ -412,7 +401,6 @@ button, .button, .card-types [aria-pressed=true] { color: var(--color-accent-ink
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front .card-overview :is(h3, p) { color: var(--color-card-ink); text-shadow: none; }
 :is(.is-deck-mode, .admin-card-browser) .builder-card .card-front > .card-flip { border-radius: 0 0 var(--radius-control) var(--radius-control); background: var(--color-card-panel); box-shadow: none; }
 .is-deck-mode .builder-card .card-back > .card-flip { color: var(--color-accent); box-shadow: none; }
-.journey-record-card { box-shadow: var(--shadow-surface); }
 .pass-card { display: grid; grid-template-columns: minmax(0, 1fr) var(--pass-stub-width); padding: 0; overflow: hidden; }
 .pass-card-main { min-width: 0; padding: var(--space-xl); }
 .pass-card-main > :first-child { margin-top: 0; }
@@ -435,10 +423,6 @@ button, .button, .card-types [aria-pressed=true] { color: var(--color-accent-ink
 .recommendation-card:has(.place-photo) { display: flex; gap: 0; }
 .destination-detail { margin-block: var(--space-xl); }
 body:not(.is-deck-mode) .builder-card { aspect-ratio: var(--destination-card-ratio); }
-.record-cards.is-record-carousel { position: relative; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; padding-inline: max(0px, calc((100% - var(--destination-card-width)) / 2)); }
-.is-record-carousel .journey-record-card { scroll-snap-align: center; scroll-snap-stop: always; aspect-ratio: var(--destination-card-ratio); }
-.journey-record-card .record-fields { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
-.journey-record-card .record-fields label { margin-block: var(--space-sm); }
 @media (max-width: 639px) {
   .pass-card-main { padding: var(--space-lg); }
   .pass-card-action { padding-inline: var(--space-sm); }
@@ -708,9 +692,6 @@ html[data-reduce-motion=true] .is-deck-mode #deck-summary[data-sheet] { transiti
 .home-layout, .page-home .home-layout { display:flex; flex-direction:column; gap:0; max-width:none; padding-top:0; }
 .home-layout > * { width:100%; }
 .home-layout .home-heading { margin-top:var(--space-2xl); }
-.record-photo { border-top:1px solid var(--color-rule); margin-top:var(--space-xl); padding-top:var(--space-md); }
-.record-photo > img { display:block; width:100%; max-height:260px; object-fit:contain; }
-.record-photo form { margin-top:var(--space-md); }
 .benefit-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-xl); padding:var(--space-xl); border-block:1px solid var(--color-rule); list-style:none; }
 .benefit-steps span, .benefit-value span { display:block; color:var(--color-muted); font-size:var(--text-sm); }
 .benefit-value strong { font-size:var(--text-section); color:var(--color-accent); }
@@ -749,7 +730,6 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .guide-section { margin-block: var(--space-3xl); }
 .guide > .guide-section:first-child { margin-top: 0; }
 .guide-section > h2 { margin-bottom: var(--space-md); }
-.mypass-name { font-weight: 700; }
 .mypass-remaining { display: flex; align-items: baseline; gap: var(--space-md); margin-block: var(--space-sm); }
 .mypass-remaining span, .mypass-code-label { color: var(--color-muted); font-size: var(--text-sm); }
 .mypass-remaining strong { font-size: var(--text-section); color: var(--color-accent); }
@@ -757,6 +737,7 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .pass-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); padding: var(--space-lg); margin-block: var(--space-sm); background: var(--color-surface); border-radius: var(--radius-control); color: inherit; text-decoration: none; }
 .pass-row > span:first-child { display: grid; gap: var(--space-xs); min-width: 0; }
 .pass-row small { color: var(--color-muted); }
+.pass-row .journey-ticket-status { flex-shrink: 0; white-space: nowrap; }
 .pass-row:hover { color: var(--color-accent); }
 /* Tour pass guide tabs under the site header */
 @media (max-width: 600px) { .guide .pass-card, .page-passes .pass-card { grid-template-columns: 1fr; } .guide .pass-card-action, .page-passes .pass-card-action { padding: 0 var(--space-xl) var(--space-xl); align-items: stretch; } .guide .pass-card-action form { width: 100%; } }
@@ -772,6 +753,51 @@ html[data-reduce-motion=true] .home-card-track { animation: none; }
 .benefit-badge { display: inline-flex; align-items: center; gap: var(--space-xs); max-width: 100%; margin: 0 0 var(--space-xs); padding: 2px var(--space-sm); border-radius: var(--radius-pill); background: var(--color-soft); color: var(--color-accent); font-size: var(--text-sm); font-weight: 700; line-height: 1.5; }
 .benefit-badge svg { flex-shrink: 0; width: 16px; height: 16px; }
 .benefit-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trip-story { margin-block: var(--space-xl); }
+.trip-story-lead { margin-bottom: var(--space-xs); font-size: var(--text-lg, 1.125rem); font-weight: 700; }
+.trip-story-stats { margin-top: 0; color: var(--color-muted); font-size: var(--text-sm); }
+.trip-stops { list-style: none; margin: var(--space-xl) 0; padding: 0; }
+.trip-stop { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: var(--space-md); padding-bottom: var(--space-xl); scroll-margin-top: var(--space-2xl); }
+.trip-stop:not(:last-child)::before { content: ""; position: absolute; top: 36px; bottom: 4px; left: 15px; border-left: 2px dotted var(--color-rule); }
+.trip-stop-no { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font-size: var(--text-sm); font-weight: 800; }
+.trip-stop-body { min-width: 0; padding: var(--space-lg); background: var(--color-surface); border-radius: var(--radius-control); box-shadow: var(--shadow-surface); }
+.trip-stop-body h3 { margin: 0; font-size: var(--text-xl); }
+.trip-stop-body > p { margin-block: var(--space-xs); }
+.trip-stop-meta { color: var(--color-muted); font-size: var(--text-sm); }
+.trip-stop-visit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); font-weight: 600; }
+.trip-stop-body .benefit-badge { margin-top: var(--space-xs); }
+.trip-stop-note { padding: var(--space-md); background: var(--color-surface-inset); border-radius: var(--radius-control); white-space: pre-line; overflow-wrap: anywhere; }
+.trip-stop-photo { display: block; width: 100%; max-height: 280px; margin-top: var(--space-md); object-fit: cover; border-radius: var(--radius-control); }
+.star-view { color: var(--color-rule); letter-spacing: 1px; }
+.star-view .is-on { color: var(--color-star); }
+.trip-stop-edit { margin: var(--space-md) 0 0; border-top: 1px solid var(--color-rule); border-radius: 0; background: none; }
+.trip-stop-edit summary { color: var(--color-accent); }
+.trip-stop-edit label { font-size: var(--text-sm); }
+.trip-stop-edit textarea { min-height: 80px; }
+.star-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin: 0 0 var(--space-md); padding: 0; border: 0; }
+.star-rating legend { margin-bottom: var(--space-xs); padding: 0; font-size: var(--text-sm); font-weight: 600; }
+.star-rating .star { display: grid; place-items: center; width: 40px; height: 44px; margin: 0; cursor: pointer; color: var(--color-star); font-size: 1.75rem; line-height: 1; }
+.star-rating .star::before { content: "★"; }
+.star-rating input:checked + label ~ .star { color: var(--color-rule); }
+.star-rating:hover .star { color: var(--color-star); }
+.star-rating .star:hover ~ .star { color: var(--color-rule); }
+.star-rating .star-clear { order: 1; margin: 0 0 0 var(--space-sm); color: var(--color-muted); font-size: var(--text-sm); text-decoration: underline; cursor: pointer; }
+.star-rating input:focus-visible + label { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-control); }
+.trip-stop-edit .record-form { margin-top: 0; padding-top: 0; border-top: 0; }
+.record-photo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--color-rule); }
+.record-photo form { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; border: 0; }
+.record-photo button, .record-photo .button { margin: 0; padding-inline: var(--space-lg); }
+.record-photo [hidden] { display: none; }
+.record-photo .form-hint { flex-basis: 100%; margin: 0; }
+.record-photo .record-photo-pick { display: inline-flex; align-items: center; margin: 0; font-size: inherit; cursor: pointer; }
+.record-photo .record-photo-pick:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.journey-stops ol { list-style: none; margin: 0; padding: 0; counter-reset: stop; }
+.journey-stops li { counter-increment: stop; display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: var(--space-md); padding: var(--space-lg); margin-block: var(--space-sm); background: var(--color-surface); border-radius: var(--radius-control); }
+.journey-stops li::before { content: counter(stop); display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--color-soft); color: var(--color-accent); font-size: var(--text-sm); font-weight: 800; }
+.journey-stops li > div { display: grid; gap: var(--space-xs); min-width: 0; justify-items: start; }
+.journey-stops li > div > span { color: var(--color-muted); font-size: var(--text-sm); }
+.journey-stops .benefit-badge { margin: 0; }
+.journey-finish { margin-block: var(--space-xl); }
 .trip-pass { margin-block: var(--space-xl); }
 .trip-pass h2 { margin-top: 0; }
 .trip-pass-qr { display: block; width: min(280px, 100%); height: auto; aspect-ratio: 1; margin: 0 auto var(--space-md); fill: var(--color-print-ink); shape-rendering: crispEdges; }

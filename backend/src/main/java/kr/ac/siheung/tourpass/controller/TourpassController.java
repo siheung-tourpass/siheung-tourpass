@@ -139,6 +139,11 @@ public class TourpassController {
         web.handle(request, response, web::issuePass);
     }
 
+    @RequestMapping({"/passes/refund"})
+    public void refundPass(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        web.handle(request, response, web::refundPass);
+    }
+
     @RequestMapping({"/feedback/places/save", "/feedback/places/delete"})
     public void savePlaceFeedback(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         web.handle(request, response, web::savePlaceFeedback);
