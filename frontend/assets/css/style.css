@@ -616,11 +616,11 @@ body.page-landing, body.page-login { padding-bottom: 0; }
 .page-journey-builder #builder-context { margin-block: var(--space-sm) var(--space-lg); border-radius: var(--radius-control); }
 /* A pick flies into the sheet as a photo dot; the count bumps when it lands. */
 .pick-dot { position: fixed; z-index: 6; width: 56px; height: 56px; border: 3px solid var(--color-surface); border-radius: 50%; background: var(--color-accent) center / cover no-repeat; box-shadow: 0 0 0 2px var(--color-accent), 0 6px 16px rgb(0 0 0 / .25); pointer-events: none; }
-#sheet-count { display: inline-block; }
-#sheet-count.is-bumped { animation: count-bump 360ms var(--ease-out); }
+:is(#sheet-count, #selection-count) { display: inline-block; }
+:is(#sheet-count, #selection-count).is-bumped { animation: count-bump 360ms var(--ease-out); }
 @keyframes count-bump { 40% { transform: scale(1.35); } }
-@media (prefers-reduced-motion: reduce) { #sheet-count.is-bumped { animation: none; } }
-html[data-reduce-motion=true] #sheet-count.is-bumped { animation: none; }
+@media (prefers-reduced-motion: reduce) { :is(#sheet-count, #selection-count).is-bumped { animation: none; } }
+html[data-reduce-motion=true] :is(#sheet-count, #selection-count).is-bumped { animation: none; }
 /* After a re-sort the new ordering basis glows briefly so the change is noticed. */
 #builder-context.is-updated { animation: context-glow 2.4s var(--ease-out); }
 @keyframes context-glow { 0%, 40% { background: var(--color-soft); color: var(--color-accent); box-shadow: 0 0 0 6px var(--color-soft); } }
@@ -651,11 +651,15 @@ html[data-reduce-motion=true] #sheet-count.is-bumped { animation: none; }
 .is-deck-mode #journey-builder[data-step=review] #deck-summary { max-width: 640px; margin-inline: auto; }
 .is-deck-mode #journey-builder[data-step=review] .deck-summary-actions { margin-top: var(--space-xl); }
 /* Deck-building sheet: #deck-summary docks onto the bottom menu as one folded row and unfolds upward. */
-.is-deck-mode #journey-builder[data-step=build] { --deck-sheet-peek: 68px; }
+.is-deck-mode { --deck-sheet-row: 64px; --deck-sheet-strip: 112px; --deck-sheet-peek: calc(var(--deck-sheet-strip) + var(--deck-sheet-row) + 16px); }
 /* Deck building is a focused task: the bottom menu steps aside and the sheet takes its place. */
-body.is-deck-mode:has(#journey-builder[data-step=build]) { padding-bottom: calc(var(--navigation-lift) + 68px + 32px + env(safe-area-inset-bottom)); }
-body.is-deck-mode:has(#journey-builder[data-step=build]) .bottom-nav { display: none; }
-.is-deck-mode #deck-summary[data-sheet] { position: fixed; z-index: 3; left: 50%; right: auto; bottom: calc(var(--navigation-lift) + env(safe-area-inset-bottom)); transform: translateX(-50%); display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; grid-template-rows: var(--deck-sheet-peek) minmax(0, 1fr); column-gap: var(--space-md); width: min(var(--navigation-width), calc(100% - max(var(--navigation-gutter), env(safe-area-inset-left), env(safe-area-inset-right)) * 2)); height: var(--deck-sheet-peek); max-width: none; margin: 0; padding: 0 var(--space-md); overflow: hidden; border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: var(--color-surface); box-shadow: var(--shadow-floating); transition: height 260ms var(--ease-out), box-shadow 260ms var(--ease-out); }
+body.is-deck-mode:has(#deck-summary[data-sheet]) { padding-bottom: calc(var(--navigation-lift) + var(--deck-sheet-peek) + 32px + env(safe-area-inset-bottom)); }
+/* The folded sheet now carries a map strip, so the deck gives up that height on narrow screens. */
+@media (max-width: 959.98px) { .is-deck-mode #journey-builder[data-step=build] .deck-stage { --deck-card-width: min(360px, calc(100vw - 80px), max(232px, calc((100svh - 560px) * 2 / 3))); } }
+body.is-deck-mode:has(#deck-summary[data-sheet]) .bottom-nav { display: none; }
+.is-deck-mode #deck-summary[data-sheet] { position: fixed; z-index: 3; left: 50%; right: auto; bottom: calc(var(--navigation-lift) + env(safe-area-inset-bottom)); transform: translateX(-50%); display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; grid-template-rows: var(--deck-sheet-row) minmax(0, 1fr); column-gap: var(--space-md); width: min(var(--navigation-width), calc(100% - max(var(--navigation-gutter), env(safe-area-inset-left), env(safe-area-inset-right)) * 2)); height: var(--deck-sheet-peek); max-width: none; margin: 0; padding: 0 var(--space-md); overflow: hidden; border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: var(--color-surface); box-shadow: var(--shadow-floating); transition: height 260ms var(--ease-out), box-shadow 260ms var(--ease-out); }
+/* Folded: the map strip sits on top and the handle row with the next button sits under it. */
+.is-deck-mode #deck-summary[data-sheet=peek] { grid-template-rows: var(--deck-sheet-strip) var(--deck-sheet-row); padding-top: 16px; }
 .is-deck-mode #deck-summary[data-sheet]::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 4px; border-radius: var(--radius-pill); background: var(--color-rule); transform: translateX(-50%); pointer-events: none; }
 .is-deck-mode #deck-summary[data-sheet=open] { height: min(760px, calc(100dvh - var(--header-height) - var(--navigation-lift) - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); box-shadow: var(--shadow-floating), 0 0 0 100vmax var(--color-popup-backdrop); }
 .is-deck-mode #deck-summary[data-dragging] { transition: none; }
@@ -663,24 +667,51 @@ body.is-deck-mode:has(#journey-builder[data-step=build]) .bottom-nav { display: 
 .deck-sheet-handle { grid-area: 1 / 1 / 2 / 3; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-width: 0; min-height: 44px; margin: 0; padding: 0 0 0 calc(72px + var(--space-md)); border: 0; background: transparent; box-shadow: none; color: var(--color-ink); text-align: left; cursor: grab; touch-action: none; }
 .deck-sheet-handle:hover { background: transparent; }
 #deck-summary[data-sheet=open] .deck-sheet-handle { flex-direction: row; align-items: center; gap: var(--space-sm); padding-left: var(--space-xs); }
+#deck-summary[data-sheet=peek] .deck-sheet-handle { grid-area: 2 / 1 / 3 / 3; padding-left: var(--space-xs); }
 .deck-sheet-title { font-weight: 700; }
 .deck-sheet-title #sheet-count { color: var(--color-accent); }
 .deck-sheet-label { color: var(--color-muted); font-size: .8125rem; font-weight: 400; }
 .deck-sheet-label::after { content: " ⌃"; }
 #deck-summary[data-sheet=open] .deck-sheet-label::after { content: " ⌄"; }
 .is-deck-mode #deck-summary[data-sheet] #builder-next { grid-area: 1 / 3; align-self: center; z-index: 1; min-height: 44px; margin: 0; }
+.is-deck-mode #deck-summary[data-sheet=peek] #builder-next { grid-area: 2 / 3; }
 .is-deck-mode #deck-summary[data-sheet] .builder-summary { grid-area: 2 / 1 / 3 / -1; min-height: 0; padding: 0; overflow: hidden; background: transparent; box-shadow: none; }
 .is-deck-mode #deck-summary[data-sheet=open] .builder-summary { overflow-y: auto; overscroll-behavior: contain; padding-bottom: var(--space-md); }
-/* Folded: the summary shrinks to the map thumbnail at the row's left; tiles stay off so only the pins and line show. */
-.is-deck-mode #deck-summary[data-sheet=peek] .builder-summary { grid-area: 1 / 1; align-self: center; z-index: 1; height: 48px; cursor: pointer; }
+/* Folded: the summary shrinks to the map strip; the list stays hidden and the map only previews (a press unfolds). */
+.is-deck-mode #deck-summary[data-sheet=peek] .builder-summary { grid-area: 1 / 1 / 2 / -1; align-self: stretch; z-index: 1; height: var(--deck-sheet-strip); cursor: pointer; }
 .is-deck-mode #deck-summary[data-sheet=peek] .builder-summary > :not(.builder-map) { visibility: hidden; }
-.is-deck-mode #deck-summary[data-sheet=peek] .builder-map { height: 48px; margin: 0; border: 0; border-radius: 12px; background: var(--color-surface-inset); pointer-events: none; }
-.is-deck-mode #deck-summary[data-sheet=peek] :is(.leaflet-tile-pane, .leaflet-control-container) { visibility: hidden; }
-.is-deck-mode #deck-summary[data-sheet=peek] .map-pin { background: transparent; border: 0; box-shadow: none; outline: 0; }
-.is-deck-mode #deck-summary[data-sheet=peek] .map-pin span { width: 12px; height: 12px; border: 2px solid var(--color-surface); border-radius: 50%; background: var(--color-accent); font-size: 0; box-shadow: 0 1px 2px rgb(0 0 0 / .3); }
-.is-deck-mode #deck-summary[data-sheet=peek] .map-route { stroke-width: 2; stroke-dasharray: 3 3; }
-@media (prefers-reduced-motion: reduce) { .is-deck-mode #deck-summary[data-sheet] { transition: none; } }
+.is-deck-mode #deck-summary[data-sheet=peek] .builder-map { height: var(--deck-sheet-strip); margin: 0; border-radius: 16px; pointer-events: none; }
+.is-deck-mode #deck-summary[data-sheet=peek] .leaflet-control-container { visibility: hidden; }
+/* Folding moves the summary between grid rows; fade it in so the map does not jump. */
+.is-deck-mode #deck-summary[data-sheet=peek] .builder-summary { animation: sheet-fold 200ms var(--ease-out); }
+.is-deck-mode #deck-summary[data-sheet=open] .builder-summary { animation: sheet-unfold 200ms var(--ease-out); }
+@keyframes sheet-fold { from { opacity: 0; } }
+@keyframes sheet-unfold { from { opacity: 0; } }
+/* Wide screens: no sheet; the picked cards and map stay in a panel beside the deck while it scrolls. */
+@media (min-width: 960px) {
+  .is-deck-mode #journey-builder[data-step=build] .builder-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-xl); align-items: start; }
+  .is-deck-mode #journey-builder[data-step=build] .deck-stage { --deck-card-width: min(340px, max(248px, calc((100svh - 400px) * 2 / 3))); }
+  .is-deck-mode #journey-builder[data-step=build] #deck-summary { position: sticky; top: calc(var(--header-height) + var(--space-lg)); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-sm); max-height: calc(100dvh - var(--header-height) - var(--space-lg) - var(--navigation-clearance)); margin: 0; padding: var(--space-lg); overflow: hidden; box-shadow: var(--shadow-surface); }
+  .is-deck-mode #journey-builder[data-step=build] #deck-summary > header { grid-area: 1 / 1; margin: 0; }
+  .is-deck-mode #journey-builder[data-step=build] #deck-summary > header h2 { margin: 0; font-size: var(--text-lg); }
+  .is-deck-mode #journey-builder[data-step=build] #builder-next { grid-area: 1 / 2; min-height: 44px; margin: 0; }
+  .is-deck-mode #journey-builder[data-step=build] #deck-summary .builder-summary { grid-area: 2 / 1 / 3 / -1; min-height: 0; max-height: 100%; margin: 0; padding: var(--space-md) 0 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .is-deck-mode #journey-builder[data-step=build] .builder-map { height: 280px; }
+  .is-deck-mode #journey-builder[data-step=build] #deck-summary { grid-template-rows: auto minmax(0, 1fr); }
+  /* Sticky stops at the end of the layout, so only the bottom menu's clearance may follow it. */
+  body.is-deck-mode:has(#journey-builder[data-step=build]) { padding-bottom: var(--navigation-clearance); }
+  body.is-deck-mode:has(#journey-builder[data-step=build]) main { padding-bottom: 0; }
+  .is-deck-mode main > #journey-builder[data-step=build] { margin-bottom: 0; }
+  /* The panel is narrow, so picked rows use the two-line layout of small screens. */
+  .is-deck-mode #journey-builder[data-step=build] #selected-places li { column-gap: var(--space-sm); grid-template-areas: "leg leg leg leg" "order thumb name name" "order thumb meta controls"; }
+  .is-deck-mode #journey-builder[data-step=build] #selected-places .selection-text { display: contents; }
+  .is-deck-mode #journey-builder[data-step=build] #selected-places .selection-name { grid-area: name; align-self: end; }
+  .is-deck-mode #journey-builder[data-step=build] #selected-places .selection-meta { grid-area: meta; align-self: center; min-width: 0; }
+  .is-deck-mode #journey-builder[data-step=build] #selected-places .selection-leg { padding-left: calc(32px + var(--space-sm)); }
+}
+@media (prefers-reduced-motion: reduce) { .is-deck-mode #deck-summary[data-sheet] { transition: none; } .is-deck-mode #deck-summary[data-sheet] .builder-summary { animation: none; } }
 html[data-reduce-motion=true] .is-deck-mode #deck-summary[data-sheet] { transition: none; }
+html[data-reduce-motion=true] .is-deck-mode #deck-summary[data-sheet] .builder-summary { animation: none; }
 @media (max-width: 359px) { #builder-steps ol { gap: var(--space-md); } }
 
 /* Recommendation and search sit side by side above the deck. */
