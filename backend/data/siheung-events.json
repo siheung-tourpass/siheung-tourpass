@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "dataset_id": "SIHEUNG_EVENTS_20261018",
-  "collected_on": "2026-10-18",
-  "scope": "2026년 가을 시흥시 축제·공연·강연 표본. 전체 행사 목록 아님. 종료 일정은 아카이브 후보로 구분.",
+  "collected_on": "2026-11-13",
+  "scope": "2026년 가을·겨울 시흥시 축제·공연·전시·강연 표본. 전체 행사 목록 아님. 종료 일정은 아카이브 후보로 구분.",
   "review_policy": "모든 행사·장소 연결·이미지는 DRAFT. 행사 목록·여행 만들기에 안내 자료로 공개하며 추천·예약 가능으로 표시하지 않음. 일정 경과와 실제 개최 상태를 구분.",
   "sources": [
     {
@@ -146,6 +146,46 @@
       "content_date": null,
       "access_status": "BODY_CHECKED",
       "evidence_section": "2026년 축제 부대행사 세계커피대회 안내 이미지와 본문 하단 CC BY-NC-ND 2.0 KR 링크"
+    },
+    {
+      "code": "SRC_EVENT_ARTCENTER",
+      "title": "시흥아트센터 13일 개관…공연장·개관 공연은?",
+      "publisher": "경인미래신문",
+      "url": "https://www.kifuture.com/news/article.html?no=177713",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-11-02",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "개관 일정(오픈 스테이지 투어·개관식·축하공연)·시설·이후 공연 일정"
+    },
+    {
+      "code": "SRC_EVENT_ARTCENTER_PROGRAM",
+      "title": "시흥아트센터 11월13일 개관..28일 임윤찬의 모차르트",
+      "publisher": "일간경기",
+      "url": "https://www.1gan.co.kr/news/articleView.html?idxno=416151",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-11-02",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "공연별 일시·장소·관람 연령·좌석 요금·예매 일정, 개관 기획전 기간·장소"
+    },
+    {
+      "code": "SRC_EVENT_CHOIR",
+      "title": "시흥시, 제9회 합창페스티벌 개최",
+      "publisher": "일간투데이",
+      "url": "https://www.dtoday.co.kr/news/articleView.html?idxno=803168",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-11-12",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "일시·장소·무료 관람·QR 예매·참여 합창단"
+    },
+    {
+      "code": "SRC_EVENT_CHANGGONG",
+      "title": "시흥문화발전소 창공, 11월 14일 '창공 라이브 온' 개최",
+      "publisher": "내외일보",
+      "url": "https://www.naewoeilbo.com/news/articleView.html?idxno=2443340",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-11-02",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "일시·장소·무료·사전 신청 불필요·공연 구성"
     }
   ],
   "events": [
@@ -668,6 +708,287 @@
       "notes": [
         "제18회 시흥시평생학습축제의 개별 프로그램. 여행 담기는 강연 신청이 아님."
       ]
+    },
+    {
+      "code": "EVENT_2026_012",
+      "name": "시흥아트센터 개관식·축하공연 「시흥의 예술, 하나된 울림」",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-11-13",
+      "end_date": "2026-11-13",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "17:00 오픈 스테이지 투어, 18:00 개관식, 19:30 축하공연",
+      "venue_name": "시흥아트센터",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "시흥아트센터 개관일에 시설 투어와 시립예술단·합창단의 축하공연을 진행한다.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "관람료·예약 조건 미확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "ONGOING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": [
+        "기사마다 축하공연 시각 표기가 달라(18:00·19:30) 경인미래신문의 일정표를 따름."
+      ]
+    },
+    {
+      "code": "EVENT_2026_013",
+      "name": "창공 라이브 온: 창공과 시민 밴드 공연",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-11-14",
+      "end_date": "2026-11-14",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "13:00",
+      "venue_name": "정왕평생학습관 대강당",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "정왕평생학습관 대표 지점과 도로명주소를 공식 자료에서 확인하지 못함(2026-11-13). 시설 안내 확보 후 재확인.",
+      "description": "1인 1악기 교육 참여자와 시민 밴드 5개 팀이 공연하는 무대.",
+      "admission_fee": "무료",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": "사전 신청 없이 관람",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_CHANGGONG"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [],
+      "image_ids": [],
+      "notes": []
+    },
+    {
+      "code": "EVENT_2026_014",
+      "name": "제9회 시흥시 합창페스티벌",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-11-21",
+      "end_date": "2026-11-21",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "17:00",
+      "venue_name": "시흥아트센터 대공연장",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "시흥시립합창단을 비롯한 8개 합창단이 참여하는 합창 공연.",
+      "admission_fee": "무료",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": "홍보물 QR코드로 예매",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_CHOIR"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": []
+    },
+    {
+      "code": "EVENT_2026_015",
+      "name": "임윤찬 피아노 리사이틀",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-11-28",
+      "end_date": "2026-11-28",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "17:00",
+      "venue_name": "시흥아트센터 대공연장",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "모차르트 피아노 소나타를 연주하는 개관 기념 리사이틀.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "시흥아트센터 누리집 예매. 시흥시민 할인·선예매 조건은 예매처에서 확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_ARTCENTER_PROGRAM",
+        "SRC_EVENT_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": [
+        "좌석 요금은 공식 예매처에서 재확인 필요."
+      ]
+    },
+    {
+      "code": "EVENT_2026_016",
+      "name": "국립오페라단 「라 트라비아타」",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-12-11",
+      "end_date": "2026-12-12",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "12월 11일 19:30, 12월 12일 15:00",
+      "venue_name": "시흥아트센터 대공연장",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "국립오페라단이 공연하는 베르디 오페라. 초등학생 이상 관람.",
+      "admission_fee": "R석 80,000원, S석 60,000원, A석 40,000원, B석 20,000원",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": "시흥아트센터 누리집 예매. 시흥시민 할인·선예매 조건은 예매처에서 확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_ARTCENTER_PROGRAM",
+        "SRC_EVENT_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": []
+    },
+    {
+      "code": "EVENT_2026_017",
+      "name": "소향 X 김성식 X 노윤 송년콘서트",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-12-29",
+      "end_date": "2026-12-29",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": "19:30",
+      "venue_name": "시흥아트센터",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "가수 소향과 뮤지컬 배우들이 함께하는 송년 공연. 초등학생 이상 관람.",
+      "admission_fee": "R석 100,000원, S석 80,000원, A석 60,000원",
+      "fee_status": "SOURCE_RECORDED",
+      "reservation_note": "시흥아트센터 누리집 예매. 시흥시민 할인·선예매 조건은 예매처에서 확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_ARTCENTER_PROGRAM",
+        "SRC_EVENT_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "UPCOMING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": []
+    },
+    {
+      "code": "EVENT_2026_018",
+      "name": "미디어아트 展: 거장의 팔레트, 빛을 만나다",
+      "edition_year": 2026,
+      "material_kind": "REAL",
+      "assertion_basis": "SOURCE_FACT",
+      "start_date": "2026-11-13",
+      "end_date": "2026-12-29",
+      "date_end_inclusive": true,
+      "timezone": "Asia/Seoul",
+      "daily_hours": null,
+      "venue_name": "시흥아트센터 전시실",
+      "address": null,
+      "coordinates": null,
+      "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시흥아트센터 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인.",
+      "description": "반 고흐·모네·마티스 등의 작품을 미디어아트로 재해석한 개관 기획전.",
+      "admission_fee": null,
+      "fee_status": "UNKNOWN",
+      "reservation_note": "관람료·관람시간·예약 조건 미확인",
+      "organizer": null,
+      "source_ids": [
+        "SRC_EVENT_ARTCENTER_PROGRAM",
+        "SRC_EVENT_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "date_position_on_checked_on": "ONGOING",
+      "operation_status": "UNKNOWN",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "place_links": [
+        {
+          "place_code": "PLACE_REAL_019",
+          "relation": "VENUE",
+          "basis": "PROJECT_CLASSIFICATION",
+          "review_status": "DRAFT"
+        }
+      ],
+      "image_ids": [],
+      "notes": []
     }
   ],
   "images": [
@@ -1046,6 +1367,16 @@
       "subject": "오이도 축제 2026",
       "reason": "검색 결과에는 10월 24~25일 일정이 있으나 공식 원문에서 확인하지 못함.",
       "resume_when": "시흥시 또는 공식 운영기관의 해당 연도 공고 확보 후 행사·이미지 수집."
+    },
+    {
+      "subject": "시흥시 12월 지역 행사",
+      "reason": "2026-11-13 기준 시흥시·운영기관의 12월 축제·지역 행사 공고를 찾지 못함(시흥아트센터 공연 제외).",
+      "resume_when": "시흥시 누리집·공식 블로그에 12월 행사 공고가 게시되면 수집."
+    },
+    {
+      "subject": "시흥시립전통예술단 정기공연 「파동: 바람의 울림」",
+      "reason": "11월 20일 개최 보도를 검색 요약으로만 확인했고 원문 접근이 차단됨.",
+      "resume_when": "시흥시 또는 시흥아트센터 공식 안내 확보 후 수집."
     }
   ]
 }

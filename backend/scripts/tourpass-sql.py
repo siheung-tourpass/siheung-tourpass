@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Convert the virtual merchant/product source into SQL; run after the tourism import."""
+"""Convert the virtual merchant/product source into SQL; run after the tourism import.
+
+Re-running adds only new codes and keeps admin edits to existing rows."""
 import json
 from pathlib import Path
 
@@ -12,7 +14,7 @@ def quote(value):
 def ref(table, code, column='code'):
     return '(SELECT id FROM ' + table + ' WHERE ' + column + '=' + quote(code) + ')'
 def insert(table, values):
-    print('INSERT INTO ' + table + '(' + ','.join(values) + ') VALUES(' + ','.join(values.values()) + ');')
+    print('INSERT INTO ' + table + '(' + ','.join(values) + ') VALUES(' + ','.join(values.values()) + ') ON CONFLICT DO NOTHING;')
 print("SET TIME ZONE 'UTC'; BEGIN;")
 # Real-card merchants replace the fictional A/B demo set; their issue history stays.
 print("UPDATE product SET active=FALSE WHERE code='DEMO_DAY';")

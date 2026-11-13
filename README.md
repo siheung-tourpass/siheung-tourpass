@@ -63,7 +63,7 @@ docker compose up --build
    psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < /tmp/siheung-tourpass.sql
    ```
 
-   기존 DB는 백업 후 [마이그레이션 디렉터리](backend/sql/migrations)의 미적용 SQL만 번호순으로 1회씩 적용한다(`psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < 파일경로`). 새 테이블 추가 시 2단계 권한 부여도 재실행한다.
+   기존 DB는 백업 후 [마이그레이션 디렉터리](backend/sql/migrations)의 미적용 SQL만 번호순으로 1회씩 적용한다(`psql -X -v ON_ERROR_STOP=1 -U postgres -d siheung_tourpass < 파일경로`). 새 테이블 추가 시 2단계 권한 부여도 재실행한다. 새 장소는 `tourism-sql.py --place-code 장소코드`로, 새 투어패스 상품·가맹점은 `tourpass-sql.py` 재적용으로 추가한다([투어패스 적재](docs/data-collection/tourpass-data.md#적재)).
 2. 앱 전용 DB 계정에 권한을 부여하고 연결 환경 변수를 설정한다.
 
    ```sql

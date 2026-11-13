@@ -139,6 +139,80 @@
         "base_price_won": 5000,
         "discount_won": 1000
       }
+    },
+    {
+      "code": "TP_MESM",
+      "place": "PLACE_REAL_020",
+      "benefit": {
+        "name": "관람료 2,000원 할인",
+        "description": "성인 개인 관람권 구매 시 2,000원을 할인합니다.",
+        "type": "DISCOUNT",
+        "base_price_won": 8000,
+        "discount_won": 2000
+      }
+    },
+    {
+      "code": "TP_ARTCENTER",
+      "place": "PLACE_REAL_019",
+      "benefit": {
+        "name": "개관 기념 엽서 증정",
+        "description": "아트센터 방문 기념 엽서 세트를 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_HANUL",
+      "place": "PLACE_REAL_007",
+      "benefit": {
+        "name": "갯벌 관찰 도구 대여 1회 무료",
+        "description": "갯벌 관찰용 도구 세트를 1회 무료로 빌려 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_OKGU",
+      "place": "PLACE_REAL_014",
+      "benefit": {
+        "name": "숲 해설 1회 무료",
+        "description": "옥구공원 숲 해설에 1회 무료로 참여합니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_MULWANG",
+      "place": "PLACE_REAL_009",
+      "benefit": {
+        "name": "호수 산책 기념품 증정",
+        "description": "물왕호수 산책 기념 손수건을 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_EUNGYE",
+      "place": "PLACE_REAL_008",
+      "benefit": {
+        "name": "산책 스탬프 기념품 증정",
+        "description": "호수 둘레 스탬프를 모으면 기념 배지를 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_SORAESAN",
+      "place": "PLACE_REAL_011",
+      "benefit": {
+        "name": "등산 기념 손수건 증정",
+        "description": "소래산 등산 기념 손수건을 드립니다.",
+        "type": "FREE_ONCE"
+      }
+    },
+    {
+      "code": "TP_WOLGOT",
+      "place": "PLACE_REAL_012",
+      "benefit": {
+        "name": "포구 기념 엽서 증정",
+        "description": "월곶포구 방문 기념 엽서를 드립니다.",
+        "type": "FREE_ONCE"
+      }
     }
   ],
   "products": [
@@ -179,6 +253,55 @@
         "TP_STARBUCKS_DAEYA"
       ],
       "price_won": 9900
+    },
+    {
+      "code": "TP_GEOBUK_OCEAN",
+      "name": "거북섬 바다 과학 패스",
+      "description": "해양생태과학관 관람과 웨이브파크 서핑, 정왕 맛집을 함께 즐기는 패스",
+      "merchants": [
+        "TP_MESM",
+        "TP_WAVEPARK",
+        "TP_BEIJING"
+      ],
+      "price_won": 9900
+    },
+    {
+      "code": "TP_BAEGOT_ART",
+      "name": "배곧 문화·산책 패스",
+      "description": "시흥아트센터와 배곧한울공원·에코센터, 배곧 카페를 잇는 문화 산책 패스",
+      "merchants": [
+        "TP_ARTCENTER",
+        "TP_HANUL",
+        "TP_ECOCENTER",
+        "TP_PAULBASSETT"
+      ],
+      "price_won": 6900
+    },
+    {
+      "code": "TP_LAKE_TRAIL",
+      "name": "호수·숲길 산책 패스",
+      "description": "물왕호수·은계호수공원·소래산을 걷고 주변 맛집과 카페에 들르는 산책 패스",
+      "merchants": [
+        "TP_MULWANG",
+        "TP_EUNGYE",
+        "TP_SORAESAN",
+        "TP_BORIGULBI",
+        "TP_STARBUCKS_DAEYA"
+      ],
+      "price_won": 5900
+    },
+    {
+      "code": "TP_WEST_COAST",
+      "name": "서해 포구·낙조 패스",
+      "description": "월곶포구와 옥구공원, 오이도 함상전망대에서 서해를 보고 포구 맛집을 들르는 패스",
+      "merchants": [
+        "TP_WOLGOT",
+        "TP_OKGU",
+        "TP_OASIS",
+        "TP_JINAEYEON",
+        "TP_WINDMILL"
+      ],
+      "price_won": 7900
     },
     {
       "code": "TP_ALL",

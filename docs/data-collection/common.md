@@ -9,7 +9,7 @@
 
 ## 좌표
 
-WGS84 위도·경도·출처·확인일·대표 지점 근거를 JSON에 기록하고 WAR에 포함해 [CardCoordinates](../../backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)가 코드로 연결한다(한국관광공사·카카오맵 대조, 허구·비공개 카드는 실좌표 제외).
+WGS84 위도·경도·출처·확인일·대표 지점 근거를 JSON에 기록하고 WAR에 포함해 [CardCoordinates](../../backend/src/main/java/kr/ac/siheung/tourpass/service/CardCoordinates.java)가 코드로 연결한다(한국관광공사·카카오맵 대조, 허구·비공개 카드는 실좌표 제외). 근거 있는 대표 지점을 찾지 못한 실제 카드는 좌표를 추정하지 않고 `coordinates: null`과 `coordinates_note`(미확인 사유·재확인 조건)를 기록하며, 지도는 좌표 미확인 카드로 안내한다.
 
 ## 이미지
 
