@@ -366,7 +366,6 @@ html[data-reduce-motion=true] .is-deck-mode .builder-card :is(.card-front, .card
   #selected-places .selection-meta { grid-area: meta; align-self: center; min-width: 0; }
   #selected-places .selection-leg { padding-left: calc(32px + var(--space-sm)); }
 }
-}
 .journey-pass-list { display: grid; gap: var(--space-xl); margin-top: var(--space-xl); }
 .journey-ticket-status { display: inline-block; padding: var(--space-xs) var(--space-sm); color: var(--color-muted); background: var(--color-paper); font-size: var(--text-sm); font-weight: 600; }
 .journey-ticket-date { margin: 0; color: var(--color-muted); font-size: var(--text-sm); }
@@ -445,6 +444,9 @@ body:not(.is-deck-mode) .builder-card { aspect-ratio: var(--destination-card-rat
 .journey-business-card .button { min-height: 44px; margin-top: var(--space-md); padding: var(--space-sm) var(--space-lg); font-size: var(--text-sm); }
 .journey-business-card .journey-ticket-status { font-size: .75rem; }
 .page-journey main > .journey-business-card { margin-block: var(--space-xl); }
+.page-journeys main, .page-passes main:has(#mypass-history-title) { width: min(var(--navigation-width), 100% - var(--layout-gutter) * 2); }
+:is(.page-journeys, .page-passes) .journey-pass-list { grid-template-columns: minmax(0, 1fr); }
+:is(.page-journeys, .page-passes) .journey-business-card { max-width: none; }
 @media (max-width: 639px) {
   .journey-business-card .pass-card-main { padding: var(--space-lg); }
   .journey-business-card h1, .journey-business-card h2, .journey-business-card h3 { font-size: var(--text-lg); }
