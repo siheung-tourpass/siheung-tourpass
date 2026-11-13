@@ -7,17 +7,25 @@ public final class Sql {
     public static List<Map<String,Object>> rows(Connection c,String sql,Object... args) throws SQLException {
         try(var s=c.prepareStatement(sql)) { bind(s,args); try(var r=s.executeQuery()) {
             var out=new ArrayList<Map<String,Object>>(); var md=r.getMetaData();
-            while(r.next()) { var row=new LinkedHashMap<String,Object>(); for(int i=1;i<=md.getColumnCount();i++) {
-                String key=camel(md.getColumnLabel(i)); Object value=r.getObject(i);
-                if(value instanceof Timestamp t) value=t.toInstant().toString();
-                else if(value instanceof java.sql.Date d) value=d.toString();
-                else if((key.equals("id")||key.endsWith("Id")||key.equals("reviewedBy")||key.equals("cancelledBy")||key.equals("revision"))&&value!=null) value=value.toString();
-                row.put(key,value);
-            } out.add(row); } return out;
+            while(r.next()) out.add(row(r,md));
+            return out;
         }}
     }
+    private static Map<String,Object> row(ResultSet r,ResultSetMetaData md) throws SQLException {
+        var row=new LinkedHashMap<String,Object>();
+        for(int i=1;i<=md.getColumnCount();i++) {
+            String key=camel(md.getColumnLabel(i)); Object value=r.getObject(i);
+            if(value instanceof Timestamp t) value=t.toInstant().toString();
+            else if(value instanceof java.sql.Date d) value=d.toString();
+            else if((key.equals("id")||key.endsWith("Id")||key.equals("reviewedBy")||key.equals("cancelledBy")||key.equals("revision"))&&value!=null) value=value.toString();
+            row.put(key,value);
+        }
+        return row;
+    }
     public static Map<String,Object> one(Connection c,String sql,Object... args) throws SQLException {
-        var r=rows(c,sql,args); return r.isEmpty()?null:r.get(0);
+        try(var s=c.prepareStatement(sql)) { bind(s,args); try(var r=s.executeQuery()) {
+            return r.next()?row(r,r.getMetaData()):null;
+        }}
     }
     public static int update(Connection c,String sql,Object... args) throws SQLException { try(var s=c.prepareStatement(sql)) {bind(s,args);return s.executeUpdate();} }
     public static String insert(Connection c,String sql,Object... args) throws SQLException {

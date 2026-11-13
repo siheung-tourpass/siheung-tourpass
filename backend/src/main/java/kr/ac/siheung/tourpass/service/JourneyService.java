@@ -107,7 +107,8 @@ public final class JourneyService {
         return detail(c,user,id);
     }
     public void delete(Connection c,String user,String id) throws SQLException {
-        require(owned(c,user,id,true).get("issuedPassId")==null,409,"JOURNEY_LOCKED");planning(c,user,id);
+        var journey=owned(c,user,id,true);
+        require(journey.get("issuedPassId")==null&&journey.get("status").equals("PLANNING"),409,"JOURNEY_LOCKED");
         JourneyDao.delete(c,id);
     }
     public record CardKey(String kind,String source) {

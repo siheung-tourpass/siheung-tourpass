@@ -76,6 +76,7 @@ jobs:
         if: matrix.suite == 'api'
         run: |
           java -ea -cp 'backend/target/classes:backend/target/checks:backend/target/siheung-tourpass/WEB-INF/lib/*' kr.ac.siheung.tourpass.service.KakaoLoginCheck "$TOURPASS_DB_URL"
+          java -ea -cp 'backend/target/classes:backend/target/checks:backend/target/siheung-tourpass/WEB-INF/lib/*' CatalogQueryCheck "$TOURPASS_DB_URL"
           python3 backend/tests/python/api_check.py "$API_URL"
           python3 backend/tests/python/db_check.py 127.0.0.1
           python3 backend/tests/python/rest_check.py "$API_URL"

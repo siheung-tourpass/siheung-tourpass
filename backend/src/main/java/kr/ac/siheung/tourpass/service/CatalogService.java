@@ -7,10 +7,12 @@ public final class CatalogService {
     public List<Map<String,Object>> cards(Connection c) throws SQLException {
         var cards=new ArrayList<Map<String,Object>>();
         for(var place:new OntologyService().browsePlaces(c))cards.add(card("place",place));
+        var placeRegions=new HashMap<Object,Object>();
+        for(var place:cards)if(place.get("regionId")!=null)placeRegions.put(place.get("code"),place.get("regionId"));
         for(var event:EventCatalog.list(null).cards()){
             var card=card("event",event);
             var regions=new LinkedHashSet<Object>();
-            for(var place:cards)if(((List<?>)event.get("placeCodes")).contains(place.get("code"))&&place.get("regionId")!=null)regions.add(place.get("regionId"));
+            for(var code:(List<?>)event.get("placeCodes"))if(placeRegions.containsKey(code))regions.add(placeRegions.get(code));
             if(regions.size()==1)card.put("regionId",regions.iterator().next());
             cards.add(card);
         }
@@ -78,7 +80,12 @@ public final class CatalogService {
     }
     public List<Map<String,Object>> withBenefits(Connection c,String collection,String region) throws SQLException {
         var items=list(c,collection,region);
-        for(var item:items)attachBenefits(c,collection,item);
+        if(items.isEmpty())return items;
+        var benefits=CatalogDao.benefits(c,collection);
+        benefits.forEach(CatalogService::demo);
+        String owner=collection.equals("products")?"productId":"merchantId";
+        var grouped=benefits.stream().collect(java.util.stream.Collectors.groupingBy(b->b.get(owner)));
+        for(var item:items)item.put("benefits",grouped.getOrDefault(item.get("id"),List.of()));
         return items;
     }
     public Map<String,Object> detail(Connection c,String collection,String id) throws SQLException {

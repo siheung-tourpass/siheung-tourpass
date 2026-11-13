@@ -52,18 +52,18 @@
   // Short enough to overlap the pick animation, so the deck never sits still waiting.
   const RESORT_DELAY = 200;
 
-  function point(card) {
-    if (!card || card.dataset.savedOnly === 'true' || !card.dataset.latitude || !card.dataset.longitude) return;
-    const latitude = Number(card.dataset.latitude), longitude = Number(card.dataset.longitude);
-    if (Number.isFinite(latitude) && Math.abs(latitude) <= 90 && Number.isFinite(longitude) && Math.abs(longitude) <= 180) return { latitude, longitude };
-  }
+  const point = BuilderMap.point;
 
   function distance(from, to) {
     if (!from || !to) return Infinity;
     const radians = degrees => degrees * Math.PI / 180;
-    const latitude = radians(to.latitude - from.latitude), longitude = radians(to.longitude - from.longitude);
-    const value = Math.sin(latitude / 2) ** 2 + Math.cos(radians(from.latitude)) * Math.cos(radians(to.latitude)) * Math.sin(longitude / 2) ** 2;
+    const latitude = radians(to[0] - from[0]), longitude = radians(to[1] - from[1]);
+    const value = Math.sin(latitude / 2) ** 2 + Math.cos(radians(from[0])) * Math.cos(radians(to[0])) * Math.sin(longitude / 2) ** 2;
     return 6371 * 2 * Math.asin(Math.sqrt(Math.min(1, value)));
+  }
+
+  function distanceLabel(km) {
+    return Number.isFinite(km) ? `직선 ${km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}` : '거리 미확인';
   }
 
   function arrangeCards() {
@@ -79,7 +79,7 @@
       const label = controls.get(card).distance;
       const km = distances.get(card);
       label.hidden = !anchor || card === anchor;
-      label.textContent = Number.isFinite(km) ? `직선 ${km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}` : '거리 미확인';
+      label.textContent = distanceLabel(km);
       if (Number.isFinite(km)) card.dataset.distanceKm = String(km);
       else delete card.dataset.distanceKm;
     });
@@ -385,7 +385,7 @@
       const km = index ? distance(point(byId.get(ids[index - 1])), point(card)) : Infinity;
       const leg = item.querySelector('.selection-leg');
       leg.hidden = !Number.isFinite(km);
-      leg.textContent = Number.isFinite(km) ? `직선 ${km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}` : '';
+      leg.textContent = Number.isFinite(km) ? distanceLabel(km) : '';
       item.querySelector('input').value = id;
       item.querySelectorAll('button').forEach(button => {
         const action = button.dataset.action;

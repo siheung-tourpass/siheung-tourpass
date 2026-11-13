@@ -55,6 +55,7 @@ async function login(request, root) {
  await page.keyboard.press('Escape');assert(await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).evaluate(el=>el===document.activeElement));
  await homePhoto.getByRole('button',{name:'사진 출처',exact:true}).click();await homeCredit.getByRole('button',{name:'닫기',exact:true}).click();assert.equal(await homeCredit.isVisible(),false);
  assert.equal((await page.request.post(root+'/logout',{form:{csrf:homeSession.csrfToken}})).status(),200);
+ await page.setViewportSize({width:375,height:900});
  await page.goto(root+'/explore');await page.waitForSelector('.is-deck-mode');
  await page.waitForFunction(()=>!document.querySelector('#journey-filters').hasAttribute('aria-busy'));
  // The builder opens on deck building: recommendations lead the deck and the sheet sits folded on the menu.
@@ -150,6 +151,8 @@ async function login(request, root) {
  assert.equal(await page.locator('#journey-builder').getAttribute('data-step'),'build');
  for(const width of [320,1280]){
   await page.setViewportSize({width,height:900});
+  assert.equal(await page.locator('.bottom-nav').isVisible(),width>=960);
+  assert.equal(await page.locator('#deck-summary').getAttribute('data-sheet')!==null,width<960);
   for(const kind of ['event','dining','place']){
    await page.locator(`[data-card-type=${kind}]`).click();await page.waitForTimeout(150);
    const card=page.locator(`[data-card-key="${await page.locator('.builder-card.is-current').getAttribute('data-card-key')}"]`);

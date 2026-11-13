@@ -54,8 +54,8 @@ public final class RecommendationService {
     }
     private static Map<String,List<Map<String,Object>>> passAvailability(Connection c,String user) throws SQLException {
         var byPlace=new HashMap<String,List<Map<String,Object>>>();
+        Instant now=Instant.now();
         for(var benefit:RecommendationDao.ownedBenefits(c,user)){
-            Instant now=Instant.now();
             String reason=PassService.availability(benefit,benefit,now);
             byPlace.computeIfAbsent((String)benefit.get("placeId"),key->new ArrayList<>()).add(Map.of(
                 "passId",benefit.get("passId"),"issuedBenefitId",benefit.get("id"),"usable",reason.equals("AVAILABLE"),"reason",reason,"checkedAt",now.toString()));
