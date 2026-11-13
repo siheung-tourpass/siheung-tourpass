@@ -11,4 +11,4 @@
 
 ## 적재
 
-관광 자료 적재 후 `python3 backend/scripts/tourpass-sql.py` 출력을 1회 적용한다([시작하기](../../README.md#시작하기); 기적재 DB 재실행 금지, 이후 수정은 관리자 화면 이용). 초기 시연 상품·가맹점 A/B는 비활성화되며, 기록까지 삭제할 때만 [가상 자료 삭제 SQL](../../backend/sql/remove-demo.sql)을 실행한다(자동 검사 DB 제외).
+관광 자료 적재 후 `python3 backend/scripts/tourpass-sql.py` 출력을 적용한다([시작하기](../../README.md#시작하기)). 기적재 DB는 백업 후 다시 적용하면 새 코드의 가맹점·상품·혜택만 추가되고, 이미 있는 코드는 관리자 화면의 수정 내용을 유지한다. 새 가맹점이 관광지 카드에 연결되면 해당 장소를 먼저 [추가 적재](tourism-data.md#추가-적재시연-자료-전환)한다. 초기 시연 상품·가맹점 A/B는 비활성화되며, 기록까지 삭제할 때만 [가상 자료 삭제 SQL](../../backend/sql/remove-demo.sql)을 실행한다(자동 검사 DB 제외).

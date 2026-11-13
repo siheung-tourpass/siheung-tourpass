@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "dataset_id": "SIHEUNG_TOURISM_20261014",
-  "collected_on": "2026-10-14",
-  "scope": "시흥시 내 10개 서비스 분류 지역의 18개 실제 관광 장소 표본. 전체 관광지·수요 대표 자료 아님.",
+  "collected_on": "2026-11-13",
+  "scope": "시흥시 내 10개 서비스 분류 지역의 20개 실제 관광 장소 표본. 전체 관광지·수요 대표 자료 아님.",
   "review_policy": "모든 장소·개념·관계는 DRAFT. 관리자 승인 전 추천 후보 없음.",
   "sources": [
     {
@@ -195,6 +195,54 @@
       "content_date_note": "출처에 표시된 수정일; 현재 운영 확인일 아님",
       "access_status": "BODY_CHECKED",
       "evidence_section": "관광지 소개의 빨강등대 전망대·서해 풍경·황새바위길 갯벌 생물 소개. 프로그램·교통·운영 조건은 수집 제외.",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_MESM",
+      "title": "해양생태과학관 이용시간·요금안내",
+      "publisher": "시흥시 해양생태과학관",
+      "url": "https://www.siheung.go.kr/mesm/itc/guide/information?menuId=8",
+      "checked_on": "2026-11-13",
+      "content_date": null,
+      "content_date_note": "페이지에 수정일 표기 없음",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "관람시간·회차·매표 마감·휴관일·관람료",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_MESM_MAIN",
+      "title": "시흥시 해양생태과학관",
+      "publisher": "시흥시 해양생태과학관",
+      "url": "https://www.siheung.go.kr/mesm/main",
+      "checked_on": "2026-11-13",
+      "content_date": null,
+      "content_date_note": "페이지에 수정일 표기 없음",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "하단 주소·연락처",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_MESM_NEWS",
+      "title": "시흥시 해양생태과학관, 2026년 '강소형 잠재관광지' 최종 선정",
+      "publisher": "아시아경제",
+      "url": "https://view.asiae.co.kr/article/2026031209235378918",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-03-12",
+      "content_date_note": "기사 입력일; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "해양 생태 전시·교육·체험 시설, 가족 단위 체험형 교육 소개",
+      "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
+    },
+    {
+      "code": "SRC_ARTCENTER",
+      "title": "임윤찬부터 지용·소향까지…시흥아트센터 화려한 개관",
+      "publisher": "더쎈뉴스",
+      "url": "https://www.mhns.co.kr/news/articleView.html?idxno=761458",
+      "checked_on": "2026-11-13",
+      "content_date": "2026-09-22",
+      "content_date_note": "기사 입력일; 현재 운영 확인일 아님",
+      "access_status": "BODY_CHECKED",
+      "evidence_section": "배곧동 위치·대공연장·소공연장·전시실 등 시설과 11월 13일 개관",
       "reuse_note": "사실을 짧게 재서술; 원문·사진·음성 미복제. 외부 게시 시 출처별 이용조건 별도 확인."
     }
   ],
@@ -1075,6 +1123,80 @@
         },
         "status": "UNKNOWN"
       },
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_019",
+      "label": "시흥아트센터",
+      "region_code": "REGION_BAEGOT",
+      "address": null,
+      "address_status": "UNKNOWN",
+      "location_note": "배곧동 시흥아트센터 일원",
+      "description": "2026년 11월 문을 연 시흥시 첫 전문공연장. 대·소공연장과 전시실을 갖췄다.",
+      "source_ids": [
+        "SRC_ARTCENTER"
+      ],
+      "evidence_note": "출처의 시설 소개와 위치를 요약. 공연별 일정·요금은 행사 자료에서 관리하며 현재 운영의 승인 아님.",
+      "operational": {
+        "opening_hours": null,
+        "price": null,
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": null,
+        "status": "UNKNOWN",
+        "coordinates_note": "한국관광공사·카카오맵·OpenStreetMap에서 시설 대표 지점을 확인하지 못함(2026-11-13). 공식 시설 안내 또는 관광 지도 등록 후 재확인."
+      },
+      "type": "Place",
+      "material_kind": "REAL",
+      "checked_on": "2026-11-13",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
+      "merchant_links": [],
+      "benefit_links": []
+    },
+    {
+      "code": "PLACE_REAL_020",
+      "label": "시흥 해양생태과학관",
+      "region_code": "REGION_GEOBUK",
+      "address": "경기도 시흥시 거북섬서로 35",
+      "address_status": "SOURCE_RECORDED",
+      "location_note": "거북섬 해양생태과학관 일원",
+      "description": "해양 생물 전시와 교육·체험 공간을 갖춘 거북섬의 과학관.",
+      "source_ids": [
+        "SRC_MESM_MAIN",
+        "SRC_MESM",
+        "SRC_MESM_NEWS"
+      ],
+      "evidence_note": "공식 누리집의 주소·이용 안내와 언론 소개를 요약. 현재 운영·프로그램 이용 가능성의 승인 아님.",
+      "operational": {
+        "opening_hours": "10:00~18:00(매표 마감 17:30), 월요일·1월 1일·설날·추석 휴관(월요일이 공휴일이면 화요일 휴관)",
+        "price": "성인 8,000원, 청소년·군인 6,000원, 어린이 4,000원, 5세 이하·65세 이상 무료, 시흥시민 50% 할인",
+        "reservation_required": null,
+        "current_operation": null,
+        "coordinates": {
+          "latitude": 37.32940082136739,
+          "longitude": 126.67703513158376,
+          "crs": "WGS84",
+          "sourceUrl": "https://www.ktriptips.com/kor/culture/3569581",
+          "checkedOn": "2026-11-13",
+          "basis": "K-TRIP TIPS 장소 지도 지점(원 출처 미표기). OpenStreetMap 거북섬서로 도로 위치와 약 150m 이내로 대조. 출입구·이동 경로를 뜻하지 않음."
+        },
+        "status": "SOURCE_RECORDED"
+      },
+      "type": "Place",
+      "material_kind": "REAL",
+      "checked_on": "2026-11-13",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null,
       "merchant_links": [],
       "benefit_links": []
     }
@@ -2051,6 +2173,114 @@
       "reviewed_at": null,
       "active": true,
       "updated_at": null
+    },
+    {
+      "code": "ANN_055",
+      "subject": "PLACE_REAL_019",
+      "predicate": "locatedIn",
+      "object": "REGION_BAEGOT",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "출처의 배곧동 위치를 서비스 지역 '배곧'으로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_056",
+      "subject": "PLACE_REAL_019",
+      "predicate": "hasTheme",
+      "object": "THEME_HISTORY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_ARTCENTER"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "공연·전시 중심 문화시설 소개; '역사·문화' 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_057",
+      "subject": "PLACE_REAL_020",
+      "predicate": "locatedIn",
+      "object": "REGION_GEOBUK",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MESM_MAIN"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "공식 누리집의 거북섬서로 주소를 서비스 지역 '거북섬'으로 배정. 행정구역 판정 아님.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_058",
+      "subject": "PLACE_REAL_020",
+      "predicate": "hasTheme",
+      "object": "THEME_EXPERIENCE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MESM_NEWS"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "해양 생태 교육·체험 공간 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_059",
+      "subject": "PLACE_REAL_020",
+      "predicate": "hasTheme",
+      "object": "THEME_NATURE",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MESM_NEWS"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "해양 생태 전시 소개; 관심 테마 부여는 프로젝트 분류 해석.",
+      "assertion_basis": "PROJECT_CLASSIFICATION",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
+    },
+    {
+      "code": "ANN_060",
+      "subject": "PLACE_REAL_020",
+      "predicate": "suitableFor",
+      "object": "COMPANION_FAMILY",
+      "material_kind": "REAL",
+      "source_ids": [
+        "SRC_MESM_NEWS"
+      ],
+      "checked_on": "2026-11-13",
+      "evidence_note": "출처가 가족 단위 체험형 교육을 직접 소개; 모든 연령·현재 프로그램 이용 가능성 보장 아님.",
+      "assertion_basis": "SOURCE_FACT",
+      "review_status": "DRAFT",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "active": true,
+      "updated_at": null
     }
   ],
   "theme_parents": [
@@ -2113,6 +2343,10 @@
             "THEME_MARINE_EXPERIENCE",
             "THEME_EXPERIENCE"
           ]
+        },
+        {
+          "place": "PLACE_REAL_020",
+          "base_score": 2
         },
         {
           "place": "PLACE_REAL_013",

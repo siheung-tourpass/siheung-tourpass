@@ -89,4 +89,51 @@ for replace in (False, True):
     assert invalid.returncode != 0 and not invalid.stdout
     db.close()
 
-print('PASS: tourism provenance, DRAFT relations, addresses, selected imports, review preservation, duplicate rejection and revision')
+# Re-applying the tourpass import adds only new codes and keeps admin edits.
+passes = json.loads((root / 'data/siheung-tourpass.json').read_text())
+tourism_sql = subprocess.check_output([sys.executable, str(root / 'scripts/tourism-sql.py')], text=True)
+tourpass_sql = subprocess.check_output([sys.executable, str(root / 'scripts/tourpass-sql.py')], text=True)
+db = sqlite3.connect(':memory:')
+db.executescript('''
+    PRAGMA foreign_keys=ON;
+    CREATE TABLE region(id INTEGER PRIMARY KEY, code TEXT UNIQUE, name TEXT, active BOOLEAN DEFAULT TRUE);
+    CREATE TABLE theme(id INTEGER PRIMARY KEY, code TEXT UNIQUE, name TEXT);
+    CREATE TABLE companion_type(id INTEGER PRIMARY KEY, code TEXT UNIQUE, name TEXT);
+    CREATE TABLE place(id INTEGER PRIMARY KEY, code TEXT UNIQUE, region_id INTEGER REFERENCES region(id), name TEXT, description TEXT,
+        location_description TEXT, material_kind TEXT, source_url TEXT, checked_on TEXT, evidence_note TEXT, active BOOLEAN DEFAULT TRUE);
+    CREATE TABLE place_source(place_id INTEGER REFERENCES place(id), source_url TEXT, checked_on TEXT, evidence_note TEXT);
+    CREATE TABLE place_theme(place_id INTEGER, theme_id INTEGER, material_kind TEXT, source_url TEXT, checked_on TEXT, evidence_note TEXT);
+    CREATE TABLE place_companion(place_id INTEGER, companion_type_id INTEGER, material_kind TEXT, source_url TEXT, checked_on TEXT, evidence_note TEXT);
+    CREATE TABLE ontology_revision(id INTEGER PRIMARY KEY, revision INTEGER);
+    INSERT INTO ontology_revision VALUES(1,1);
+    CREATE TABLE app_user(id INTEGER PRIMARY KEY, login_id TEXT UNIQUE);
+    INSERT INTO app_user(login_id) VALUES('staff-a'),('staff-b');
+    CREATE TABLE merchant(id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, place_id INTEGER REFERENCES place(id), dining_code TEXT,
+        region_id INTEGER NOT NULL REFERENCES region(id), name TEXT NOT NULL, location_description TEXT NOT NULL, active BOOLEAN DEFAULT TRUE);
+    CREATE TABLE merchant_staff(user_id INTEGER NOT NULL REFERENCES app_user(id), merchant_id INTEGER NOT NULL REFERENCES merchant(id), PRIMARY KEY(user_id,merchant_id));
+    CREATE TABLE product(id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT, description TEXT, price_won INTEGER, active BOOLEAN DEFAULT TRUE);
+    CREATE TABLE benefit(id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, product_id INTEGER NOT NULL REFERENCES product(id),
+        merchant_id INTEGER NOT NULL REFERENCES merchant(id), name TEXT, description TEXT, benefit_type TEXT, base_price_won INTEGER,
+        discount_won INTEGER, payable_won INTEGER, reservation_note TEXT);
+''')
+db.executescript(tourism_sql.replace("SET TIME ZONE 'UTC'; ", ''))
+db.executescript(tourpass_sql.replace("SET TIME ZONE 'UTC'; ", ''))
+# Simulate a database loaded before the newest product and merchant were added.
+newest_product, newest_merchant = passes['products'][-2]['code'], passes['merchants'][-1]['code']
+db.execute('DELETE FROM benefit WHERE product_id=(SELECT id FROM product WHERE code=?) OR merchant_id=(SELECT id FROM merchant WHERE code=?)', (newest_product, newest_merchant))
+db.execute('DELETE FROM product WHERE code=?', (newest_product,))
+db.execute('DELETE FROM merchant_staff WHERE merchant_id=(SELECT id FROM merchant WHERE code=?)', (newest_merchant,))
+db.execute('DELETE FROM merchant WHERE code=?', (newest_merchant,))
+db.execute("UPDATE product SET name='관리자 수정', price_won=1000 WHERE code=?", (passes['products'][0]['code'],))
+db.commit()
+for _ in range(2):
+    db.executescript(tourpass_sql.replace("SET TIME ZONE 'UTC'; ", ''))
+assert db.execute('SELECT name,price_won FROM product WHERE code=?', (passes['products'][0]['code'],)).fetchone() == ('관리자 수정', 1000)
+assert db.execute('SELECT COUNT(*) FROM product').fetchone()[0] == len(passes['products'])
+assert db.execute('SELECT COUNT(*) FROM merchant').fetchone()[0] == len(passes['merchants'])
+assert db.execute('SELECT COUNT(*) FROM merchant_staff').fetchone()[0] == 2 * len(passes['merchants'])
+expected = sum(len(passes['merchants']) if p['merchants'] == 'ALL' else len(p['merchants']) for p in passes['products'])
+assert db.execute('SELECT COUNT(*) FROM benefit').fetchone()[0] == expected
+db.close()
+
+print('PASS: tourism provenance, DRAFT relations, addresses, selected imports, review preservation, duplicate rejection, revision and repeatable tourpass additions')

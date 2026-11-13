@@ -19,19 +19,32 @@ public final class CardCoordinatesCheck {
         assert !point.get("basis").toString().isBlank();
     }
     public static void main(String[] args) throws Exception {
-        var source=new ObjectMapper().readTree(Files.readString(Path.of("data/siheung-tourism.json")));
+        var mapper=new ObjectMapper();
+        var source=mapper.readTree(Files.readString(Path.of("data/siheung-tourism.json")));
+        // Real cards without a sourced point must say why instead of carrying a guessed one.
+        var unlocated=new HashSet<String>();
+        for(var kind:List.of("tourism","events")){
+            var data=mapper.readTree(Files.readString(Path.of("data/siheung-"+kind+".json")));
+            for(var card:data.path(kind.equals("events")?"events":"places")){
+                var holder=kind.equals("tourism")?card.path("operational"):card;
+                if(!holder.path("coordinates").isNull())continue;
+                assert !holder.path("coordinates_note").asText().isBlank():card.path("code").asText();
+                unlocated.add(card.path("code").asText());
+            }
+        }
         for(var place:source.path("places")){
             var card=new HashMap<String,Object>(Map.of("code",place.path("code").asText(),"materialKind","REAL"));
-            check(CardCoordinates.attach(card));
+            CardCoordinates.attach(card);
+            if(unlocated.contains(place.path("code").asText()))assert !card.containsKey("coordinates");else check(card);
             for(var exclusion:List.of(Map.of("materialKind","DEMO"),Map.of("savedOnly",true))){
                 var excluded=new HashMap<String,Object>(Map.of("code",place.path("code").asText()));
                 excluded.putAll(exclusion);CardCoordinates.attach(excluded);assert !excluded.containsKey("coordinates");
             }
         }
-        for(var card:EventCatalog.list(null).cards())check(card);
+        for(var card:EventCatalog.list(null).cards())if(unlocated.contains(card.get("code")))assert !card.containsKey("coordinates");else check(card);
         for(var card:DiningCatalog.list())check(card);
         var unknown=new HashMap<String,Object>(Map.of("code","custom-place"));
         CardCoordinates.attach(unknown);assert !unknown.containsKey("coordinates");
-        System.out.println("PASS: all real catalog cards have sourced WGS84 points; fictional, saved-only and unknown cards have no inferred coordinates");
+        System.out.println("PASS: real catalog cards have sourced WGS84 points or a recorded gap; fictional, saved-only and unknown cards have no inferred coordinates");
     }
 }
