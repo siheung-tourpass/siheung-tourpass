@@ -288,10 +288,10 @@ visitor.get(journey_url)
 # A trip in progress shows the visit order only; records are written after it is finished.
 text=visitor.get(journey_url); assert 'journey-stops' in text and '여행 마치고 기록 남기기' in text
 assert '/journeys/record' not in text and '/journeys/photo' not in text and 'class="code"' not in text and 'trip-pass-qr' not in text
-# Once a pass is linked, the trip presents its code and can no longer be reopened or deleted.
+# Once a pass is linked, the trip presents its QR and can no longer be reopened or deleted.
 visitor.submit('/journeys/save', {'name':'나의 여행','travelDate':'2026-10-01','issuedPassId':pid})
-text=visitor.get(journey_url); assert 'class="code">'+html.escape(code)+'</p>' in text and '남은 시간' in text and 'trip-pass-qr' in text
-text=visitor.get('/passes/detail?id='+pid); assert 'class="code"' not in text and journey_url+'">코드·QR 보기' in text
+text=visitor.get(journey_url); assert html.escape(code) not in text and 'class="code"' not in text and '남은 시간' in text and 'trip-pass-qr' in text
+text=visitor.get('/passes/detail?id='+pid); assert 'class="code"' not in text and journey_url+'">QR 보기' in text
 text=visitor.get('/passes'); assert '제작 중으로 보내기' not in text and '사용 완료 · 아카이브' in text
 visitor.request('/journeys/save', {'csrf':csrf,'id':jid,'status':'PLANNING'},409)
 visitor.get(journey_url); visitor.submit('/journeys/save', {'status':'ARCHIVED'})
@@ -314,7 +314,7 @@ text=visitor.get('/journeys?status=ARCHIVED'); assert '나의 여행' in text an
 for status in ('CONFIRMED','PLANNING'): visitor.request('/journeys/save', {'csrf':csrf,'id':jid,'status':status},409)
 for values in ({'name':'바꾼 이름'},{'travelDate':'2026-10-02'}): visitor.request('/journeys/save', {'csrf':csrf,'id':jid,**values},409)
 visitor.request('/journeys/delete', {'csrf':csrf,'id':jid},409)
-text=visitor.get('/passes/detail?id='+pid); assert html.escape(code) not in text and 'trip-pass-qr' not in text and '코드·QR 보기' not in text
+text=visitor.get('/passes/detail?id='+pid); assert html.escape(code) not in text and 'trip-pass-qr' not in text and 'QR 보기' not in text
 # All admin form variants render and retain their service contracts.
 for collection in ('products','merchants','benefits'):
     admin.get('/admin/catalog?collection='+collection)

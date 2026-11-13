@@ -17,8 +17,8 @@
 
 | 여행 확인·구매 진입 | 내 투어패스 | 방문 기록 |
 | --- | --- | --- |
-| [![여행 이름·날짜와 추천 투어패스 가격 확인](docs/assets/journey-review.png)](docs/assets/journey-review.png) | [![현재 투어패스의 남은 시간과 가맹점 제시 코드](docs/assets/my-tourpass.png)](docs/assets/my-tourpass.png) | [![방문 날짜·만족도·나만의 메모를 저장하는 여행 기록](docs/assets/journey-record.png)](docs/assets/journey-record.png) |
-| 이름·날짜와 추천 상품·가격을 확인하고 시연 구매로 이동한다. | 남은 시간과 가맹점 제시 코드를 확인한다. | 방문 날짜·만족도·메모를 남겨 보관한다. |
+| [![여행 이름·날짜와 추천 투어패스 가격 확인](docs/assets/journey-review.png)](docs/assets/journey-review.png) | [![현재 투어패스의 남은 시간과 가맹점 제시 QR](docs/assets/my-tourpass.png)](docs/assets/my-tourpass.png) | [![방문 날짜·만족도·나만의 메모를 저장하는 여행 기록](docs/assets/journey-record.png)](docs/assets/journey-record.png) |
+| 이름·날짜와 추천 상품·가격을 확인하고 시연 구매로 이동한다. | 남은 시간과 가맹점 제시 QR을 확인한다. | 방문 날짜·만족도·메모를 남겨 보관한다. |
 
 ## 기술 스택
 
