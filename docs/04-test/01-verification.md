@@ -21,4 +21,4 @@ API 변경 시 [REST API 명세](../03-tech/api.md)의 정상·거부·오류·�
 
 ## 화면 검증 기록
 
-[핵심 유저 플로우](02-user-flows.md)에 캡처·검증 결과를 기록한다.
+[모바일 핵심 유저 플로우](02-user-flows-mobile.md)와 [데스크톱 핵심 유저 플로우](03-user-flows-desktop.md)에 캡처·검증 결과를 기록한다.

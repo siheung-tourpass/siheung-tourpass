@@ -8,7 +8,7 @@
 
 ### 주요 화면
 
-모바일 `360×784` 화면을 2배 해상도로 캡처했다(클릭 시 원본 표시). 단계별 캡처·UX 검토는 [핵심 유저 플로우](docs/04-test/02-user-flows.md)를 따른다.
+모바일 `360×784` 화면을 2배 해상도로 캡처했다(클릭 시 원본 표시). 단계별 캡처·UX 검토는 [모바일 핵심 유저 플로우](docs/04-test/02-user-flows-mobile.md)와 [데스크톱 핵심 유저 플로우](docs/04-test/03-user-flows-desktop.md)를 따른다.
 
 | 서비스 소개 | 상품 선택 | 여행 덱 구성 |
 | --- | --- | --- |
@@ -126,14 +126,14 @@ Bruno에서 [컬렉션](backend/bruno)(`Local` 환경)의 `Auth / Index`와 역�
 
 [GitHub Actions](.github/workflows/ci.yml)가 push·PR마다 빌드·검사를 실행하며 초기화·실행 명령의 원본이다. 테스트는 DB를 변경하므로 시연 DB와 분리한다. 검증 범위는 [테스트 명세](docs/04-test/01-verification.md#검증-전략), 판정은 [완료 기준](docs/01-func/01-common.md#완료-기준)을 따른다.
 
-브라우저 검사는 Node.js · Playwright(`PLAYWRIGHT_MODULE` 지정 가능) · Chrome과 시연 계정이 있는 테스트 서버가 필요하다.
+브라우저 검사는 Node.js · Playwright(`PLAYWRIGHT_MODULE` 지정 가능) · Chrome과 시연 계정이 있는 테스트 서버가 필요하다. 핵심 흐름 촬영은 화면 버전마다 실제 관광·가상 혜택 자료를 적재한 새 검증 DB에서 실행한다(구매·사용 기록을 변경하므로 같은 DB에서 연속 실행하지 않는다).
 
 | 검사 | 명령 |
 | --- | --- |
 | 카드 탐색·선택·저장 | `node backend/tests/browser/cards_browser_check.cjs http://localhost:8080/siheung-tourpass` |
 | 빈 검색·구매 없이 확정·오류 복구 | `node backend/tests/browser/ux_flow_check.cjs http://localhost:8080/siheung-tourpass` |
 | 여행 사진 업로드·교체·삭제·소유권 | `node backend/tests/browser/journey_photos_check.cjs http://localhost:8080/siheung-tourpass` |
-| 핵심 흐름·단계별 캡처(실제 자료 적재 DB) | `node backend/tests/browser/user_flows_check.cjs http://localhost:8080/siheung-tourpass .runtime/user-flows` |
+| 핵심 흐름·단계별 캡처(실제 자료 적재 DB) | `node backend/tests/browser/user_flows_check.cjs http://localhost:8080/siheung-tourpass .runtime/user-flows-mobile mobile` / `node backend/tests/browser/user_flows_check.cjs http://localhost:8080/siheung-tourpass .runtime/user-flows-desktop desktop` |
 | 관리자·포토카드 출력 | `node backend/tests/browser/admin_browser_check.cjs http://localhost:8080/siheung-tourpass` |
 
 ## 관련 문서
